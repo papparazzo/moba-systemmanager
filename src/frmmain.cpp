@@ -21,6 +21,9 @@
 #include <iostream>
 #include <exception>
 
+#include <ctime>
+#include <sys/timeb.h>
+
 #include "frmmain.h"
 #include "config.h"
 
@@ -364,11 +367,15 @@ void FrmMain::setSystemNotice(moba::JsonItemPtr data) {
     m_Label_InfoBarMessage.set_markup(ss.str());
     m_InfoBar.show();
 
+    timeb sTimeB;
 
-    // FIXME get current timestamp
+    char buffer[25] = "";
+
+    ftime(&sTimeB);
+    strftime(buffer, 21, "%d.%m.%Y %H:%M:%S", localtime(&sTimeB.time));
 
     Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
-    row[m_Columns_Notices.m_col_timestamp] = "---";
+    row[m_Columns_Notices.m_col_timestamp] = std::string(buffer);
     row[m_Columns_Notices.m_col_type     ] = type;
     row[m_Columns_Notices.m_col_caption  ] = caption;
     row[m_Columns_Notices.m_col_text     ] = text;
