@@ -21,6 +21,8 @@
 
 #include <gtkmm.h>
 
+#include <chrono>
+
 #include <moba/msghandler.h>
 #include <moba/systemhandler.h>
 #include <moba/jsonabstractitem.h>
@@ -70,6 +72,10 @@ class FrmMain : public Gtk::Window {
         Gtk::Button m_Button_SystemStandby;
         Gtk::Button m_Button_SystemShutdown;
         Gtk::Button m_Button_SystemReset;
+        Gtk::Button m_Button_SystemPing;
+        Gtk::Box m_VBox_SystemControl;
+        Gtk::Label m_Label_HardwareState;
+        Gtk::Label m_Label_PingResult[4];
 
         class ModelColumnsActiveApps : public Gtk::TreeModel::ColumnRecord {
             public:
@@ -118,6 +124,8 @@ class FrmMain : public Gtk::Window {
 
         moba::MsgHandlerPtr msgHandler;
         moba::SystemHandler sysHandler;
+        std::chrono::time_point<std::chrono::system_clock> start;
+        int pingctr;
 
         // Signal handlers:
         bool on_timeout(int timer_number);
@@ -126,6 +134,7 @@ class FrmMain : public Gtk::Window {
         void on_button_system_shutdown_clicked();
         void on_button_system_reset_clicked();
         void on_button_system_standby_clicked();
+        void on_button_system_ping_clicked();
         void on_about_dialog_response(int response_id);
         void on_infobar_response(int response);
 
@@ -133,4 +142,6 @@ class FrmMain : public Gtk::Window {
         void setServerInfoRes(moba::JsonItemPtr data);
         void setConClientsRes(moba::JsonItemPtr data);
         void setSystemNotice(moba::JsonItemPtr data);
+        void setHardwareState(moba::JsonItemPtr data);
+        void setPingResult();
 };

@@ -67,7 +67,8 @@ namespace {
 
 FrmMain::FrmMain(moba::MsgHandlerPtr mhp) :
     msgHandler(mhp), sysHandler(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6),
-    m_Button_About("About...")
+    m_Button_About("About..."), m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6),
+    m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6)
 {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn = Glib::signal_timeout().connect(my_slot, 250); // 250 ms
@@ -115,6 +116,7 @@ FrmMain::FrmMain(moba::MsgHandlerPtr mhp) :
     msgHandler->sendServerInfoReq();
     msgHandler->sendConClientsReq();
     sysHandler.sendGetEmergencyStopState();
+    sysHandler.sendGetHardwareState();
     show_all_children();
     m_InfoBar.hide();
 }
@@ -175,19 +177,36 @@ void FrmMain::initServerData() {
 }
 
 void FrmMain::initSystemControl() {
-    m_Notebook.append_page(m_ButtonBox_System, "System Control");
+    m_Notebook.append_page(m_VBox_SystemControl, "System Control");
+
+    m_Label_HardwareState.set_markup("<b>Hardwarestatus:</b> [unbekannt]");
+    m_Label_PingResult[0].set_markup("<b>Ping 1:</b> [unbekannt]");
+    m_Label_PingResult[1].set_markup("<b>Ping 2:</b> [unbekannt]");
+    m_Label_PingResult[2].set_markup("<b>Ping 3:</b> [unbekannt]");
+    m_Label_PingResult[3].set_markup("<b>Ping 4:</b> [unbekannt]");
+
+    m_VBox_SystemControl.pack_start(m_Label_HardwareState, Gtk::PACK_SHRINK, 50);
+    m_VBox_SystemControl.pack_start(m_Label_PingResult[0], Gtk::PACK_SHRINK);
+    m_VBox_SystemControl.pack_start(m_Label_PingResult[1], Gtk::PACK_SHRINK);
+    m_VBox_SystemControl.pack_start(m_Label_PingResult[2], Gtk::PACK_SHRINK);
+    m_VBox_SystemControl.pack_start(m_Label_PingResult[3], Gtk::PACK_SHRINK);
+    m_VBox_SystemControl.pack_end(m_ButtonBox_System, Gtk::PACK_SHRINK);
 
     m_ButtonBox_System.pack_start(m_Button_SystemShutdown);
     m_ButtonBox_System.pack_start(m_Button_SystemReset);
     m_ButtonBox_System.pack_start(m_Button_SystemStandby);
+    m_ButtonBox_System.pack_start(m_Button_SystemPing);
+    m_ButtonBox_System.set_layout(Gtk::BUTTONBOX_CENTER);
 
     m_Button_SystemShutdown.set_label("Shutdown");
     m_Button_SystemReset.set_label("Reset");
     m_Button_SystemStandby.set_label("Standby");
+    m_Button_SystemPing.set_label("Ping");
 
     m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_shutdown_clicked));
     m_Button_SystemReset.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_reset_clicked));
     m_Button_SystemStandby.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_standby_clicked));
+    m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_ping_clicked));
 }
 
 void FrmMain::initStatus() {
@@ -239,7 +258,8 @@ bool FrmMain::on_timeout(int) {
         );
         dialog.set_secondary_text(e.what());
         dialog.run();
-        close();
+        msgHandler->connect();
+        return true;
     }
 
     if(!msg) {
@@ -266,6 +286,14 @@ bool FrmMain::on_timeout(int) {
         case moba::Message::MT_EMERGENCY_STOP_CLEARING:
             m_Button_Emegerency.set_label("Nothalt");
             break;
+
+        case moba::Message::MT_HARDWARE_STATE_CHANGED:
+            setHardwareState(msg->getData());
+            break;
+
+        case moba::Message::MT_ECHO_RES:
+            setPingResult();
+            break;
     }
     return true;
 }
@@ -285,6 +313,13 @@ void FrmMain::on_button_system_shutdown_clicked() {
 
 void FrmMain::on_button_system_standby_clicked() {
     sysHandler.sendHardwareSwitchStandby();
+}
+
+void FrmMain::on_button_system_ping_clicked() {
+    msgHandler->sendEchoReq("test");
+    start = std::chrono::system_clock::now();
+    pingctr = 0;
+    m_Button_SystemPing.set_sensitive(false);
 }
 
 void FrmMain::setServerInfoRes(moba::JsonItemPtr data) {
@@ -379,4 +414,37 @@ void FrmMain::setSystemNotice(moba::JsonItemPtr data) {
     row[m_Columns_Notices.m_col_type     ] = type;
     row[m_Columns_Notices.m_col_caption  ] = caption;
     row[m_Columns_Notices.m_col_text     ] = text;
+}
+
+void FrmMain::setHardwareState(moba::JsonItemPtr data) {
+    std::stringstream ss;
+    ss << "<b>Hardwarestatus:</b> " << moba::castToString(data);
+    m_Label_HardwareState.set_markup(ss.str());
+}
+
+void FrmMain::setPingResult() {
+    std::stringstream ss;
+    timeb sTimeB;
+
+    char buffer[25] = "";
+
+    ftime(&sTimeB);
+    strftime(buffer, 21, "%d.%m.%Y %H:%M:%S", localtime(&sTimeB.time));
+
+    std::chrono::time_point<std::chrono::system_clock>
+        end = std::chrono::system_clock::now();
+
+    int elapsed_millis = std::chrono::duration_cast<std::chrono::milliseconds> (end - start).count();
+
+
+    ss << "<b>Ping " << (pingctr + 1) << ":</b> " << buffer << " -> " << " elapsed time: " << elapsed_millis << " ms";
+    m_Label_PingResult[pingctr].set_markup(ss.str());
+
+    if(pingctr < 3) {
+        msgHandler->sendEchoReq("test");
+        start = std::chrono::system_clock::now();
+        pingctr++;
+        return;
+    }
+    m_Button_SystemPing.set_sensitive(true);
 }
