@@ -3,6 +3,7 @@ bin_PROGRAMS = \
     moba-systemmanager
 moba_systemmanager_SOURCES = \
     main.cpp \
+    activeapps.cpp \
     frmmain.cpp
 
 

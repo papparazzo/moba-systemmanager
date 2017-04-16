@@ -31,6 +31,8 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/liststore.h>
 
+#include "activeapps.h"
+
 class FrmMain : public Gtk::Window {
     public:
         FrmMain(moba::MsgHandlerPtr mhp);
@@ -53,8 +55,7 @@ class FrmMain : public Gtk::Window {
 
         // active-apps
         Gtk::ScrolledWindow m_ScrolledWindow;
-        Gtk::TreeView m_TreeView;
-        Glib::RefPtr<Gtk::ListStore> m_refTreeModel;
+        TreeView_ActiveApps m_TreeView_ActiveApps;
 
         // notices
         Gtk::ScrolledWindow m_ScrolledWindow_Notices;
@@ -76,28 +77,6 @@ class FrmMain : public Gtk::Window {
         Gtk::Box m_VBox_SystemControl;
         Gtk::Label m_Label_HardwareState;
         Gtk::Label m_Label_PingResult[4];
-
-        class ModelColumnsActiveApps : public Gtk::TreeModel::ColumnRecord {
-            public:
-
-                ModelColumnsActiveApps() {
-                    add(m_col_id);
-                    add(m_col_name);
-                    add(m_col_version);
-                    add(m_col_ipAddr);
-                    add(m_col_port);
-                    add(m_col_uptime);
-                }
-
-                Gtk::TreeModelColumn<unsigned int>  m_col_id;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_name;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_version;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_ipAddr;
-                Gtk::TreeModelColumn<unsigned int>  m_col_port;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_uptime;
-        };
-
-        ModelColumnsActiveApps m_Columns_ActiveApps;
 
         class ModelColumnsNotices : public Gtk::TreeModel::ColumnRecord {
             public:
@@ -143,5 +122,7 @@ class FrmMain : public Gtk::Window {
         void setConClientsRes(moba::JsonItemPtr data);
         void setSystemNotice(moba::JsonItemPtr data);
         void setHardwareState(moba::JsonItemPtr data);
+        void setNewClient(moba::JsonItemPtr data);
+        void setRemoveClient(moba::JsonItemPtr data);
         void setPingResult();
 };

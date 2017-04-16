@@ -68,10 +68,11 @@ namespace {
 FrmMain::FrmMain(moba::MsgHandlerPtr mhp) :
     msgHandler(mhp), sysHandler(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6),
     m_Button_About("About..."), m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6),
-    m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6)
+    m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6),
+    m_TreeView_ActiveApps(mhp)
 {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
-    sigc::connection conn = Glib::signal_timeout().connect(my_slot, 250); // 250 ms
+    sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 250 ms
 
     set_title(PACKAGE_NAME);
 
@@ -145,19 +146,8 @@ void FrmMain::initAboutDialog() {
 void FrmMain::initActiveApps() {
     m_Notebook.append_page(m_ScrolledWindow, "Active Apps");
 
-    m_ScrolledWindow.add(m_TreeView);
+    m_ScrolledWindow.add(m_TreeView_ActiveApps);
     m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-
-    //Create the Tree model:
-    m_refTreeModel = Gtk::ListStore::create(m_Columns_ActiveApps);
-    m_TreeView.set_model(m_refTreeModel);
-
-    m_TreeView.append_column("ID",         m_Columns_ActiveApps.m_col_id);
-    m_TreeView.append_column("Name",       m_Columns_ActiveApps.m_col_name);
-    m_TreeView.append_column("Version",    m_Columns_ActiveApps.m_col_version);
-    m_TreeView.append_column("IP-Adresse", m_Columns_ActiveApps.m_col_ipAddr);
-    m_TreeView.append_column("Port",       m_Columns_ActiveApps.m_col_port);
-    m_TreeView.append_column("Uptime",     m_Columns_ActiveApps.m_col_uptime);
 }
 
 void FrmMain::initServerData() {
@@ -275,6 +265,14 @@ bool FrmMain::on_timeout(int) {
             setConClientsRes(msg->getData());
             break;
 
+        case moba::Message::MT_NEW_CLIENT_STARTED:
+            setNewClient(msg->getData());
+            break;
+
+        case moba::Message::MT_CLIENT_CLOSED:
+            setRemoveClient(msg->getData());
+            break;
+
         case moba::Message::MT_SYSTEM_NOTICE:
             setSystemNotice(msg->getData());
             break;
@@ -363,20 +361,18 @@ void FrmMain::setServerInfoRes(moba::JsonItemPtr data) {
 
 void FrmMain::setConClientsRes(moba::JsonItemPtr data) {
     moba::JsonArrayPtr a = boost::dynamic_pointer_cast<moba::JsonArray>(data);
-    Gtk::TreeModel::Row row;
+
+    m_TreeView_ActiveApps.clearList();
 
     for(auto iter = a->begin(); iter != a->end(); ++iter) {
         moba::JsonObjectPtr o = boost::dynamic_pointer_cast<moba::JsonObject>(*iter);
-        moba::JsonObjectPtr oi =
-                boost::dynamic_pointer_cast<moba::JsonObject>(o->at("appInfo"));
+        moba::JsonObjectPtr oi = boost::dynamic_pointer_cast<moba::JsonObject>(o->at("appInfo"));
 
-        row = *(m_refTreeModel->append());
-        row[m_Columns_ActiveApps.m_col_id     ] = moba::castToInt(o->at("appID"));
-        row[m_Columns_ActiveApps.m_col_name   ] = moba::castToString(oi->at("appName"));
-        row[m_Columns_ActiveApps.m_col_version] = moba::castToString(oi->at("version"));
-        row[m_Columns_ActiveApps.m_col_ipAddr ] = moba::castToString(o->at("addr"));
-        row[m_Columns_ActiveApps.m_col_port   ] = moba::castToInt(o->at("port"));
-        row[m_Columns_ActiveApps.m_col_uptime ] = moba::castToString(o->at("upTime"));
+        m_TreeView_ActiveApps.addActiveApp(
+            moba::castToInt(o->at("appID")), moba::castToString(oi->at("appName")),
+            moba::castToString(oi->at("version")), moba::castToString(o->at("addr")),
+            moba::castToInt(o->at("port")), moba::castToString(o->at("upTime"))
+        );
     }
 }
 
@@ -420,6 +416,21 @@ void FrmMain::setHardwareState(moba::JsonItemPtr data) {
     std::stringstream ss;
     ss << "<b>Hardwarestatus:</b> " << moba::castToString(data);
     m_Label_HardwareState.set_markup(ss.str());
+}
+
+void FrmMain::setNewClient(moba::JsonItemPtr data) {
+    moba::JsonObjectPtr o = boost::dynamic_pointer_cast<moba::JsonObject>(data);
+    moba::JsonObjectPtr oi = boost::dynamic_pointer_cast<moba::JsonObject>(o->at("appInfo"));
+
+    m_TreeView_ActiveApps.addActiveApp(
+        moba::castToInt(o->at("appID")), moba::castToString(oi->at("appName")),
+        moba::castToString(oi->at("version")), moba::castToString(o->at("addr")),
+        moba::castToInt(o->at("port")), moba::castToString(o->at("upTime"))
+    );
+}
+
+void FrmMain::setRemoveClient(moba::JsonItemPtr data) {
+    m_TreeView_ActiveApps.removeActiveApp(moba::castToInt(data));
 }
 
 void FrmMain::setPingResult() {
