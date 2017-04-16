@@ -246,6 +246,10 @@ bool FrmMain::on_timeout(int) {
             msgHandler->connect();
             m_Label_Connectivity.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
             m_Button_SystemPing.set_sensitive(true);
+            msgHandler->sendServerInfoReq();
+            msgHandler->sendConClientsReq();
+            sysHandler.sendGetEmergencyStopState();
+            sysHandler.sendGetHardwareState();
             connected = true;
             return true;
         }
