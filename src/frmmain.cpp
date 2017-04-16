@@ -69,10 +69,10 @@ FrmMain::FrmMain(moba::MsgHandlerPtr mhp) :
     msgHandler(mhp), sysHandler(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6),
     m_Button_About("About..."), m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6),
     m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6),
-    m_TreeView_ActiveApps(mhp)
+    m_TreeView_ActiveApps(mhp), m_HBox(Gtk::ORIENTATION_HORIZONTAL, 6), m_Label_Connectivity(" \xe2\x8f\xb9")
 {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
-    sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 250 ms
+    sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 25 ms
 
     set_title(PACKAGE_NAME);
 
@@ -96,8 +96,11 @@ FrmMain::FrmMain(moba::MsgHandlerPtr mhp) :
 
     m_Notebook.set_border_width(10);
     m_VBox.pack_start(m_Notebook);
-
-    m_VBox.pack_start(m_ButtonBox, Gtk::PACK_SHRINK);
+    m_VBox.pack_start(m_HBox, Gtk::PACK_SHRINK);
+    m_HBox.pack_end(m_ButtonBox, Gtk::PACK_SHRINK);
+    m_HBox.pack_start(m_Label_Connectivity, Gtk::PACK_SHRINK);
+    m_Label_Connectivity.set_justify(Gtk::JUSTIFY_LEFT);
+    m_Label_Connectivity.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
 
     // about-dialog
     m_ButtonBox.pack_start(m_Button_About, Gtk::PACK_EXPAND_WIDGET, 5);
@@ -235,20 +238,33 @@ void FrmMain::on_about_dialog_response(int) {
 }
 
 bool FrmMain::on_timeout(int) {
+    static bool connected = true;
     moba::MessagePtr msg;
+
     try {
+        if(!connected) {
+            msgHandler->connect();
+            m_Label_Connectivity.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            m_Button_SystemPing.set_sensitive(true);
+            connected = true;
+            return true;
+        }
         msg = msgHandler->recieveMsg();
     } catch(std::exception &e) {
-        Gtk::MessageDialog dialog(
-            *this,
-            "msg-handler exception:",
-            false,
-            Gtk::MESSAGE_ERROR,
-            Gtk::BUTTONS_OK
-        );
-        dialog.set_secondary_text(e.what());
-        dialog.run();
-        msgHandler->connect();
+        if(connected) {
+            m_Button_SystemPing.set_sensitive(false);
+            m_Label_Connectivity.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+            Gtk::MessageDialog dialog(
+                *this,
+                "msg-handler exception:",
+                false,
+                Gtk::MESSAGE_ERROR,
+                Gtk::BUTTONS_OK
+            );
+            dialog.set_secondary_text(e.what());
+            dialog.run();
+            connected = false;
+        }
         return true;
     }
 

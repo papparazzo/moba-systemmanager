@@ -44,6 +44,8 @@ class FrmMain : public Gtk::Window {
         Gtk::ButtonBox m_ButtonBox;
         Gtk::Button m_Button_Emegerency;
         Gtk::Box m_VBox;
+        Gtk::Box m_HBox;
+        Gtk::Label m_Label_Connectivity;
 
         // about
         Gtk::Button m_Button_About;

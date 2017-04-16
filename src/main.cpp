@@ -42,16 +42,15 @@ namespace {
 int main(int argc, char *argv[]) {
     moba::setCoreFileSizeToULimit();
 
-    moba::MsgHandlerPtr msgHandler(new moba::MsgHandler());
+    moba::MsgHandlerPtr msgHandler(new moba::MsgHandler(appData.host, appData.port));
 
     try {
-        msgHandler->connect(appData.host, appData.port);
         moba::JsonArrayPtr groups(new moba::JsonArray());
         groups->push_back(moba::toJsonStringPtr("BASE"));
         groups->push_back(moba::toJsonStringPtr("SERV"));
         groups->push_back(moba::toJsonStringPtr("SYSTEM"));
 
-        msgHandler->registerApp(
+        msgHandler->connect(
             appData.appName,
             appData.version,
             groups
