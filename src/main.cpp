@@ -23,7 +23,7 @@
 #include <gtkmm/application.h>
 
 #include <moba/helper.h>
-#include <moba/msghandler.h>
+#include <moba/msgendpoint.h>
 
 #include "frmmain.h"
 #include "config.h"
@@ -42,7 +42,7 @@ namespace {
 int main(int argc, char *argv[]) {
     moba::setCoreFileSizeToULimit();
 
-    moba::MsgHandlerPtr msgHandler(new moba::MsgHandler(appData.host, appData.port));
+    moba::MsgEndpointPtr msgEndpoint(new moba::MsgEndpoint(appData.host, appData.port));
 
     try {
         moba::JsonArrayPtr groups(new moba::JsonArray());
@@ -50,19 +50,19 @@ int main(int argc, char *argv[]) {
         groups->push_back(moba::toJsonStringPtr("SERV"));
         groups->push_back(moba::toJsonStringPtr("SYSTEM"));
 
-        msgHandler->connect(
+        msgEndpoint->connect(
             appData.appName,
             appData.version,
             groups
         );
-    } catch(moba::MsgHandlerException &e) {
+    } catch(moba::MsgEndpointException &e) {
         std::cerr << e.what() << std::endl;
         return (EXIT_FAILURE);
     }
 
     auto app = Gtk::Application::create(argc, argv, "org.moba.taskmanager");
 
-    FrmMain frmMain(msgHandler);
+    FrmMain frmMain(msgEndpoint);
     frmMain.set_title(appData.appName);
     frmMain.set_border_width(10);
     frmMain.set_default_size(400, 200);

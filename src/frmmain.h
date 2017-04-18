@@ -23,8 +23,9 @@
 
 #include <chrono>
 
-#include <moba/msghandler.h>
-#include <moba/systemhandler.h>
+#include <moba/msgendpoint.h>
+#include <moba/msgsystemhandler.h>
+#include <moba/msgclienthandler.h>
 #include <moba/jsonabstractitem.h>
 
 #include <gtkmm/window.h>
@@ -35,7 +36,7 @@
 
 class FrmMain : public Gtk::Window {
     public:
-        FrmMain(moba::MsgHandlerPtr mhp);
+        FrmMain(moba::MsgEndpointPtr mhp);
         virtual ~FrmMain() {
         }
 
@@ -103,8 +104,11 @@ class FrmMain : public Gtk::Window {
         void initSystemControl();
         void initStatus();
 
-        moba::MsgHandlerPtr msgHandler;
-        moba::SystemHandler sysHandler;
+        moba::MsgEndpointPtr   msgEndpoint;
+        moba::MsgSystemHandler sysHandler;
+        moba::MsgServerHandler serHandler;
+        moba::MsgClientHandler cltHandler;
+
         std::chrono::time_point<std::chrono::system_clock> start;
         int pingctr;
 

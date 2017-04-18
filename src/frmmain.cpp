@@ -65,8 +65,8 @@ namespace {
     };
 }
 
-FrmMain::FrmMain(moba::MsgHandlerPtr mhp) :
-    msgHandler(mhp), sysHandler(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6),
+FrmMain::FrmMain(moba::MsgEndpointPtr mhp) :
+    msgEndpoint(mhp), sysHandler(mhp), serHandler(mhp), cltHandler(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6),
     m_Button_About("About..."), m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6),
     m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6),
     m_TreeView_ActiveApps(mhp), m_HBox(Gtk::ORIENTATION_HORIZONTAL, 6), m_Label_Connectivity(" \xe2\x8f\xb9")
@@ -117,8 +117,8 @@ FrmMain::FrmMain(moba::MsgHandlerPtr mhp) :
     initSystemControl();
     initStatus();
 
-    msgHandler->sendServerInfoReq();
-    msgHandler->sendConClientsReq();
+    serHandler.sendServerInfoReq();
+    serHandler.sendConClientsReq();
     sysHandler.sendGetEmergencyStopState();
     sysHandler.sendGetHardwareState();
     show_all_children();
@@ -243,17 +243,17 @@ bool FrmMain::on_timeout(int) {
 
     try {
         if(!connected) {
-            msgHandler->connect();
+            msgEndpoint->connect();
             m_Label_Connectivity.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
             m_Button_SystemPing.set_sensitive(true);
-            msgHandler->sendServerInfoReq();
-            msgHandler->sendConClientsReq();
+            serHandler.sendServerInfoReq();
+            serHandler.sendConClientsReq();
             sysHandler.sendGetEmergencyStopState();
             sysHandler.sendGetHardwareState();
             connected = true;
             return true;
         }
-        msg = msgHandler->recieveMsg();
+        msg = msgEndpoint->recieveMsg();
     } catch(std::exception &e) {
         if(connected) {
             m_Button_SystemPing.set_sensitive(false);
@@ -334,7 +334,7 @@ void FrmMain::on_button_system_standby_clicked() {
 }
 
 void FrmMain::on_button_system_ping_clicked() {
-    msgHandler->sendEchoReq("test");
+    cltHandler.sendEchoReq("test");
     start = std::chrono::system_clock::now();
     pingctr = 0;
     m_Button_SystemPing.set_sensitive(false);
@@ -472,7 +472,7 @@ void FrmMain::setPingResult() {
     m_Label_PingResult[pingctr].set_markup(ss.str());
 
     if(pingctr < 3) {
-        msgHandler->sendEchoReq("test");
+        cltHandler.sendEchoReq("test");
         start = std::chrono::system_clock::now();
         pingctr++;
         return;
