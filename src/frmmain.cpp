@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <exception>
+#include <algorithm>
 
 #include <ctime>
 #include <sys/timeb.h>
@@ -412,6 +413,11 @@ void FrmMain::setSystemNotice(moba::JsonItemPtr data) {
         m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
     }
 
+    std::replace(caption.begin(), caption.end(), '<', '"');
+    std::replace(caption.begin(), caption.end(), '>', '"');
+    std::replace(text.begin(), text.end(), '<', '"');
+    std::replace(text.begin(), text.end(), '>', '"');
+
     std::stringstream ss;
     ss << "<b>" << caption << "!</b>\n" << text;
 
@@ -466,7 +472,6 @@ void FrmMain::setPingResult() {
         end = std::chrono::system_clock::now();
 
     int elapsed_millis = std::chrono::duration_cast<std::chrono::milliseconds> (end - start).count();
-
 
     ss << "<b>Ping " << (pingctr + 1) << ":</b> " << buffer << " -> " << " elapsed time: " << elapsed_millis << " ms";
     m_Label_PingResult[pingctr].set_markup(ss.str());
