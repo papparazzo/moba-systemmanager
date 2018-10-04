@@ -46,7 +46,6 @@ int main(int argc, char *argv[]) {
 
     try {
         moba::JsonArrayPtr groups(new moba::JsonArray());
-        groups->push_back(moba::toJsonStringPtr("BASE"));
         groups->push_back(moba::toJsonStringPtr("SERV"));
         groups->push_back(moba::toJsonStringPtr("SYSTEM"));
 
