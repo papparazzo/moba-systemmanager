@@ -47,30 +47,14 @@ namespace {
         "You should have received a copy of the GNU Affero General Public License\n"
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
 
-    moba::Message::MessageType type[] = {
-
-        moba::Message::MT_ECHO_REQ,
-
-        moba::Message::MT_RESET_CLIENT,
-        moba::Message::MT_SERVER_INFO_REQ,
-        moba::Message::MT_CON_CLIENTS_REQ,
-        moba::Message::MT_SELF_TESTING_CLIENT,
-
-        moba::Message::MT_EMERGENCY_STOP,
-        moba::Message::MT_EMERGENCY_STOP_CLEARING,
-        moba::Message::MT_GET_HARDWARE_STATE,
-        moba::Message::MT_SET_HARDWARE_STATE,
-        moba::Message::MT_HARDWARE_SHUTDOWN,
-        moba::Message::MT_HARDWARE_RESET,
-        moba::Message::MT_HARDWARE_SWITCH_STANDBY,
-    };
 }
 
 FrmMain::FrmMain(moba::MsgEndpointPtr mhp) :
     msgEndpoint(mhp), sysHandler(mhp), serHandler(mhp), cltHandler(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6),
     m_Button_About("About..."), m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6),
     m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6),
-    m_TreeView_ActiveApps(mhp), m_HBox(Gtk::ORIENTATION_HORIZONTAL, 6), m_Label_Connectivity(" \xe2\x8f\xb9")
+    m_TreeView_ActiveApps(mhp), m_HBox(Gtk::ORIENTATION_HORIZONTAL, 6), m_Label_Connectivity_HW(" \xe2\x96\x84"),
+    m_Label_Connectivity_SW(" \xe2\x96\x84")
 {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 25 ms
@@ -99,9 +83,16 @@ FrmMain::FrmMain(moba::MsgEndpointPtr mhp) :
     m_VBox.pack_start(m_Notebook);
     m_VBox.pack_start(m_HBox, Gtk::PACK_SHRINK);
     m_HBox.pack_end(m_ButtonBox, Gtk::PACK_SHRINK);
-    m_HBox.pack_start(m_Label_Connectivity, Gtk::PACK_SHRINK);
-    m_Label_Connectivity.set_justify(Gtk::JUSTIFY_LEFT);
-    m_Label_Connectivity.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+
+    m_HBox.pack_start(m_Label_Connectivity_HW, Gtk::PACK_SHRINK);
+    m_Label_Connectivity_HW.set_justify(Gtk::JUSTIFY_LEFT);
+    m_Label_Connectivity_HW.override_color(Gdk::RGBA("Gray"), Gtk::STATE_FLAG_NORMAL);
+    m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> unbekannt");
+
+    m_HBox.pack_start(m_Label_Connectivity_SW, Gtk::PACK_SHRINK);
+    m_Label_Connectivity_SW.set_justify(Gtk::JUSTIFY_LEFT);
+    m_Label_Connectivity_SW.override_color(Gdk::RGBA("Gray"), Gtk::STATE_FLAG_NORMAL);
+    m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> unbekannt");
 
     // about-dialog
     m_ButtonBox.pack_start(m_Button_About, Gtk::PACK_EXPAND_WIDGET, 5);
@@ -120,7 +111,6 @@ FrmMain::FrmMain(moba::MsgEndpointPtr mhp) :
 
     serHandler.sendServerInfoReq();
     serHandler.sendConClientsReq();
-    sysHandler.sendGetEmergencyStopState();
     sysHandler.sendGetHardwareState();
     show_all_children();
     m_InfoBar.hide();
@@ -132,7 +122,7 @@ void FrmMain::initAboutDialog() {
     m_Dialog.set_program_name(PACKAGE_NAME);
     m_Dialog.set_version(PACKAGE_VERSION);
     m_Dialog.set_copyright("Stefan Paproth");
-    m_Dialog.set_comments("This is just an application for testing purpose.");
+    m_Dialog.set_comments("Application for controlling the moba-server.");
     m_Dialog.set_license(license);
 
     m_Dialog.set_website("<pappi-@gmx.de>");
@@ -188,6 +178,7 @@ void FrmMain::initSystemControl() {
 
     m_ButtonBox_System.pack_start(m_Button_SystemShutdown);
     m_ButtonBox_System.pack_start(m_Button_SystemReset);
+    m_ButtonBox_System.pack_start(m_Button_SystemAutomatic);
     m_ButtonBox_System.pack_start(m_Button_SystemStandby);
     m_ButtonBox_System.pack_start(m_Button_SystemPing);
     m_ButtonBox_System.set_layout(Gtk::BUTTONBOX_CENTER);
@@ -195,11 +186,13 @@ void FrmMain::initSystemControl() {
     m_Button_SystemShutdown.set_label("Shutdown");
     m_Button_SystemReset.set_label("Reset");
     m_Button_SystemStandby.set_label("Standby");
+    m_Button_SystemAutomatic.set_label("Automatik");
     m_Button_SystemPing.set_label("Ping");
 
     m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_shutdown_clicked));
     m_Button_SystemReset.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_reset_clicked));
     m_Button_SystemStandby.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_standby_clicked));
+    m_Button_SystemAutomatic.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_automatic_clicked));
     m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_ping_clicked));
 }
 
@@ -228,9 +221,9 @@ void FrmMain::on_button_about_clicked() {
 
 void FrmMain::on_button_emegency_clicked() {
     if(m_Button_Emegerency.get_label() == "Nothalt") {
-        sysHandler.sendEmergencyStop();
+        sysHandler.sendSetEmergencyStop(true);
     } else {
-        sysHandler.sendEmergencyStopClearing();
+        sysHandler.sendSetEmergencyStop(false);
     }
 }
 
@@ -245,11 +238,13 @@ bool FrmMain::on_timeout(int) {
     try {
         if(!connected) {
             msgEndpoint->connect();
-            m_Label_Connectivity.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
+            m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Button_SystemPing.set_sensitive(true);
             serHandler.sendServerInfoReq();
             serHandler.sendConClientsReq();
-            sysHandler.sendGetEmergencyStopState();
             sysHandler.sendGetHardwareState();
             connected = true;
             return true;
@@ -258,7 +253,10 @@ bool FrmMain::on_timeout(int) {
     } catch(std::exception &e) {
         if(connected) {
             m_Button_SystemPing.set_sensitive(false);
-            m_Label_Connectivity.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+            m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
+            m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
             Gtk::MessageDialog dialog(
                 *this,
                 "msg-handler exception:",
@@ -298,14 +296,6 @@ bool FrmMain::on_timeout(int) {
             setSystemNotice(msg->getData());
             break;
 
-        case moba::Message::MT_EMERGENCY_STOP:
-            m_Button_Emegerency.set_label("Freigabe");
-            break;
-
-        case moba::Message::MT_EMERGENCY_STOP_CLEARING:
-            m_Button_Emegerency.set_label("Nothalt");
-            break;
-
         case moba::Message::MT_HARDWARE_STATE_CHANGED:
             setHardwareState(msg->getData());
             break;
@@ -331,7 +321,19 @@ void FrmMain::on_button_system_shutdown_clicked() {
 }
 
 void FrmMain::on_button_system_standby_clicked() {
-    sysHandler.sendHardwareSwitchStandby();
+    if(m_Button_SystemStandby.get_label() == "Standby (aus)") {
+        sysHandler.sendSetStandByMode(true);
+    } else {
+        sysHandler.sendSetStandByMode(false);
+    }
+}
+
+void FrmMain::on_button_system_automatic_clicked() {
+    if(m_Button_SystemAutomatic.get_label() == "Automatik (aus)") {
+        sysHandler.sendSetAutomaticMode(true);
+    } else {
+        sysHandler.sendSetAutomaticMode(false);
+    }
 }
 
 void FrmMain::on_button_system_ping_clicked() {
@@ -439,6 +441,56 @@ void FrmMain::setSystemNotice(moba::JsonItemPtr data) {
 }
 
 void FrmMain::setHardwareState(moba::JsonItemPtr data) {
+    std::string status = moba::castToString(data);
+    if(status == "ERROR") {
+        m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
+        m_Button_Emegerency.set_sensitive(false);
+        m_Button_SystemStandby.set_sensitive(false);
+        m_Button_SystemAutomatic.set_sensitive(false);
+        return;
+    }
+    m_Button_Emegerency.set_sensitive(true);
+    m_Button_SystemStandby.set_sensitive(true);
+    m_Button_SystemAutomatic.set_sensitive(true);
+    if(status == "EMERGENCY_STOP") {
+        m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
+        m_Button_Emegerency.set_label("Freigabe");
+        m_Button_SystemAutomatic.set_sensitive(false);
+        m_Button_SystemStandby.set_sensitive(false);
+        return;
+    }
+    m_Button_Emegerency.set_label("Nothalt");
+    if(status == "STANDBY") {
+        m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
+        m_Button_SystemStandby.set_label("Standby (an)");
+        m_Button_Emegerency.set_sensitive(false);
+        m_Button_SystemAutomatic.set_sensitive(false);
+        return;
+    }
+    m_Button_SystemStandby.set_label("Standby (aus)");
+    if(status == "MANUEL") {
+        m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> manuell");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> manuell");
+        m_Button_SystemAutomatic.set_label("Automatik (aus)");
+    } else if(status == "AUTOMATIC") {
+        m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> automatisch");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> automatisch");
+        m_Button_SystemAutomatic.set_label("Automatik (an)");
+    }
+
     std::stringstream ss;
     ss << "<b>Hardwarestatus:</b> " << moba::castToString(data);
     m_Label_HardwareState.set_markup(ss.str());

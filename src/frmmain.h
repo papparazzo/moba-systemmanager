@@ -46,7 +46,8 @@ class FrmMain : public Gtk::Window {
         Gtk::Button m_Button_Emegerency;
         Gtk::Box m_VBox;
         Gtk::Box m_HBox;
-        Gtk::Label m_Label_Connectivity;
+        Gtk::Label m_Label_Connectivity_HW;
+        Gtk::Label m_Label_Connectivity_SW;
 
         // about
         Gtk::Button m_Button_About;
@@ -74,6 +75,7 @@ class FrmMain : public Gtk::Window {
         // system-controll
         Gtk::ButtonBox m_ButtonBox_System;
         Gtk::Button m_Button_SystemStandby;
+        Gtk::Button m_Button_SystemAutomatic;
         Gtk::Button m_Button_SystemShutdown;
         Gtk::Button m_Button_SystemReset;
         Gtk::Button m_Button_SystemPing;
@@ -118,6 +120,7 @@ class FrmMain : public Gtk::Window {
         void on_button_emegency_clicked();
         void on_button_system_shutdown_clicked();
         void on_button_system_reset_clicked();
+        void on_button_system_automatic_clicked();
         void on_button_system_standby_clicked();
         void on_button_system_ping_clicked();
         void on_about_dialog_response(int response_id);
