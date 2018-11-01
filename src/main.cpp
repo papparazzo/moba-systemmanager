@@ -56,7 +56,6 @@ int main(int argc, char *argv[]) {
         );
     } catch(moba::MsgEndpointException &e) {
         std::cerr << e.what() << std::endl;
-        return (EXIT_FAILURE);
     }
 
     auto app = Gtk::Application::create(argc, argv, "org.moba.taskmanager");
