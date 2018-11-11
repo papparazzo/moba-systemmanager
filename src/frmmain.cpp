@@ -32,7 +32,7 @@ namespace {
     const char license[] =
         "Project:    moba-systemmanager\n"
         "\n"
-        "Copyright (C) 2016 Stefan Paproth <pappi-@gmx.de>\n"
+        "Copyright (C) 2018 Stefan Paproth <pappi-@gmx.de>\n"
         "\n"
         "This program is free software: you can redistribute it and/or modify\n"
         "it under the terms of the GNU Affero General Public License as\n"
@@ -46,7 +46,6 @@ namespace {
         "\n"
         "You should have received a copy of the GNU Affero General Public License\n"
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
-
 }
 
 FrmMain::FrmMain(moba::MsgEndpointPtr mhp) :
