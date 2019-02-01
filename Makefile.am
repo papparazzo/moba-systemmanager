@@ -1,3 +1,3 @@
 ## Process this file with automake to generate Makefile.in
-SUBDIRS = src
+SUBDIRS = modules/lib-msghandling/src/moba src
 CLEANFILES = *~
