@@ -20,12 +20,12 @@
 #pragma once
 
 #include <gtkmm.h>
-#include <moba/msgendpoint.h>
-#include <moba/msgserverhandler.h>
+
+#include "moba/endpoint.h"
 
 class TreeView_ActiveApps : public Gtk::TreeView {
     public:
-        TreeView_ActiveApps(moba::MsgEndpointPtr msgEndpoint);
+        TreeView_ActiveApps(EndpointPtr msgEndpoint);
         virtual ~TreeView_ActiveApps();
 
         void clearList();
@@ -64,8 +64,7 @@ class TreeView_ActiveApps : public Gtk::TreeView {
 
         Gtk::Menu m_Menu_Popup;
 
-        moba::MsgEndpointPtr msgEndpoint;
-        moba::MsgServerHandler serverHandler;
+        EndpointPtr msgEndpoint;
 
         void on_menu_popup_reset();
         void on_menu_popup_selftest();

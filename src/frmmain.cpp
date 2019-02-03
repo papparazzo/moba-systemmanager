@@ -27,6 +27,9 @@
 
 #include "frmmain.h"
 #include "config.h"
+#include "moba/serverhandler.h"
+#include "moba/systemhandler.h"
+#include "moba/clienthandler.h"
 
 namespace {
     const char license[] =
@@ -48,12 +51,11 @@ namespace {
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
 }
 
-FrmMain::FrmMain(moba::MsgEndpointPtr mhp) :
-    msgEndpoint(mhp), sysHandler(mhp), serHandler(mhp), cltHandler(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6),
-    m_Button_About("About..."), m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6),
-    m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6),
-    m_TreeView_ActiveApps(mhp), m_HBox(Gtk::ORIENTATION_HORIZONTAL, 6), m_Label_Connectivity_HW(" \xe2\x96\x84"),
-    m_Label_Connectivity_SW(" \xe2\x96\x84")
+FrmMain::FrmMain(EndpointPtr mhp) :
+    msgEndpoint(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6), m_Button_About("About..."),
+    m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6),
+    m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6), m_TreeView_ActiveApps(mhp), m_HBox(Gtk::ORIENTATION_HORIZONTAL, 6),
+    m_Label_Connectivity_HW(" \xe2\x96\x84"), m_Label_Connectivity_SW(" \xe2\x96\x84")
 {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 25 ms
@@ -108,9 +110,9 @@ FrmMain::FrmMain(moba::MsgEndpointPtr mhp) :
     initSystemControl();
     initStatus();
 
-    serHandler.sendServerInfoReq();
-    serHandler.sendConClientsReq();
-    sysHandler.sendGetHardwareState();
+    msgEndpoint->sendMsg(ServerInfoReq{});
+    msgEndpoint->sendMsg(ServerConClientsReq{});
+    msgEndpoint->sendMsg(SystemGetHardwareState{});
     show_all_children();
     m_InfoBar.hide();
 }
@@ -220,9 +222,9 @@ void FrmMain::on_button_about_clicked() {
 
 void FrmMain::on_button_emegency_clicked() {
     if(m_Button_Emegerency.get_label() == "Nothalt") {
-        sysHandler.sendSetEmergencyStop(true);
+        msgEndpoint->sendMsg(SystemSetEmergencyStop{true});
     } else {
-        sysHandler.sendSetEmergencyStop(false);
+        msgEndpoint->sendMsg(SystemSetEmergencyStop{false});
     }
 }
 
@@ -242,13 +244,13 @@ bool FrmMain::on_timeout(int) {
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Button_SystemPing.set_sensitive(true);
-            serHandler.sendServerInfoReq();
-            serHandler.sendConClientsReq();
-            sysHandler.sendGetHardwareState();
+            msgEndpoint->sendMsg(ServerInfoReq{});
+            msgEndpoint->sendMsg(ServerConClientsReq{});
+            msgEndpoint->sendMsg(SystemGetHardwareState{});
             connected = true;
             return true;
         }
-        msg = msgEndpoint->recieveMsg();
+        //msg = msgEndpoint->recieveMsg();
     } catch(std::exception &e) {
         if(connected) {
             m_Button_SystemPing.set_sensitive(false);
@@ -308,31 +310,31 @@ void FrmMain::on_infobar_response(int) {
 }
 
 void FrmMain::on_button_system_reset_clicked() {
-    sysHandler.sendHardwareReset();
+    msgEndpoint->sendMsg(SystemHardwareReset{});
 }
 
 void FrmMain::on_button_system_shutdown_clicked() {
-    sysHandler.sendHardwareShutdown();
+    msgEndpoint->sendMsg(SystemHardwareShutdown{});
 }
 
 void FrmMain::on_button_system_standby_clicked() {
     if(m_Button_SystemStandby.get_label() == "Standby (aus)") {
-        sysHandler.sendSetStandByMode(true);
+        msgEndpoint->sendMsg(SystemSetStandbyMode{true});
     } else {
-        sysHandler.sendSetStandByMode(false);
+        msgEndpoint->sendMsg(SystemSetStandbyMode{false});
     }
 }
 
 void FrmMain::on_button_system_automatic_clicked() {
     if(m_Button_SystemAutomatic.get_label() == "Automatik (aus)") {
-        sysHandler.sendSetAutomaticMode(true);
+        msgEndpoint->sendMsg(SystemSetAutomaticMode{true});
     } else {
-        sysHandler.sendSetAutomaticMode(false);
+        msgEndpoint->sendMsg(SystemSetAutomaticMode{false});
     }
 }
 
 void FrmMain::on_button_system_ping_clicked() {
-    cltHandler.sendEchoReq("test");
+    msgEndpoint->sendMsg(ClientEchoReq{"test"});
     start = std::chrono::system_clock::now();
     pingctr = 0;
     m_Button_SystemPing.set_sensitive(false);
@@ -524,7 +526,7 @@ void FrmMain::setPingResult() {
     m_Label_PingResult[pingctr].set_markup(ss.str());
 
     if(pingctr < 3) {
-        cltHandler.sendEchoReq("test");
+        msgEndpoint->sendMsg(ClientEchoReq{"test"});
         start = std::chrono::system_clock::now();
         pingctr++;
         return;
