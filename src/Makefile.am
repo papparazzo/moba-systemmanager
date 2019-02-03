@@ -7,9 +7,9 @@ moba_systemmanager_SOURCES = \
     frmmain.cpp
 
 
-moba_systemmanager_LDADD = -lMoBaCommon $(GTKMM_LIBS)
+moba_systemmanager_LDADD = -lMoBaCommon $(GTKMM_LIBS) $(srcdir)/../modules/lib-msghandling/src/moba/libmsghandling.a
 LDFLAGS += -L/usr/local/lib
 
-AM_CPPFLAGS = $(GTKMM_CFLAGS)
+AM_CPPFLAGS = $(GTKMM_CFLAGS) -I$(srcdir)/../modules/lib-msghandling/src
 
 CLEANFILES = *~
