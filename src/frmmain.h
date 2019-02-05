@@ -25,6 +25,8 @@
 
 #include "moba/endpoint.h"
 #include <moba/jsonabstractitem.h>
+#include "moba/registry.h"
+#include "moba/serverhandler.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>
@@ -104,7 +106,8 @@ class FrmMain : public Gtk::Window {
         void initSystemControl();
         void initStatus();
 
-        EndpointPtr   msgEndpoint;
+        EndpointPtr msgEndpoint;
+        Registry    registry;
 
         std::chrono::time_point<std::chrono::system_clock> start;
         int pingctr;
@@ -122,7 +125,7 @@ class FrmMain : public Gtk::Window {
         void on_infobar_response(int response);
 
         // msg-response
-        void setServerInfoRes(moba::JsonItemPtr data);
+        void setServerInfoRes(const ServerInfoRes &data);
         void setConClientsRes(moba::JsonItemPtr data);
         void setSystemNotice(moba::JsonItemPtr data);
         void setHardwareState(moba::JsonItemPtr data);
