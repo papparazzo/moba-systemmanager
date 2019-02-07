@@ -21,6 +21,7 @@
 #include <iostream>
 #include <exception>
 #include <algorithm>
+#include <functional>
 
 #include <ctime>
 #include <sys/timeb.h>
@@ -109,6 +110,39 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     initServerData();
     initSystemControl();
     initStatus();
+
+    registry.registerHandler<ServerInfoRes>      (std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
+    registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
+
+    /*
+        case moba::Message::MT_CON_CLIENTS_RES:
+            setConClientsRes(msg->getData());
+            break;
+
+        case moba::Message::MT_NEW_CLIENT_STARTED:
+            setNewClient(msg->getData());
+            break;
+
+        case moba::Message::MT_CLIENT_CLOSED:
+            setRemoveClient(msg->getData());
+            break;
+
+        case moba::Message::MT_SYSTEM_NOTICE:
+            setSystemNotice(msg->getData());
+            break;
+
+        case moba::Message::MT_HARDWARE_STATE_CHANGED:
+            setHardwareState(msg->getData());
+            break;
+
+        case moba::Message::MT_ECHO_RES:
+            setPingResult();
+            break;
+    }
+
+     */
+
+
 
     msgEndpoint->sendMsg(ServerInfoReq{});
     msgEndpoint->sendMsg(ServerConClientsReq{});
@@ -234,7 +268,6 @@ void FrmMain::on_about_dialog_response(int) {
 
 bool FrmMain::on_timeout(int) {
     static bool connected = true;
-    moba::MessagePtr msg;
 
     try {
         if(!connected) {
@@ -250,7 +283,8 @@ bool FrmMain::on_timeout(int) {
             connected = true;
             return true;
         }
-        //msg = msgEndpoint->recieveMsg();
+        registry.handleMsg(msgEndpoint->recieveMsg());
+
     } catch(std::exception &e) {
         if(connected) {
             m_Button_SystemPing.set_sensitive(false);
@@ -265,41 +299,6 @@ bool FrmMain::on_timeout(int) {
             m_InfoBar.show();
             connected = false;
         }
-        return true;
-    }
-
-    if(!msg) {
-        return true;
-    }
-
-    switch(msg->getMsgType()) {
-        case moba::Message::MT_SERVER_INFO_RES:
-            setServerInfoRes(msg->getData());
-            break;
-
-        case moba::Message::MT_CON_CLIENTS_RES:
-            setConClientsRes(msg->getData());
-            break;
-
-        case moba::Message::MT_NEW_CLIENT_STARTED:
-            setNewClient(msg->getData());
-            break;
-
-        case moba::Message::MT_CLIENT_CLOSED:
-            setRemoveClient(msg->getData());
-            break;
-
-        case moba::Message::MT_SYSTEM_NOTICE:
-            setSystemNotice(msg->getData());
-            break;
-
-        case moba::Message::MT_HARDWARE_STATE_CHANGED:
-            setHardwareState(msg->getData());
-            break;
-
-        case moba::Message::MT_ECHO_RES:
-            setPingResult();
-            break;
     }
     return true;
 }
@@ -340,58 +339,50 @@ void FrmMain::on_button_system_ping_clicked() {
     m_Button_SystemPing.set_sensitive(false);
 }
 
-void FrmMain::setServerInfoRes(moba::JsonItemPtr data) {
-    moba::JsonObjectPtr o = boost::dynamic_pointer_cast<moba::JsonObject>(data);
+void FrmMain::setServerInfoRes(const ServerInfoRes &data) {
     lblName[0][0].set_markup("<b>AppName:</b>");
-    lblName[1][0].set_label(moba::castToString(o->at("appName")));
+    lblName[1][0].set_label(data.appName);
 
     lblName[0][1].set_markup("<b>Version:</b>");
-    lblName[1][1].set_label(moba::castToString(o->at("version")));
+    lblName[1][1].set_label(data.version.getJsonString());
 
     lblName[0][2].set_markup("<b>Build-Date:</b>");
-    lblName[1][2].set_label(moba::castToString(o->at("buildDate")));
+    lblName[1][2].set_label(data.buildDate);
 
     lblName[0][3].set_markup("<b>Start-Time:</b>");
-    lblName[1][3].set_label(moba::castToString(o->at("startTime")));
+    lblName[1][3].set_label(data.startTime);
 
     lblName[0][4].set_markup("<b>Up-Time:</b>");
-    lblName[1][4].set_label(moba::castToString(o->at("upTime")));
+    lblName[1][4].set_label(data.upTime);
 
     lblName[0][5].set_markup("<b>max. Clients:</b>");
-    lblName[1][5].set_label(std::to_string(moba::castToInt(o->at("maxClients"))));
+    lblName[1][5].set_label(std::to_string(data.maxClients));
 
     lblName[0][6].set_markup("<b>connected Clients:</b>");
-    lblName[1][6].set_label(std::to_string(moba::castToInt(o->at("connectedClients"))));
+    lblName[1][6].set_label(std::to_string(data.connectedClients));
 
     lblName[0][7].set_markup("<b>osArch:</b>");
-    lblName[1][7].set_label(moba::castToString(o->at("osArch")));
+    lblName[1][7].set_label(data.osArch);
 
     lblName[0][8].set_markup("<b>osName:</b>");
-    lblName[1][8].set_label(moba::castToString(o->at("osName")));
+    lblName[1][8].set_label(data.osName);
 
     lblName[0][9].set_markup("<b>osVersion:</b>");
-    lblName[1][9].set_label(moba::castToString(o->at("osVersion")));
+    lblName[1][9].set_label(data.osVersion);
 
     lblName[0][10].set_markup("<b>fwType:</b>");
-    lblName[1][10].set_label(moba::castToString(o->at("fwType")));
+    lblName[1][10].set_label(data.fwType);
 
     lblName[0][11].set_markup("<b>fwVersion:</b>");
-    lblName[1][11].set_label(moba::castToString(o->at("fwVersion")));
+    lblName[1][11].set_label(data.fwVersion);
 }
 
-void FrmMain::setConClientsRes(moba::JsonItemPtr data) {
-    moba::JsonArrayPtr a = boost::dynamic_pointer_cast<moba::JsonArray>(data);
-
+void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
     m_TreeView_ActiveApps.clearList();
 
-    for(auto iter = a->begin(); iter != a->end(); ++iter) {
-        moba::JsonObjectPtr o = boost::dynamic_pointer_cast<moba::JsonObject>(*iter);
-        moba::JsonObjectPtr oi = boost::dynamic_pointer_cast<moba::JsonObject>(o->at("appInfo"));
-
+    for(auto iter : data.endpoints) {
         m_TreeView_ActiveApps.addActiveApp(
-            moba::castToInt(o->at("appID")), moba::castToString(oi->at("appName")),
-            moba::castToString(oi->at("version")), moba::castToString(o->at("addr")),
-            moba::castToInt(o->at("port")), moba::castToString(o->at("upTime"))
+            iter.appId, iter.appInfo.appName, iter.appInfo.version.getJsonString(), iter.addr, iter.port, iter.upTime
         );
     }
 }

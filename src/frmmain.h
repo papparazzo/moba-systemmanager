@@ -126,7 +126,7 @@ class FrmMain : public Gtk::Window {
 
         // msg-response
         void setServerInfoRes(const ServerInfoRes &data);
-        void setConClientsRes(moba::JsonItemPtr data);
+        void setConClientsRes(const ServerConClientsRes &data);
         void setSystemNotice(moba::JsonItemPtr data);
         void setHardwareState(moba::JsonItemPtr data);
         void setNewClient(moba::JsonItemPtr data);
