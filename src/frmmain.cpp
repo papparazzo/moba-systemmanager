@@ -114,15 +114,7 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     registry.registerHandler<ClientEchoRes>(std::bind(&FrmMain::setPingResult, this, std::placeholders::_1));
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmMain::setHardwareState, this, std::placeholders::_1));
-
-    /*
-        case moba::Message::MT_CLIENT_CLOSED:
-            setRemoveClient(msg->getData());
-
-        case moba::Message::MT_HARDWARE_STATE_CHANGED:
-            setHardwareState(msg->getData());
-
-     */
+    registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
 
     msgEndpoint->sendMsg(ServerInfoReq{});
     msgEndpoint->sendMsg(ServerConClientsReq{});
@@ -476,8 +468,8 @@ void FrmMain::setNewClient(const ServerNewClientStarted &data) {
     );
 }
 
-void FrmMain::setRemoveClient(moba::JsonItemPtr data) {
-    m_TreeView_ActiveApps.removeActiveApp(moba::castToInt(data));
+void FrmMain::setRemoveClient(const ServerClientClosed &data) {
+    m_TreeView_ActiveApps.removeActiveApp(data.clientId);
 }
 
 void FrmMain::setPingResult(const ClientEchoRes&) {
