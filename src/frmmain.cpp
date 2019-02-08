@@ -113,11 +113,9 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     registry.registerHandler<GuiSystemNotice>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
     registry.registerHandler<ClientEchoRes>(std::bind(&FrmMain::setPingResult, this, std::placeholders::_1));
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
+    registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmMain::setHardwareState, this, std::placeholders::_1));
+
     /*
-
-        case moba::Message::MT_NEW_CLIENT_STARTED:
-            setNewClient(msg->getData());
-
         case moba::Message::MT_CLIENT_CLOSED:
             setRemoveClient(msg->getData());
 
@@ -369,7 +367,7 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
     }
 }
 
-void FrmMain::setSystemNotice(const GuiSystemNotice &notice) {
+void FrmMain::setSystemNotice(const GuiSystemNotice &data) {
     timeb sTimeB;
     char buffer[25] = "";
 
@@ -378,10 +376,10 @@ void FrmMain::setSystemNotice(const GuiSystemNotice &notice) {
 
     Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
     row[m_Columns_Notices.m_col_timestamp] = std::string(buffer);
-    row[m_Columns_Notices.m_col_caption  ] = notice.caption;
-    row[m_Columns_Notices.m_col_text     ] = notice.text;
+    row[m_Columns_Notices.m_col_caption  ] = data.caption;
+    row[m_Columns_Notices.m_col_text     ] = data.text;
 
-    switch(notice.noticeType) {
+    switch(data.noticeType) {
         case GuiSystemNotice::NoticeType::ERROR:
             m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
             row[m_Columns_Notices.m_col_type] = "ERROR";
@@ -398,8 +396,8 @@ void FrmMain::setSystemNotice(const GuiSystemNotice &notice) {
             break;
     }
 
-    std::string cpt = notice.caption;
-    std::string txt = notice.text;
+    std::string cpt = data.caption;
+    std::string txt = data.text;
 
     std::replace(cpt.begin(), cpt.end(), '<', '"');
     std::replace(cpt.begin(), cpt.end(), '>', '"');
@@ -407,15 +405,14 @@ void FrmMain::setSystemNotice(const GuiSystemNotice &notice) {
     std::replace(txt.begin(), txt.end(), '>', '"');
 
     std::stringstream ss;
-    ss << "<b>" << notice.caption << "!</b>\n" << notice.text;
+    ss << "<b>" << data.caption << "!</b>\n" << data.text;
 
     m_Label_InfoBarMessage.set_markup(ss.str());
     m_InfoBar.show();
 }
 
-void FrmMain::setHardwareState(moba::JsonItemPtr data) {
-    std::string status = moba::castToString(data);
-    if(status == "ERROR") {
+void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
@@ -428,7 +425,7 @@ void FrmMain::setHardwareState(moba::JsonItemPtr data) {
     m_Button_Emegerency.set_sensitive(true);
     m_Button_SystemStandby.set_sensitive(true);
     m_Button_SystemAutomatic.set_sensitive(true);
-    if(status == "EMERGENCY_STOP") {
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
@@ -439,7 +436,7 @@ void FrmMain::setHardwareState(moba::JsonItemPtr data) {
         return;
     }
     m_Button_Emegerency.set_label("Nothalt");
-    if(status == "STANDBY") {
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
@@ -450,22 +447,25 @@ void FrmMain::setHardwareState(moba::JsonItemPtr data) {
         return;
     }
     m_Button_SystemStandby.set_label("Standby (aus)");
-    if(status == "MANUEL") {
+    std::string status;
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> manuell");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> manuell");
         m_Button_SystemAutomatic.set_label("Automatik (aus)");
-    } else if(status == "AUTOMATIC") {
+        status = "manuell";
+    } else if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> automatisch");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> automatisch");
         m_Button_SystemAutomatic.set_label("Automatik (an)");
+        status = "automatisch";
     }
 
     std::stringstream ss;
-    ss << "<b>Hardwarestatus:</b> " << moba::castToString(data);
+    ss << "<b>Hardwarestatus:</b> " << status;
     m_Label_HardwareState.set_markup(ss.str());
 }
 
