@@ -29,6 +29,7 @@
 #include "moba/registry.h"
 #include "moba/serverhandler.h"
 #include "moba/guihandler.h"
+#include "moba/clienthandler.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>
@@ -133,5 +134,5 @@ class FrmMain : public Gtk::Window {
         void setHardwareState(moba::JsonItemPtr data);
         void setNewClient(moba::JsonItemPtr data);
         void setRemoveClient(moba::JsonItemPtr data);
-        void setPingResult();
+        void setPingResult(const ClientEchoRes&);
 };
