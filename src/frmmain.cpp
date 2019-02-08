@@ -111,13 +111,11 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     initSystemControl();
     initStatus();
 
-    registry.registerHandler<ServerInfoRes>      (std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
+    registry.registerHandler<ServerInfoRes>(std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
-
+    registry.registerHandler<GuiSystemNotice>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
+    //registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
     /*
-        case moba::Message::MT_CON_CLIENTS_RES:
-            setConClientsRes(msg->getData());
-            break;
 
         case moba::Message::MT_NEW_CLIENT_STARTED:
             setNewClient(msg->getData());
@@ -387,35 +385,8 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
     }
 }
 
-void FrmMain::setSystemNotice(moba::JsonItemPtr data) {
-    moba::JsonObjectPtr o = boost::dynamic_pointer_cast<moba::JsonObject>(data);
-    std::string type = moba::castToString(o->at("type"));
-    std::string caption = moba::castToString(o->at("caption"));
-    std::string text = moba::castToString(o->at("text"));
-
-    if(type == "INFO") {
-        m_InfoBar.set_message_type(Gtk::MESSAGE_INFO);
-    }
-    if(type == "WARNING") {
-        m_InfoBar.set_message_type(Gtk::MESSAGE_WARNING);
-    }
-    if(type == "ERROR") {
-        m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
-    }
-
-    std::replace(caption.begin(), caption.end(), '<', '"');
-    std::replace(caption.begin(), caption.end(), '>', '"');
-    std::replace(text.begin(), text.end(), '<', '"');
-    std::replace(text.begin(), text.end(), '>', '"');
-
-    std::stringstream ss;
-    ss << "<b>" << caption << "!</b>\n" << text;
-
-    m_Label_InfoBarMessage.set_markup(ss.str());
-    m_InfoBar.show();
-
+void FrmMain::setSystemNotice(const GuiSystemNotice &notice) {
     timeb sTimeB;
-
     char buffer[25] = "";
 
     ftime(&sTimeB);
@@ -423,9 +394,39 @@ void FrmMain::setSystemNotice(moba::JsonItemPtr data) {
 
     Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
     row[m_Columns_Notices.m_col_timestamp] = std::string(buffer);
-    row[m_Columns_Notices.m_col_type     ] = type;
-    row[m_Columns_Notices.m_col_caption  ] = caption;
-    row[m_Columns_Notices.m_col_text     ] = text;
+    row[m_Columns_Notices.m_col_caption  ] = notice.caption;
+    row[m_Columns_Notices.m_col_text     ] = notice.text;
+
+    switch(notice.noticeType) {
+        case GuiSystemNotice::NoticeType::ERROR:
+            m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
+            row[m_Columns_Notices.m_col_type] = "ERROR";
+            break;
+
+        case GuiSystemNotice::NoticeType::INFO:
+            m_InfoBar.set_message_type(Gtk::MESSAGE_INFO);
+            row[m_Columns_Notices.m_col_type] = "INFO";
+            break;
+
+        case GuiSystemNotice::NoticeType::WARNING:
+            m_InfoBar.set_message_type(Gtk::MESSAGE_WARNING);
+            row[m_Columns_Notices.m_col_type] = "WARNING";
+            break;
+    }
+
+    std::string cpt = notice.caption;
+    std::string txt = notice.text;
+
+    std::replace(cpt.begin(), cpt.end(), '<', '"');
+    std::replace(cpt.begin(), cpt.end(), '>', '"');
+    std::replace(txt.begin(), txt.end(), '<', '"');
+    std::replace(txt.begin(), txt.end(), '>', '"');
+
+    std::stringstream ss;
+    ss << "<b>" << notice.caption << "!</b>\n" << notice.text;
+
+    m_Label_InfoBarMessage.set_markup(ss.str());
+    m_InfoBar.show();
 }
 
 void FrmMain::setHardwareState(moba::JsonItemPtr data) {

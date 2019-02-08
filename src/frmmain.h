@@ -25,8 +25,10 @@
 
 #include "moba/endpoint.h"
 #include <moba/jsonabstractitem.h>
+
 #include "moba/registry.h"
 #include "moba/serverhandler.h"
+#include "moba/guihandler.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>
@@ -127,7 +129,7 @@ class FrmMain : public Gtk::Window {
         // msg-response
         void setServerInfoRes(const ServerInfoRes &data);
         void setConClientsRes(const ServerConClientsRes &data);
-        void setSystemNotice(moba::JsonItemPtr data);
+        void setSystemNotice(const GuiSystemNotice &notice);
         void setHardwareState(moba::JsonItemPtr data);
         void setNewClient(moba::JsonItemPtr data);
         void setRemoveClient(moba::JsonItemPtr data);
