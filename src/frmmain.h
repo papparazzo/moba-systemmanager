@@ -30,6 +30,7 @@
 #include "moba/serverhandler.h"
 #include "moba/guihandler.h"
 #include "moba/clienthandler.h"
+#include "moba/systemhandler.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>
@@ -132,7 +133,7 @@ class FrmMain : public Gtk::Window {
         void setConClientsRes(const ServerConClientsRes &data);
         void setSystemNotice(const GuiSystemNotice &notice);
         void setHardwareState(moba::JsonItemPtr data);
-        void setNewClient(moba::JsonItemPtr data);
+        void setNewClient(const ServerNewClientStarted &data);
         void setRemoveClient(moba::JsonItemPtr data);
         void setPingResult(const ClientEchoRes&);
 };

@@ -28,9 +28,6 @@
 
 #include "frmmain.h"
 #include "config.h"
-#include "moba/serverhandler.h"
-#include "moba/systemhandler.h"
-#include "moba/clienthandler.h"
 
 namespace {
     const char license[] =
@@ -115,8 +112,7 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
     registry.registerHandler<GuiSystemNotice>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
     registry.registerHandler<ClientEchoRes>(std::bind(&FrmMain::setPingResult, this, std::placeholders::_1));
-
-    //registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
+    registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
     /*
 
         case moba::Message::MT_NEW_CLIENT_STARTED:
@@ -473,14 +469,10 @@ void FrmMain::setHardwareState(moba::JsonItemPtr data) {
     m_Label_HardwareState.set_markup(ss.str());
 }
 
-void FrmMain::setNewClient(moba::JsonItemPtr data) {
-    moba::JsonObjectPtr o = boost::dynamic_pointer_cast<moba::JsonObject>(data);
-    moba::JsonObjectPtr oi = boost::dynamic_pointer_cast<moba::JsonObject>(o->at("appInfo"));
-
+void FrmMain::setNewClient(const ServerNewClientStarted &data) {
     m_TreeView_ActiveApps.addActiveApp(
-        moba::castToInt(o->at("appID")), moba::castToString(oi->at("appName")),
-        moba::castToString(oi->at("version")), moba::castToString(o->at("addr")),
-        moba::castToInt(o->at("port")), moba::castToString(o->at("upTime"))
+        data.endpoint.appId, data.endpoint.appInfo.appName, data.endpoint.appInfo.version.getJsonString(),
+        data.endpoint.addr, data.endpoint.port, data.endpoint.upTime
     );
 }
 
