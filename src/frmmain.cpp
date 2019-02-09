@@ -316,7 +316,7 @@ void FrmMain::setServerInfoRes(const ServerInfoRes &data) {
     lblName[1][0].set_label(data.appName);
 
     lblName[0][1].set_markup("<b>Version:</b>");
-    lblName[1][1].set_label(data.version.getJsonString());
+    lblName[1][1].set_label(data.version.getString());
 
     lblName[0][2].set_markup("<b>Build-Date:</b>");
     lblName[1][2].set_label(data.buildDate);
@@ -354,7 +354,7 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
 
     for(auto iter : data.endpoints) {
         m_TreeView_ActiveApps.addActiveApp(
-            iter.appId, iter.appInfo.appName, iter.appInfo.version.getJsonString(), iter.addr, iter.port, iter.upTime
+            iter.appId, iter.appInfo.appName, iter.appInfo.version.getString(), iter.addr, iter.port, iter.upTime
         );
     }
 }
@@ -463,7 +463,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
 
 void FrmMain::setNewClient(const ServerNewClientStarted &data) {
     m_TreeView_ActiveApps.addActiveApp(
-        data.endpoint.appId, data.endpoint.appInfo.appName, data.endpoint.appInfo.version.getJsonString(),
+        data.endpoint.appId, data.endpoint.appInfo.appName, data.endpoint.appInfo.version.getString(),
         data.endpoint.addr, data.endpoint.port, data.endpoint.upTime
     );
 }
