@@ -111,6 +111,7 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     registry.registerHandler<ServerInfoRes>(std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
     registry.registerHandler<GuiSystemNotice>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
+    registry.registerHandler<ClientError>(std::bind(&FrmMain::setErrorNotice, this, std::placeholders::_1));
     registry.registerHandler<ClientEchoRes>(std::bind(&FrmMain::setPingResult, this, std::placeholders::_1));
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmMain::setHardwareState, this, std::placeholders::_1));
@@ -216,6 +217,45 @@ void FrmMain::initStatus() {
     m_TreeView_Notices.append_column("Type",      m_Columns_Notices.m_col_type);
     m_TreeView_Notices.append_column("Caption",   m_Columns_Notices.m_col_caption);
     m_TreeView_Notices.append_column("Text",      m_Columns_Notices.m_col_text);
+}
+
+void FrmMain::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
+    timeb sTimeB;
+    char buffer[25] = "";
+
+    ftime(&sTimeB);
+    strftime(buffer, 21, "%d.%m.%Y %H:%M:%S", localtime(&sTimeB.time));
+
+    Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
+    row[m_Columns_Notices.m_col_timestamp] = std::string(buffer);
+    row[m_Columns_Notices.m_col_caption  ] = caption;
+    row[m_Columns_Notices.m_col_text     ] = text;
+
+    switch(noticeType) {
+        case Gtk::MESSAGE_ERROR:
+            row[m_Columns_Notices.m_col_type] = "ERROR";
+            break;
+
+        case Gtk::MESSAGE_WARNING:
+            row[m_Columns_Notices.m_col_type] = "WARNING";
+            break;
+
+        default:
+            row[m_Columns_Notices.m_col_type] = "INFO";
+            break;
+    }
+
+    std::replace(caption.begin(), caption.end(), '<', '"');
+    std::replace(caption.begin(), caption.end(), '>', '"');
+    std::replace(text.begin(), text.end(), '<', '"');
+    std::replace(text.begin(), text.end(), '>', '"');
+
+    std::stringstream ss;
+    ss << "<b>" << caption << "!</b>\n" << text;
+
+    m_Label_InfoBarMessage.set_markup(ss.str());
+    m_InfoBar.set_message_type(noticeType);
+    m_InfoBar.show();
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -359,48 +399,26 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
     }
 }
 
+void FrmMain::setErrorNotice(const ClientError &data) {
+    setNotice(Gtk::MESSAGE_ERROR, data.errorId, data.additionalMsg);
+}
+
 void FrmMain::setSystemNotice(const GuiSystemNotice &data) {
-    timeb sTimeB;
-    char buffer[25] = "";
-
-    ftime(&sTimeB);
-    strftime(buffer, 21, "%d.%m.%Y %H:%M:%S", localtime(&sTimeB.time));
-
-    Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
-    row[m_Columns_Notices.m_col_timestamp] = std::string(buffer);
-    row[m_Columns_Notices.m_col_caption  ] = data.caption;
-    row[m_Columns_Notices.m_col_text     ] = data.text;
-
+    Gtk::MessageType mt;
     switch(data.noticeType) {
         case GuiSystemNotice::NoticeType::ERROR:
-            m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
-            row[m_Columns_Notices.m_col_type] = "ERROR";
+            mt = Gtk::MESSAGE_ERROR;
             break;
 
         case GuiSystemNotice::NoticeType::INFO:
-            m_InfoBar.set_message_type(Gtk::MESSAGE_INFO);
-            row[m_Columns_Notices.m_col_type] = "INFO";
+            mt = Gtk::MESSAGE_INFO;
             break;
 
         case GuiSystemNotice::NoticeType::WARNING:
-            m_InfoBar.set_message_type(Gtk::MESSAGE_WARNING);
-            row[m_Columns_Notices.m_col_type] = "WARNING";
+            mt = Gtk::MESSAGE_WARNING;
             break;
     }
-
-    std::string cpt = data.caption;
-    std::string txt = data.text;
-
-    std::replace(cpt.begin(), cpt.end(), '<', '"');
-    std::replace(cpt.begin(), cpt.end(), '>', '"');
-    std::replace(txt.begin(), txt.end(), '<', '"');
-    std::replace(txt.begin(), txt.end(), '>', '"');
-
-    std::stringstream ss;
-    ss << "<b>" << data.caption << "!</b>\n" << data.text;
-
-    m_Label_InfoBarMessage.set_markup(ss.str());
-    m_InfoBar.show();
+    setNotice(mt, data.caption, data.text);
 }
 
 void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {

@@ -116,6 +116,8 @@ class FrmMain : public Gtk::Window {
         std::chrono::time_point<std::chrono::system_clock> start;
         int pingctr;
 
+        void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
+
         // Signal handlers:
         bool on_timeout(int timer_number);
         void on_button_about_clicked();
@@ -132,6 +134,7 @@ class FrmMain : public Gtk::Window {
         void setServerInfoRes(const ServerInfoRes &data);
         void setConClientsRes(const ServerConClientsRes &data);
         void setSystemNotice(const GuiSystemNotice &data);
+        void setErrorNotice(const ClientError &data);
         void setHardwareState(const SystemHardwareStateChanged &data);
         void setNewClient(const ServerNewClientStarted &data);
         void setRemoveClient(const ServerClientClosed &data);
