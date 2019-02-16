@@ -10,6 +10,6 @@ moba_systemmanager_SOURCES = \
 moba_systemmanager_LDADD = -lMoBaCommon $(GTKMM_LIBS) $(srcdir)/../modules/lib-msghandling/src/moba/libmsghandling.a
 LDFLAGS += -L/usr/local/lib
 
-AM_CPPFLAGS = $(GTKMM_CFLAGS) -I$(srcdir)/../modules/lib-msghandling/src
+AM_CPPFLAGS = $(GTKMM_CFLAGS) -I$(srcdir)/../modules/lib-msghandling/src -g3 -ggdb -O3 -Wall
 
 CLEANFILES = *~
