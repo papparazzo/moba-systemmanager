@@ -50,10 +50,11 @@ namespace {
 }
 
 FrmMain::FrmMain(EndpointPtr mhp) :
-    msgEndpoint(mhp), m_VBox(Gtk::ORIENTATION_VERTICAL, 6), m_Button_About("About..."),
-    m_VBox_SystemControl(Gtk::ORIENTATION_VERTICAL, 6), m_VBox_ServerDataKey(Gtk::ORIENTATION_VERTICAL, 6),
-    m_VBox_ServerDataValue(Gtk::ORIENTATION_VERTICAL, 6), m_TreeView_ActiveApps(mhp), m_HBox(Gtk::ORIENTATION_HORIZONTAL, 6),
-    m_Label_Connectivity_HW(" \xe2\x96\x84"), m_Label_Connectivity_SW(" \xe2\x96\x84")
+    m_VBox{Gtk::ORIENTATION_VERTICAL, 6}, m_HBox{Gtk::ORIENTATION_HORIZONTAL, 6},
+    m_Label_Connectivity_HW{" \xe2\x96\x84"}, m_Label_Connectivity_SW{" \xe2\x96\x84"},
+    m_Button_About{"About..."}, m_TreeView_ActiveApps{mhp},
+    m_VBox_ServerDataKey{Gtk::ORIENTATION_VERTICAL, 6}, m_VBox_ServerDataValue{Gtk::ORIENTATION_VERTICAL, 6},
+    m_VBox_SystemControl{Gtk::ORIENTATION_VERTICAL, 6}, msgEndpoint{mhp}
 {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 25 ms
@@ -410,12 +411,13 @@ void FrmMain::setSystemNotice(const GuiSystemNotice &data) {
             mt = Gtk::MESSAGE_ERROR;
             break;
 
-        case GuiSystemNotice::NoticeType::INFO:
-            mt = Gtk::MESSAGE_INFO;
-            break;
-
         case GuiSystemNotice::NoticeType::WARNING:
             mt = Gtk::MESSAGE_WARNING;
+            break;
+
+        case GuiSystemNotice::NoticeType::INFO:
+        default:
+            mt = Gtk::MESSAGE_INFO;
             break;
     }
     setNotice(mt, data.caption, data.text);
