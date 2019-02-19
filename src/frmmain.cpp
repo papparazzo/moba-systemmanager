@@ -284,7 +284,7 @@ bool FrmMain::on_timeout(int) {
 
     try {
         if(!connected) {
-            msgEndpoint->connect();
+            msgEndpoint->reconnect();
             m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
