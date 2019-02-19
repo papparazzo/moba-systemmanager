@@ -118,9 +118,6 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmMain::setHardwareState, this, std::placeholders::_1));
     registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
 
-    msgEndpoint->sendMsg(ServerInfoReq{});
-    msgEndpoint->sendMsg(ServerConClientsReq{});
-    msgEndpoint->sendMsg(SystemGetHardwareState{});
     show_all_children();
     m_InfoBar.hide();
 }
@@ -280,16 +277,17 @@ void FrmMain::on_about_dialog_response(int) {
 }
 
 bool FrmMain::on_timeout(int) {
-    static bool connected = true;
+    static bool connected = false;
 
     try {
         if(!connected) {
-            msgEndpoint->reconnect();
+            msgEndpoint->connect();
             m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Button_SystemPing.set_sensitive(true);
+
             msgEndpoint->sendMsg(ServerInfoReq{});
             msgEndpoint->sendMsg(ServerConClientsReq{});
             msgEndpoint->sendMsg(SystemGetHardwareState{});

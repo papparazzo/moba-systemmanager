@@ -43,23 +43,13 @@ namespace {
 int main(int argc, char *argv[]) {
     moba::setCoreFileSizeToULimit();
 
+    moba::JsonArrayPtr groups(new moba::JsonArray());
+    groups->push_back(moba::toJsonStringPtr("SERVER"));
+    groups->push_back(moba::toJsonStringPtr("SYSTEM"));
+    groups->push_back(moba::toJsonStringPtr("GUI"));
+
     SocketPtr   socket(new Socket{appData.host, appData.port});
-    EndpointPtr endpoint(new Endpoint{socket});
-
-    try {
-        moba::JsonArrayPtr groups(new moba::JsonArray());
-        groups->push_back(moba::toJsonStringPtr("SERVER"));
-        groups->push_back(moba::toJsonStringPtr("SYSTEM"));
-        groups->push_back(moba::toJsonStringPtr("GUI"));
-
-        endpoint->connect(
-            appData.appName,
-            appData.version,
-            groups
-        );
-    } catch(SocketException &e) {
-        std::cerr << e.what() << std::endl;
-    }
+    EndpointPtr endpoint(new Endpoint{socket, appData.appName, appData.version, groups});
 
     auto app = Gtk::Application::create(argc, argv, "org.moba.taskmanager");
 
