@@ -32,7 +32,7 @@ class TreeView_ActiveApps : public Gtk::TreeView {
 
         void addActiveApp(
             int id, const std::string &name, const std::string &version,
-            const std::string &addr, int port, const std::string upTime
+            const std::string &addr, int port, const std::string startTime
         );
         void removeActiveApp(long id);
 
@@ -47,7 +47,7 @@ class TreeView_ActiveApps : public Gtk::TreeView {
                     add(m_col_version);
                     add(m_col_ipAddr);
                     add(m_col_port);
-                    add(m_col_uptime);
+                    add(m_col_startTime);
                 }
 
                 Gtk::TreeModelColumn<unsigned int>  m_col_id;
@@ -55,7 +55,7 @@ class TreeView_ActiveApps : public Gtk::TreeView {
                 Gtk::TreeModelColumn<Glib::ustring> m_col_version;
                 Gtk::TreeModelColumn<Glib::ustring> m_col_ipAddr;
                 Gtk::TreeModelColumn<unsigned int>  m_col_port;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_uptime;
+                Gtk::TreeModelColumn<Glib::ustring> m_col_startTime;
         };
 
         ModelColumnsActiveApps m_Columns_ActiveApps;

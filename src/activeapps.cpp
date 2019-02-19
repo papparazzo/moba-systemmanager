@@ -30,7 +30,7 @@ TreeView_ActiveApps::TreeView_ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(
     append_column("Version",    m_Columns_ActiveApps.m_col_version);
     append_column("IP-Adresse", m_Columns_ActiveApps.m_col_ipAddr);
     append_column("Port",       m_Columns_ActiveApps.m_col_port);
-    append_column("Uptime",     m_Columns_ActiveApps.m_col_uptime);
+    append_column("Start-Time", m_Columns_ActiveApps.m_col_startTime);
 
     auto item = Gtk::manage(new Gtk::MenuItem("_Selftest", true));
 
@@ -67,16 +67,16 @@ void TreeView_ActiveApps::clearList() {
 
 void TreeView_ActiveApps::addActiveApp(
     int id, const std::string &name, const std::string &version,
-    const std::string &addr, int port, const std::string upTime
+    const std::string &addr, int port, const std::string startTime
 ) {
     Gtk::TreeModel::Row row;
     row = *(m_refTreeModel_ActiveApps->append());
-    row[m_Columns_ActiveApps.m_col_id     ] = id;
-    row[m_Columns_ActiveApps.m_col_name   ] = name;
-    row[m_Columns_ActiveApps.m_col_version] = version;
-    row[m_Columns_ActiveApps.m_col_ipAddr ] = addr;
-    row[m_Columns_ActiveApps.m_col_port   ] = port;
-    row[m_Columns_ActiveApps.m_col_uptime ] = upTime;
+    row[m_Columns_ActiveApps.m_col_id       ] = id;
+    row[m_Columns_ActiveApps.m_col_name     ] = name;
+    row[m_Columns_ActiveApps.m_col_version  ] = version;
+    row[m_Columns_ActiveApps.m_col_ipAddr   ] = addr;
+    row[m_Columns_ActiveApps.m_col_port     ] = port;
+    row[m_Columns_ActiveApps.m_col_startTime] = startTime;
 }
 
 bool TreeView_ActiveApps::on_button_press_event(GdkEventButton *button_event) {

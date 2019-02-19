@@ -392,7 +392,7 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
 
     for(auto iter : data.endpoints) {
         m_TreeView_ActiveApps.addActiveApp(
-            iter.appId, iter.appInfo.appName, iter.appInfo.version.getString(), iter.addr, iter.port, iter.upTime
+            iter.appId, iter.appInfo.appName, iter.appInfo.version.getString(), iter.addr, iter.port, iter.startTime
         );
     }
 }
@@ -481,7 +481,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
 void FrmMain::setNewClient(const ServerNewClientStarted &data) {
     m_TreeView_ActiveApps.addActiveApp(
         data.endpoint.appId, data.endpoint.appInfo.appName, data.endpoint.appInfo.version.getString(),
-        data.endpoint.addr, data.endpoint.port, data.endpoint.upTime
+        data.endpoint.addr, data.endpoint.port, data.endpoint.startTime
     );
 }
 
