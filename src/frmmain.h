@@ -71,7 +71,7 @@ class FrmMain : public Gtk::Window {
         Glib::RefPtr<Gtk::ListStore> m_refTreeModel_Notices;
 
         // server-data
-        Gtk::Label lblName[2][12];
+        Gtk::Label lblName[2][11];
         Gtk::VBox m_VBox_ServerDataKey;
         Gtk::VBox m_VBox_ServerDataValue;
         Gtk::HBox m_HBox_ServerData;

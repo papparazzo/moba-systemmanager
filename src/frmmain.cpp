@@ -161,7 +161,7 @@ void FrmMain::initServerData() {
     m_HBox_ServerData.add(m_VBox_ServerDataKey);
     m_HBox_ServerData.add(m_VBox_ServerDataValue);
 
-    for(int i = 0; i < 12; ++i) {
+    for(int i = 0; i < 11; ++i) {
         m_VBox_ServerDataKey.pack_start(lblName[0][i]);
         m_VBox_ServerDataValue.pack_start(lblName[1][i]);
         lblName[0][i].set_justify(Gtk::JUSTIFY_RIGHT);
@@ -365,29 +365,26 @@ void FrmMain::setServerInfoRes(const ServerInfoRes &data) {
     lblName[0][3].set_markup("<b>Start-Time:</b>");
     lblName[1][3].set_label(data.startTime);
 
-    lblName[0][4].set_markup("<b>Up-Time:</b>");
-    lblName[1][4].set_label(data.upTime);
+    lblName[0][4].set_markup("<b>max. Clients:</b>");
+    lblName[1][4].set_label(std::to_string(data.maxClients));
 
-    lblName[0][5].set_markup("<b>max. Clients:</b>");
-    lblName[1][5].set_label(std::to_string(data.maxClients));
+    lblName[0][5].set_markup("<b>connected Clients:</b>");
+    lblName[1][5].set_label(std::to_string(data.connectedClients));
 
-    lblName[0][6].set_markup("<b>connected Clients:</b>");
-    lblName[1][6].set_label(std::to_string(data.connectedClients));
+    lblName[0][6].set_markup("<b>osArch:</b>");
+    lblName[1][6].set_label(data.osArch);
 
-    lblName[0][7].set_markup("<b>osArch:</b>");
-    lblName[1][7].set_label(data.osArch);
+    lblName[0][7].set_markup("<b>osName:</b>");
+    lblName[1][7].set_label(data.osName);
 
-    lblName[0][8].set_markup("<b>osName:</b>");
-    lblName[1][8].set_label(data.osName);
+    lblName[0][8].set_markup("<b>osVersion:</b>");
+    lblName[1][8].set_label(data.osVersion);
 
-    lblName[0][9].set_markup("<b>osVersion:</b>");
-    lblName[1][9].set_label(data.osVersion);
+    lblName[0][9].set_markup("<b>fwType:</b>");
+    lblName[1][9].set_label(data.fwType);
 
-    lblName[0][10].set_markup("<b>fwType:</b>");
-    lblName[1][10].set_label(data.fwType);
-
-    lblName[0][11].set_markup("<b>fwVersion:</b>");
-    lblName[1][11].set_label(data.fwVersion);
+    lblName[0][10].set_markup("<b>fwVersion:</b>");
+    lblName[1][10].set_label(data.fwVersion);
 }
 
 void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
