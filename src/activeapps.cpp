@@ -19,6 +19,7 @@
  */
 
 #include "activeapps.h"
+#include "moba/serverhandler.h"
 
 TreeView_ActiveApps::TreeView_ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(msgEndpoint) {
     m_refTreeModel_ActiveApps = Gtk::ListStore::create(m_Columns_ActiveApps);
@@ -98,7 +99,7 @@ void TreeView_ActiveApps::on_menu_popup_reset() {
         return;
     }
     long id = (*iter)[m_Columns_ActiveApps.m_col_id];
-    //serverHandler.sendResetClient(id);
+    msgEndpoint->sendMsg(ServerResetClient{id});
 }
 
 void TreeView_ActiveApps::on_menu_popup_selftest() {
@@ -111,5 +112,5 @@ void TreeView_ActiveApps::on_menu_popup_selftest() {
         return;
     }
     long id = (*iter)[m_Columns_ActiveApps.m_col_id];
-    //serverHandler.sendSelfTestingClient(id);
+    msgEndpoint->sendMsg(ServerSelfTestingClient{id});
 }
