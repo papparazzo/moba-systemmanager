@@ -259,6 +259,12 @@ void FrmMain::setNotice(Gtk::MessageType noticeType, std::string caption, std::s
     m_InfoBar.show();
 }
 
+void FrmMain::setHardwareStateLabel(const std::string &status) {
+    std::stringstream ss;
+    ss << "<b>Hardwarestatus:</b> " << status;
+    m_Label_HardwareState.set_markup(ss.str());
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Call-back-methodes
 
@@ -430,6 +436,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         m_Button_Emegerency.set_sensitive(false);
         m_Button_SystemStandby.set_sensitive(false);
         m_Button_SystemAutomatic.set_sensitive(false);
+        setHardwareStateLabel("Hardwarefehler");
         return;
     }
     m_Button_Emegerency.set_sensitive(true);
@@ -443,6 +450,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         m_Button_Emegerency.set_label("Freigabe");
         m_Button_SystemAutomatic.set_sensitive(false);
         m_Button_SystemStandby.set_sensitive(false);
+        setHardwareStateLabel("Nothalt");
         return;
     }
     m_Button_Emegerency.set_label("Nothalt");
@@ -454,29 +462,27 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         m_Button_SystemStandby.set_label("Standby (an)");
         m_Button_Emegerency.set_sensitive(false);
         m_Button_SystemAutomatic.set_sensitive(false);
+        setHardwareStateLabel("standby");
         return;
     }
     m_Button_SystemStandby.set_label("Standby (aus)");
-    std::string status;
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> manuell");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> manuell");
         m_Button_SystemAutomatic.set_label("Automatik (aus)");
-        status = "manuell";
-    } else if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
+        setHardwareStateLabel("manuell");
+        return;
+    }
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> automatisch");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> automatisch");
         m_Button_SystemAutomatic.set_label("Automatik (an)");
-        status = "automatisch";
+        setHardwareStateLabel("automatisch");
     }
-
-    std::stringstream ss;
-    ss << "<b>Hardwarestatus:</b> " << status;
-    m_Label_HardwareState.set_markup(ss.str());
 }
 
 void FrmMain::setNewClient(const ServerNewClientStarted &data) {

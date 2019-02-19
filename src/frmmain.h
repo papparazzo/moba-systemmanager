@@ -117,6 +117,7 @@ class FrmMain : public Gtk::Window {
         int pingctr;
 
         void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
+        void setHardwareStateLabel(const std::string &status);
 
         // Signal handlers:
         bool on_timeout(int timer_number);
