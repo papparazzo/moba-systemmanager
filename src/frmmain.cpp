@@ -109,6 +109,8 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     initSystemControl();
     initStatus();
 
+    m_Button_Emegerency.set_sensitive(false);
+
     registry.registerHandler<ServerInfoRes>(std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
     registry.registerHandler<GuiSystemNotice>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
@@ -188,6 +190,7 @@ void FrmMain::initSystemControl() {
     m_ButtonBox_System.pack_start(m_Button_SystemStandby);
     m_ButtonBox_System.pack_start(m_Button_SystemPing);
     m_ButtonBox_System.set_layout(Gtk::BUTTONBOX_CENTER);
+    m_ButtonBox_System.set_sensitive(false);
 
     m_Button_SystemShutdown.set_label("Shutdown");
     m_Button_SystemReset.set_label("Reset");
@@ -286,8 +289,7 @@ bool FrmMain::on_timeout(int) {
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
-            m_Button_SystemPing.set_sensitive(true);
-
+            m_ButtonBox_System.set_sensitive(true);
             msgEndpoint->sendMsg(ServerInfoReq{});
             msgEndpoint->sendMsg(ServerConClientsReq{});
             msgEndpoint->sendMsg(SystemGetHardwareState{});
@@ -298,7 +300,8 @@ bool FrmMain::on_timeout(int) {
 
     } catch(std::exception &e) {
         if(connected) {
-            m_Button_SystemPing.set_sensitive(false);
+            m_ButtonBox_System.set_sensitive(false);
+            m_Button_Emegerency.set_sensitive(false);
             m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
