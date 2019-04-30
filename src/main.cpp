@@ -43,15 +43,10 @@ namespace {
 int main(int argc, char *argv[]) {
     moba::setCoreFileSizeToULimit();
 
-    moba::JsonArrayPtr groups(new moba::JsonArray());
-    groups->push_back(moba::toJsonStringPtr("SERVER"));
-    groups->push_back(moba::toJsonStringPtr("SYSTEM"));
-    groups->push_back(moba::toJsonStringPtr("GUI"));
-
-    SocketPtr   socket(new Socket{appData.host, appData.port});
-    EndpointPtr endpoint(new Endpoint{socket, appData.appName, appData.version, groups});
-
-    auto app = Gtk::Application::create(argc, argv, "org.moba.taskmanager");
+    auto groups = Groups::SERVER | Groups::SYSTEM | Groups::GUI;
+    auto socket = std::make_shared<Socket>(appData.host, appData.port);
+    auto endpoint = std::make_shared<Endpoint>(socket, appData.appName, appData.version, groups);
+    auto app = Gtk::Application::create(argc, argv, "org.moba.systemmanager");
 
     FrmMain frmMain{endpoint};
     frmMain.set_title(appData.appName);
