@@ -18,8 +18,8 @@ PKG_CHECK_MODULES([GTKMM], [gtkmm-3.0])
 AX_CXX_COMPILE_STDCXX_17()
 
 AC_CONFIG_FILES([
-  Makefile
-  src/Makefile
+    Makefile
+    src/Makefile
 ])
 
 AC_OUTPUT

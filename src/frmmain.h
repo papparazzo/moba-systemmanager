@@ -24,13 +24,12 @@
 #include <chrono>
 
 #include "moba/endpoint.h"
-#include <moba/jsonabstractitem.h>
 
 #include "moba/registry.h"
-#include "moba/serverhandler.h"
-#include "moba/guihandler.h"
-#include "moba/clienthandler.h"
-#include "moba/systemhandler.h"
+#include "moba/servermessage.h"
+#include "moba/guimessage.h"
+#include "moba/clientmessage.h"
+#include "moba/systemmessage.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>

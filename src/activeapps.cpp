@@ -19,7 +19,7 @@
  */
 
 #include "activeapps.h"
-#include "moba/serverhandler.h"
+#include "moba/servermessage.h"
 
 TreeView_ActiveApps::TreeView_ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(msgEndpoint) {
     m_refTreeModel_ActiveApps = Gtk::ListStore::create(m_Columns_ActiveApps);
