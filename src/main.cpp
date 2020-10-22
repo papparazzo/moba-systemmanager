@@ -43,9 +43,8 @@ namespace {
 int main(int argc, char *argv[]) {
     moba::common::setCoreFileSizeToULimit();
 
-    auto groups = Groups::SERVER | Groups::SYSTEM | Groups::GUI;
     auto socket = std::make_shared<Socket>(appData.host, appData.port);
-    auto endpoint = std::make_shared<Endpoint>(socket, appData.appName, appData.version, groups);
+    auto endpoint = EndpointPtr{new Endpoint{socket, appData.appName, appData.version, {Message::SERVER, Message::SYSTEM, Message::GUI}}};
     auto app = Gtk::Application::create(argc, argv, "org.moba.systemmanager");
 
     FrmMain frmMain{endpoint};
