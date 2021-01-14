@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MoBa-Systemmanager
+Exec=moba-systemmanager
+Comment=Systemmanger
+Icon=moba-systemmanager
+Terminal=0
+Categories=System-manager
+Encoding=UTF-8
+

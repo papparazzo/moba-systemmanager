@@ -74,3 +74,4 @@ Makefile.in
 .deps/
 .dirstamp
 /src/Makefile
+/pixmaps/Makefile
