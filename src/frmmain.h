@@ -26,10 +26,10 @@
 #include "moba/endpoint.h"
 
 #include "moba/registry.h"
-#include "moba/servermessage.h"
-#include "moba/guimessage.h"
-#include "moba/clientmessage.h"
-#include "moba/systemmessage.h"
+#include "moba/servermessages.h"
+#include "moba/guimessages.h"
+#include "moba/clientmessages.h"
+#include "moba/systemmessages.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>
