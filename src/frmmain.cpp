@@ -136,6 +136,8 @@ void FrmMain::initAboutDialog() {
     m_Dialog.set_website("<pappi-@gmx.de>");
     m_Dialog.set_website_label("pappi-@gmx.de");
 
+    m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/moba-systemmanager.svg"));
+
     std::vector<Glib::ustring> list_authors;
     list_authors.push_back("Stefan Paproth");
     m_Dialog.set_authors(list_authors);
