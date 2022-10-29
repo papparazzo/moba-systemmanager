@@ -75,3 +75,5 @@ Makefile.in
 .dirstamp
 /src/Makefile
 /pixmaps/Makefile
+*.o
+*~
