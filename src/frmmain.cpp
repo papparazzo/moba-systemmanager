@@ -277,9 +277,9 @@ void FrmMain::on_button_about_clicked() {
 
 void FrmMain::on_button_emegency_clicked() {
     if(m_Button_Emegerency.get_label() == "Nothalt") {
-        msgEndpoint->sendMsg(SystemSetEmergencyStop{true});
+        msgEndpoint->sendMsg(SystemTriggerEmergencyStop{});
     } else {
-        msgEndpoint->sendMsg(SystemSetEmergencyStop{false});
+        msgEndpoint->sendMsg(SystemReleaseEmergencyStop{});
     }
 }
 
