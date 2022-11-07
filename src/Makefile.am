@@ -3,9 +3,10 @@ bin_PROGRAMS = \
     moba-systemmanager
 
 moba_systemmanager_SOURCES = \
-    main.cpp \
+    clock.cpp \
     activeapps.cpp \
-    frmmain.cpp
+    frmmain.cpp \
+    main.cpp
 
 
 moba_systemmanager_LDADD = -lmobacommon $(GTKMM_LIBS) $(srcdir)/../modules/lib-msghandling/src/moba/libmsghandling.a
