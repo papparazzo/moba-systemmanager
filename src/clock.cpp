@@ -124,17 +124,16 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 }
 
 bool Clock::on_timeout() {
-
-
     if(++m_seconds % 60 == 0) {
         m_seconds = 0;
     }
 
-    if(m_seconds % 4 == 0) {
-        // 1 Sekunde!
-        //(m_factor / 4)
+    if(++m_ticks % 4 == 0) {
+        m_ticks = 0;
 
-        if(++m_minutes % 60 == 0) {
+        m_minutes += m_multiplier / 60  ;
+
+        if(m_minutes % 60 == 0) {
             m_minutes = 0;
             if(++m_hours % 12) {
                 m_hours = 0;

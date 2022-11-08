@@ -38,8 +38,8 @@ protected:
     int m_seconds;
     int m_hours;
 
-    //int m_factor; // factor 60 bedeutet: 1 Sek Echtzeit = 60 Sek Modellbahnzeit
-
+    int m_ticks{0};
+    int m_multiplier{180}; // factor 60 bedeutet: 1 Sek Echtzeit = 60 Sek Modellbahnzeit
 
     const double m_factor = 0.9;
     const double m_radius = 0.42 * m_factor;
