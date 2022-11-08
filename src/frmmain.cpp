@@ -49,13 +49,7 @@ namespace {
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
 }
 
-FrmMain::FrmMain(EndpointPtr mhp) :
-    m_VBox{Gtk::ORIENTATION_VERTICAL, 6}, m_HBox{Gtk::ORIENTATION_HORIZONTAL, 6},
-    m_Label_Connectivity_HW{" \xe2\x96\x84"}, m_Label_Connectivity_SW{" \xe2\x96\x84"},
-    m_Button_About{"About..."}, m_TreeView_ActiveApps{mhp},
-    m_VBox_ServerDataKey{Gtk::ORIENTATION_VERTICAL, 6}, m_VBox_ServerDataValue{Gtk::ORIENTATION_VERTICAL, 6},
-    m_VBox_SystemControl{Gtk::ORIENTATION_VERTICAL, 6}, msgEndpoint{mhp}
-{
+FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp} {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 25 ms
 
@@ -107,7 +101,8 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     initActiveApps();
     initServerData();
     initSystemControl();
-    initStatus();
+    initNoticeLogger();
+    initTimeController();
 
     m_Button_Emegerency.set_sensitive(false);
 
@@ -119,6 +114,7 @@ FrmMain::FrmMain(EndpointPtr mhp) :
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmMain::setHardwareState, this, std::placeholders::_1));
     registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
+    //registry.registerHandler<>
 
     show_all_children();
     m_InfoBar.hide();
@@ -207,11 +203,37 @@ void FrmMain::initSystemControl() {
     m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_ping_clicked));
 }
 
-void FrmMain::initStatus() {
-    m_Notebook.append_page(m_ScrolledWindow_Notices, "Notice Logger");
+void FrmMain::initTimeController() {
+    m_Notebook.append_page(m_ScrolledWindow_TimeControl, "Time Control");
+    m_ScrolledWindow_TimeControl.add(m_HBox_TimeControl);
 
-    m_ScrolledWindow_Notices.add(m_TreeView_Notices);
-    m_ScrolledWindow_Notices.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_HBox_TimeControl.set_homogeneous(true);
+
+    m_VBox_TimeControl.pack_start(m_HBox_CurModelTime, Gtk::PACK_SHRINK);
+    m_VBox_TimeControl.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
+
+    m_HBox_CurModelTime.pack_start(m_Label_CurModelTime, Gtk::PACK_SHRINK);
+    m_HBox_CurModelTime.pack_end(m_Entry_CurModelTime, Gtk::PACK_SHRINK);
+
+    m_HBox_Multiplicator.pack_start(m_Label_Multiplicator, Gtk::PACK_SHRINK);
+    m_HBox_Multiplicator.pack_end(m_Entry_Multiplicator, Gtk::PACK_SHRINK);
+
+    m_Label_CurModelTime.set_label("DD hh:mm "); //(z.B. Sa 10:00)
+    m_Label_Multiplicator.set_label("Multiplikator");
+
+    m_HBox_TimeControl.add(m_VBox_TimeControl);
+    m_HBox_TimeControl.add(m_Clock);
+}
+
+void FrmMain::initNoticeLogger() {
+    m_Notebook.append_page(m_VBox_NoticeLogger, "Notice Logger");
+
+    m_VBox_NoticeLogger.pack_start(m_ScrolledWindow_NoticeLogger);
+    m_VBox_NoticeLogger.pack_end(m_ButtonBox_NoticeLogger, Gtk::PACK_SHRINK);
+
+    // TreeView
+    m_ScrolledWindow_NoticeLogger.add(m_TreeView_Notices);
+    m_ScrolledWindow_NoticeLogger.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 
     m_refTreeModel_Notices = Gtk::ListStore::create(m_Columns_Notices);
     m_TreeView_Notices.set_model(m_refTreeModel_Notices);
@@ -220,6 +242,12 @@ void FrmMain::initStatus() {
     m_TreeView_Notices.append_column("Type",      m_Columns_Notices.m_col_type);
     m_TreeView_Notices.append_column("Caption",   m_Columns_Notices.m_col_caption);
     m_TreeView_Notices.append_column("Text",      m_Columns_Notices.m_col_text);
+
+    // HBox
+    m_ButtonBox_NoticeLogger.pack_start(m_Button_NoticesClear, Gtk::PACK_EXPAND_WIDGET, 5);
+    m_ButtonBox_NoticeLogger.set_layout(Gtk::BUTTONBOX_END);
+
+    m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_notices_clear_clicked));
 }
 
 void FrmMain::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
@@ -359,6 +387,10 @@ void FrmMain::on_button_system_ping_clicked() {
     start = std::chrono::system_clock::now();
     pingctr = 0;
     m_Button_SystemPing.set_sensitive(false);
+}
+
+void FrmMain::on_button_notices_clear_clicked() {
+    m_refTreeModel_Notices->clear();
 }
 
 void FrmMain::setServerInfoRes(const ServerInfoRes &data) {

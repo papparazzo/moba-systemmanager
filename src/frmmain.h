@@ -36,6 +36,7 @@
 #include <gtkmm/liststore.h>
 
 #include "activeapps.h"
+#include "clock.h"
 
 class FrmMain : public Gtk::Window {
     public:
@@ -44,47 +45,66 @@ class FrmMain : public Gtk::Window {
         }
 
     protected:
-        Gtk::Notebook m_Notebook;
+        Gtk::Notebook  m_Notebook;
         Gtk::ButtonBox m_ButtonBox;
-        Gtk::Button m_Button_Emegerency;
-        Gtk::Box m_VBox;
-        Gtk::Box m_HBox;
-        Gtk::Label m_Label_Connectivity_HW;
-        Gtk::Label m_Label_Connectivity_SW;
+        Gtk::Button    m_Button_Emegerency;
+        Gtk::Box       m_VBox{Gtk::ORIENTATION_VERTICAL, 6};
+        Gtk::Box       m_HBox{Gtk::ORIENTATION_HORIZONTAL, 6};
+        Gtk::Label     m_Label_Connectivity_HW{" \xe2\x96\x84"};
+        Gtk::Label     m_Label_Connectivity_SW{" \xe2\x96\x84"};
 
         // about
-        Gtk::Button m_Button_About;
+        Gtk::Button      m_Button_About{"About..."};
         Gtk::AboutDialog m_Dialog;
 
         // info-bar
         Gtk::InfoBar m_InfoBar;
-        Gtk::Label m_Label_InfoBarMessage;
+        Gtk::Label   m_Label_InfoBarMessage;
 
         // active-apps
         Gtk::ScrolledWindow m_ScrolledWindow;
         TreeView_ActiveApps m_TreeView_ActiveApps;
 
-        // notices
-        Gtk::ScrolledWindow m_ScrolledWindow_Notices;
-        Gtk::TreeView m_TreeView_Notices;
+        // time-control
+        Gtk::ScrolledWindow m_ScrolledWindow_TimeControl;
+        Gtk::HBox           m_HBox_TimeControl;
+        Clock               m_Clock;
+
+        Gtk::Box            m_VBox_TimeControl{Gtk::ORIENTATION_VERTICAL, 6};
+        Gtk::Box            m_HBox_CurModelTime{Gtk::ORIENTATION_HORIZONTAL, 6};
+        Gtk::Box            m_HBox_Multiplicator{Gtk::ORIENTATION_HORIZONTAL, 6};
+
+        Gtk::Entry          m_Entry_CurModelTime;
+        Gtk::Label          m_Label_CurModelTime;
+
+        Gtk::Entry          m_Entry_Multiplicator;
+        Gtk::Label          m_Label_Multiplicator;
+
+        // notice-logger
+        Gtk::ScrolledWindow m_ScrolledWindow_NoticeLogger;
+        Gtk::TreeView       m_TreeView_Notices;
         Glib::RefPtr<Gtk::ListStore> m_refTreeModel_Notices;
+
+        Gtk::Box         m_VBox_NoticeLogger{Gtk::ORIENTATION_VERTICAL, 2};
+        Gtk::ButtonBox   m_ButtonBox_NoticeLogger;
+        Gtk::Button      m_Button_NoticesClear{"Liste leeren"};
 
         // server-data
         Gtk::Label lblName[2][11];
-        Gtk::VBox m_VBox_ServerDataKey;
-        Gtk::VBox m_VBox_ServerDataValue;
-        Gtk::HBox m_HBox_ServerData;
+        Gtk::VBox  m_VBox_ServerDataKey{Gtk::ORIENTATION_VERTICAL, 6};
+        Gtk::VBox  m_VBox_ServerDataValue{Gtk::ORIENTATION_VERTICAL, 6};
+        Gtk::HBox  m_HBox_ServerData;
 
-        // system-controll
+        // system-control
         Gtk::ButtonBox m_ButtonBox_System;
-        Gtk::Button m_Button_SystemStandby;
-        Gtk::Button m_Button_SystemAutomatic;
-        Gtk::Button m_Button_SystemShutdown;
-        Gtk::Button m_Button_SystemReset;
-        Gtk::Button m_Button_SystemPing;
-        Gtk::Box m_VBox_SystemControl;
-        Gtk::Label m_Label_HardwareState;
-        Gtk::Label m_Label_PingResult[4];
+        Gtk::Button    m_Button_SystemStandby;
+        Gtk::Button    m_Button_SystemAutomatic;
+        Gtk::Button    m_Button_SystemShutdown;
+        Gtk::Button    m_Button_SystemReset;
+        Gtk::Button    m_Button_SystemPing;
+        Gtk::Box       m_VBox_SystemControl{Gtk::ORIENTATION_VERTICAL, 6};
+        Gtk::Label     m_Label_HardwareState;
+        Gtk::Label     m_Label_PingResult[4];
 
         class ModelColumnsNotices : public Gtk::TreeModel::ColumnRecord {
             public:
@@ -107,7 +127,8 @@ class FrmMain : public Gtk::Window {
         void initActiveApps();
         void initServerData();
         void initSystemControl();
-        void initStatus();
+        void initTimeController();
+        void initNoticeLogger();
 
         EndpointPtr msgEndpoint;
         Registry    registry;
@@ -127,6 +148,7 @@ class FrmMain : public Gtk::Window {
         void on_button_system_automatic_clicked();
         void on_button_system_standby_clicked();
         void on_button_system_ping_clicked();
+        void on_button_notices_clear_clicked();
         void on_about_dialog_response(int response_id);
         void on_infobar_response(int response);
 
