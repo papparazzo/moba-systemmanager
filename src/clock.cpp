@@ -32,15 +32,15 @@ Clock::~Clock() {
 
 bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     Gtk::Allocation allocation = get_allocation();
-    const int width = allocation.get_height(); //  allocation.get_width();
+    const int width = allocation.get_width();
     const int height = allocation.get_height();
 
     const double radius = 0.42 * m_factor;
 
     // scale to unit square and translate (0, 0) to be (0.5, 0.5), i.e.
     // the center of the window
-    cr->scale(width, height);
-    cr->translate(0.5, 0.43);
+    cr->scale(height, height);
+    cr->translate(0.5 * width / height, 0.5);
     cr->set_line_width(0.013 * m_factor);
 
     cr->arc(0, 0, 0.441 * m_factor, 0, 2 * M_PI);
@@ -124,6 +124,11 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 }
 
 bool Clock::on_timeout() {
+
+    if(!m_run) {
+        return false;
+    }
+
     if(++m_seconds % 60 == 0) {
         m_seconds = 0;
     }

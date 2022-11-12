@@ -21,6 +21,7 @@
 #pragma once
 
 #include <gtkmm/drawingarea.h>
+#include <atomic>
 
 class Clock : public Gtk::DrawingArea
 {
@@ -28,19 +29,37 @@ public:
     Clock();
     virtual ~Clock();
 
+    void setHours(unsigned int hours) {
+        m_hours = hours;
+    }
+
+    void setMinutes(unsigned int minutes) {
+        m_minutes = minutes;
+    }
+
+    void setMultiplier(unsigned int multiplier) {
+        m_multiplier = multiplier;
+    }
+
+    void stop() {
+        //m_run = false;
+    }
+
 protected:
     //Override default signal handler:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
 
     bool on_timeout();
 
-    int m_minutes;
     int m_seconds;
-    int m_hours;
+    std::atomic<unsigned int> m_minutes;
+    std::atomic<unsigned int> m_hours;
+    std::atomic<unsigned int> m_multiplier{180}; // factor 60 bedeutet: 1 Sek Echtzeit = 60 Sek Modellbahnzeit
 
-    int m_ticks{0};
-    int m_multiplier{180}; // factor 60 bedeutet: 1 Sek Echtzeit = 60 Sek Modellbahnzeit
+    std::atomic<bool> m_run;
 
-    const double m_factor = 0.9;
+    unsigned int m_ticks{0};
+
+    const double m_factor = 1;
     const double m_radius = 0.42 * m_factor;
 };
