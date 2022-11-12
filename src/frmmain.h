@@ -30,6 +30,8 @@
 #include "moba/guimessages.h"
 #include "moba/clientmessages.h"
 #include "moba/systemmessages.h"
+#include "moba/timermessages.h"
+#include "moba/day.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>
@@ -66,19 +68,45 @@ class FrmMain : public Gtk::Window {
         TreeView_ActiveApps m_TreeView_ActiveApps;
 
         // time-control
-        Gtk::ScrolledWindow m_ScrolledWindow_TimeControl;
         Gtk::HBox           m_HBox_TimeControl;
+
+        Gtk::VBox           m_HBox_TimeControl_Clock;
+        Gtk::Label          m_Label_Date;
+
         Clock               m_Clock;
 
         Gtk::Box            m_VBox_TimeControl{Gtk::ORIENTATION_VERTICAL, 6};
+
+        Gtk::Box            m_HBox_CurModelDay{Gtk::ORIENTATION_HORIZONTAL, 6};
         Gtk::Box            m_HBox_CurModelTime{Gtk::ORIENTATION_HORIZONTAL, 6};
         Gtk::Box            m_HBox_Multiplicator{Gtk::ORIENTATION_HORIZONTAL, 6};
 
+        class ModelColumns : public Gtk::TreeModel::ColumnRecord {
+        public:
+            ModelColumns() {
+                add(m_col_name);
+                add(m_col_id);
+            }
+
+            Gtk::TreeModelColumn<Glib::ustring> m_col_name; //The data to choose - this must be text.
+            Gtk::TreeModelColumn<Day>           m_col_id;
+        };
+
+        ModelColumns m_Columns;
+
+        Glib::RefPtr<Gtk::ListStore> m_refTreeModel;
+
+        Gtk::ComboBox       m_Combo_CurModelDay;
+        Gtk::Label          m_Label_CurModelDay{"Tag:"};
+
         Gtk::Entry          m_Entry_CurModelTime;
-        Gtk::Label          m_Label_CurModelTime;
+        Gtk::Label          m_Label_CurModelTime{"Uhrzeit (hh:mm):"};
 
         Gtk::Entry          m_Entry_Multiplicator;
-        Gtk::Label          m_Label_Multiplicator;
+        Gtk::Label          m_Label_Multiplicator{"Multiplikator"};
+
+        Gtk::ButtonBox      m_ButtonBox_TimeControl;
+        Gtk::Button         m_Button_TimeControl_Set{"Werte setzen"};
 
         // notice-logger
         Gtk::ScrolledWindow m_ScrolledWindow_NoticeLogger;
@@ -138,6 +166,7 @@ class FrmMain : public Gtk::Window {
 
         void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
         void setHardwareStateLabel(const std::string &status);
+        void setClock(Day day, unsigned int hours);
 
         // Signal handlers:
         bool on_timeout(int timer_number);
@@ -151,6 +180,7 @@ class FrmMain : public Gtk::Window {
         void on_button_notices_clear_clicked();
         void on_about_dialog_response(int response_id);
         void on_infobar_response(int response);
+        void on_button_time_control_set_clicked();
 
         // msg-response
         void setServerInfoRes(const ServerInfoRes &data);
@@ -160,5 +190,7 @@ class FrmMain : public Gtk::Window {
         void setHardwareState(const SystemHardwareStateChanged &data);
         void setNewClient(const ServerNewClientStarted &data);
         void setRemoveClient(const ServerClientClosed &data);
+        void setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data);
+        void setTimerSetGlobalTimer(const TimerSetGlobalTimer &data);
         void setPingResult(const ClientEchoRes&);
 };

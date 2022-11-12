@@ -22,7 +22,9 @@
 #include <exception>
 #include <algorithm>
 #include <functional>
+#include <string>
 
+#include <cassert>
 #include <ctime>
 #include <sys/timeb.h>
 
@@ -97,6 +99,8 @@ FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp}
     m_Button_Emegerency.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_emegency_clicked));
     m_Button_Emegerency.set_label("Nothalt");
 
+    m_Button_TimeControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_time_control_set_clicked));
+
     initAboutDialog();
     initActiveApps();
     initServerData();
@@ -105,6 +109,7 @@ FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp}
     initTimeController();
 
     m_Button_Emegerency.set_sensitive(false);
+    m_Button_TimeControl_Set.set_sensitive(false);
 
     registry.registerHandler<ServerInfoRes>(std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
@@ -114,7 +119,8 @@ FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp}
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmMain::setHardwareState, this, std::placeholders::_1));
     registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
-    //registry.registerHandler<>
+    registry.registerHandler<TimerGlobalTimerEvent>(std::bind(&FrmMain::setTimerGlobalTimerEvent, this, std::placeholders::_1));
+    registry.registerHandler<TimerSetGlobalTimer>(std::bind(&FrmMain::setTimerSetGlobalTimer, this, std::placeholders::_1));
 
     show_all_children();
     m_InfoBar.hide();
@@ -204,25 +210,64 @@ void FrmMain::initSystemControl() {
 }
 
 void FrmMain::initTimeController() {
-    m_Notebook.append_page(m_ScrolledWindow_TimeControl, "Time Control");
-    m_ScrolledWindow_TimeControl.add(m_HBox_TimeControl);
+    m_Notebook.append_page(m_HBox_TimeControl, "Time Control");
+
+    m_refTreeModel = Gtk::ListStore::create(m_Columns);
+    m_Combo_CurModelDay.set_model(m_refTreeModel);
+
+    auto row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = Day::MONDAY;
+    row[m_Columns.m_col_name] = "Montag";
+
+    row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = Day::TUESDAY;
+    row[m_Columns.m_col_name] = "Dienstag";
+
+    row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = Day::WEDNESDAY;
+    row[m_Columns.m_col_name] = "Mittwoch";
+
+    row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = Day::THURSDAY;
+    row[m_Columns.m_col_name] = "Donnerstag";
+
+    row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = Day::FRIDAY;
+    row[m_Columns.m_col_name] = "Freitag";
+
+    row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = Day::SATURDAY;
+    row[m_Columns.m_col_name] = "Samstag";
+
+    row = *(m_refTreeModel->append());
+    row[m_Columns.m_col_id] = Day::SUNDAY;
+    row[m_Columns.m_col_name] = "Sonntag";
+
+    m_Combo_CurModelDay.pack_start(m_Columns.m_col_name);
 
     m_HBox_TimeControl.set_homogeneous(true);
+    m_HBox_TimeControl.add(m_VBox_TimeControl);
+    m_HBox_TimeControl.add(m_HBox_TimeControl_Clock);
 
+    m_HBox_TimeControl_Clock.pack_start(m_Clock);
+    m_HBox_TimeControl_Clock.pack_start(m_Label_Date, Gtk::PACK_SHRINK, 10);
+
+    m_VBox_TimeControl.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
     m_VBox_TimeControl.pack_start(m_HBox_CurModelTime, Gtk::PACK_SHRINK);
     m_VBox_TimeControl.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
+    m_VBox_TimeControl.pack_end(m_ButtonBox_TimeControl, Gtk::PACK_SHRINK, 15);
+
+    m_ButtonBox_TimeControl.pack_start(m_Button_TimeControl_Set, Gtk::PACK_EXPAND_WIDGET, 5);
+    m_ButtonBox_TimeControl.set_layout(Gtk::BUTTONBOX_END);
+
+    m_HBox_CurModelDay.pack_start(m_Label_CurModelDay, Gtk::PACK_SHRINK);
+    m_HBox_CurModelDay.pack_end(m_Combo_CurModelDay, Gtk::PACK_SHRINK);
 
     m_HBox_CurModelTime.pack_start(m_Label_CurModelTime, Gtk::PACK_SHRINK);
     m_HBox_CurModelTime.pack_end(m_Entry_CurModelTime, Gtk::PACK_SHRINK);
 
     m_HBox_Multiplicator.pack_start(m_Label_Multiplicator, Gtk::PACK_SHRINK);
     m_HBox_Multiplicator.pack_end(m_Entry_Multiplicator, Gtk::PACK_SHRINK);
-
-    m_Label_CurModelTime.set_label("DD hh:mm "); //(z.B. Sa 10:00)
-    m_Label_Multiplicator.set_label("Multiplikator");
-
-    m_HBox_TimeControl.add(m_VBox_TimeControl);
-    m_HBox_TimeControl.add(m_Clock);
 }
 
 void FrmMain::initNoticeLogger() {
@@ -295,9 +340,83 @@ void FrmMain::setHardwareStateLabel(const std::string &status) {
     m_Label_HardwareState.set_markup(ss.str());
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Call-back-methodes
+void FrmMain::setClock(Day day, unsigned int hours) {
 
+    std::stringstream ss;
+    ss << "<b>";
+
+    switch(day) {
+        case Day::MONDAY:
+            ss << "Montag";
+            break;
+
+        case Day::TUESDAY:
+            ss << "Dienstag";
+            break;
+
+        case Day::WEDNESDAY:
+            ss << "Mittwoch";
+            break;
+
+        case Day::THURSDAY:
+            ss << "Donnerstag";
+            break;
+
+        case Day::FRIDAY:
+            ss << "Freitag";
+            break;
+
+        case Day::SATURDAY:
+            ss << "Samstag";
+            break;
+
+        case Day::SUNDAY:
+            ss << "Sonntag";
+            break;
+    }
+
+    /**
+     * https://www.t-online.de/leben/familie/id_88749070/tageszeiten-in-deutschland-wann-beginnt-eigentlich-die-nacht-.html
+     *
+     * ab  7:00 Uhr morgens
+     * ab 11:00 Uhr vormittags
+     * ab 13:00 Uhr mittags
+     * ab 15:00 Uhr nachmittags
+     * ab 18:00 Uhr abends
+     * ab 22:00 Uhr nachts
+     *
+     * https://www.laenderdaten.info/Europa/Deutschland/sonnenuntergang.php
+     *
+     * ab  4:00 Uhr Sonnenaufgang
+     * ab  5:00 Uhr Tag
+     * ab 21:30 Uhr Sonnenuntergang
+     * ab 22:30 Uht Nacht
+     */
+
+    ss << "</b> (";
+
+    /*
+    if(data.hours >= 7 || data.hours < 11) {
+        ss << "morgens";
+    } else if(data.hours >= 11 || data.hours < 13) {
+        ss << "vormittags";
+    } else if(data.hours < 11 || data.hours > 9) {
+        ss << "mittags";
+    } else if(data.hours < 13 || data.hours > 11) {
+        ss << "nachmittags";
+    } else if(data.hours < 17 || data.hours > 13) {
+        ss << "abends";
+    } else if(data.hours < 21 || data.hours > 17) {
+        ss << "nachts";
+    }*/
+    ss << ")";
+
+    m_Label_Date.set_markup(ss.str());
+    //m_Label_Date.set_tooltip_markup("<b>Faktor:</b> unbekannt");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// <editor-fold defaultstate="collapsed" desc="call-back-methodes">
 void FrmMain::on_button_about_clicked() {
     m_Dialog.show();
     m_Dialog.present();
@@ -325,10 +444,12 @@ bool FrmMain::on_timeout(int) {
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
+            m_Button_TimeControl_Set.set_sensitive(true);
             m_ButtonBox_System.set_sensitive(true);
             msgEndpoint->sendMsg(ServerInfoReq{});
             msgEndpoint->sendMsg(ServerConClientsReq{});
             msgEndpoint->sendMsg(SystemGetHardwareState{});
+            msgEndpoint->sendMsg(TimerGetGlobalTimer{});
             connected = true;
             return true;
         }
@@ -336,6 +457,7 @@ bool FrmMain::on_timeout(int) {
 
     } catch(std::exception &e) {
         if(connected) {
+            m_Button_TimeControl_Set.set_sensitive(false);
             m_ButtonBox_System.set_sensitive(false);
             m_Button_Emegerency.set_sensitive(false);
             m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
@@ -393,6 +515,25 @@ void FrmMain::on_button_notices_clear_clicked() {
     m_refTreeModel_Notices->clear();
 }
 
+void FrmMain::on_button_time_control_set_clicked() {
+    const auto iter = m_Combo_CurModelDay.get_active();
+    assert(iter);
+
+    const auto row = *iter;
+    assert(row);
+
+    Day day = row[m_Columns.m_col_id];
+
+    msgEndpoint->sendMsg(TimerSetGlobalTimer{
+        day,
+        m_Entry_CurModelTime.get_text(),
+        static_cast<unsigned int>(std::stoi(m_Entry_Multiplicator.get_text()))
+    });
+}
+// </editor-fold>
+
+////////////////////////////////////////////////////////////////////////////////
+// <editor-fold defaultstate="collapsed" desc="msg-response">
 void FrmMain::setServerInfoRes(const ServerInfoRes &data) {
     lblName[0][0].set_markup("<b>AppName:</b>");
     lblName[1][0].set_label(data.appName);
@@ -463,6 +604,7 @@ void FrmMain::setSystemNotice(const GuiSystemNotice &data) {
 
 void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
+        m_Clock.stop();
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
@@ -477,6 +619,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
     m_Button_SystemStandby.set_sensitive(true);
     m_Button_SystemAutomatic.set_sensitive(true);
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
+        m_Clock.stop();
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
@@ -489,6 +632,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
     }
     m_Button_Emegerency.set_label("Nothalt");
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
+        m_Clock.stop();
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
@@ -501,6 +645,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
     }
     m_Button_SystemStandby.set_label("Standby (aus)");
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
+        m_Clock.stop();
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> manuell");
@@ -510,6 +655,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         return;
     }
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
+        m_Clock.run();
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> automatisch");
@@ -528,6 +674,24 @@ void FrmMain::setNewClient(const ServerNewClientStarted &data) {
 
 void FrmMain::setRemoveClient(const ServerClientClosed &data) {
     m_TreeView_ActiveApps.removeActiveApp(data.clientId);
+}
+
+void FrmMain::setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data) {
+    m_Clock.setMultiplier(data.multiplicator);
+    m_Clock.setTime(data.hours, data.minutes, false);
+
+    setClock(data.curModelDay, data.hours);
+}
+
+void FrmMain::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
+    m_Combo_CurModelDay.set_active(static_cast<int>(data.curModelDay));
+    m_Entry_CurModelTime.set_text(data.curModelTime);
+    m_Entry_Multiplicator.set_text(std::to_string(data.multiplicator));
+
+    m_Clock.setMultiplier(data.multiplicator);
+    m_Clock.setTime(data.hours, data.minutes, true);
+
+    setClock(data.curModelDay, data.hours);
 }
 
 void FrmMain::setPingResult(const ClientEchoRes&) {
@@ -555,3 +719,4 @@ void FrmMain::setPingResult(const ClientEchoRes&) {
     }
     m_Button_SystemPing.set_sensitive(true);
 }
+// </editor-fold>
