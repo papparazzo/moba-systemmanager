@@ -23,7 +23,7 @@
 #include <glibmm/main.h>
 #include "clock.h"
 
-Clock::Clock() /*: m_factor{60}*/ {
+Clock::Clock() : m_run{false} {
     Glib::signal_timeout().connect(sigc::mem_fun(*this, &Clock::on_timeout), 250);
 }
 
@@ -43,6 +43,9 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     cr->translate(0.5 * width / height, 0.5);
     cr->set_line_width(0.013 * m_factor);
 
+    if(!m_run) {
+        cr->set_source_rgba(0.5, 0.5, 0.5, 0.8);
+    }
     cr->arc(0, 0, 0.441 * m_factor, 0, 2 * M_PI);
     cr->save();
     cr->set_source_rgba(1.0, 1.0, 1.0, 0.8);
@@ -50,6 +53,10 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     cr->restore();
     cr->stroke_preserve();
     cr->clip();
+
+    if(!m_run) {
+        cr->set_source_rgba(0.5, 0.5, 0.5, 0.8);
+    }
 
     //clock ticks
     for (int i = 0; i < 60; i++) {
@@ -109,7 +116,12 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
     cr->restore();
 
     // draw the seconds hand
-    cr->set_source_rgba(1.0, 0.0, 0.0, 0.8); // red
+    if(m_run) {
+        cr->set_source_rgba(1.0, 0.0, 0.0, 0.8); // red
+    } else {
+        cr->set_source_rgba(0.5, 0.5, 0.5, 0.8);
+    }
+
     cr->move_to(
         -sin(seconds) * (radius * 0.14),
         cos(seconds) * (radius * 0.14)
@@ -124,38 +136,32 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
 }
 
 bool Clock::on_timeout() {
-
     if(!m_run) {
-        return false;
+        return true;
     }
 
     if(++m_seconds % 60 == 0) {
         m_seconds = 0;
     }
 
-    if(++m_ticks % 4 == 0) {
-        m_ticks = 0;
+    m_minutes += m_multiplier / 240;
 
-        m_minutes += m_multiplier / 60  ;
-
-        if(m_minutes % 60 == 0) {
-            m_minutes = 0;
-            if(++m_hours % 12) {
-                m_hours = 0;
-            }
+    if(m_minutes % 60 == 0) {
+        m_minutes = 0;
+        if(++m_hours % 12 == 0) {
+            m_hours = 0;
         }
     }
 
-    auto win = get_window();
-    if(win) {
-        Gdk::Rectangle r(
-            0,
-            0,
-            get_allocation().get_width(),
-            get_allocation().get_height()
-        );
-        win->invalidate_rect(r, false);
-    }
+    invalidateRect();
     return true;
 }
 
+void Clock::invalidateRect() {
+    auto win = get_window();
+    if(!win) {
+        return;
+    }
+    Gdk::Rectangle r{0, 0, get_allocation().get_width(), get_allocation().get_height()};
+    win->invalidate_rect(r, false);
+}

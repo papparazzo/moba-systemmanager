@@ -29,31 +29,37 @@ public:
     Clock();
     virtual ~Clock();
 
-    void setHours(unsigned int hours) {
+    void setTime(unsigned int hours, unsigned int minutes, bool draw) {
         m_hours = hours;
-    }
-
-    void setMinutes(unsigned int minutes) {
         m_minutes = minutes;
+        if(draw) {
+            invalidateRect();
+        }
     }
 
     void setMultiplier(unsigned int multiplier) {
         m_multiplier = multiplier;
     }
 
+    void run() {
+        m_run = true;
+    }
+
     void stop() {
-        //m_run = false;
+        m_run = false;
+        m_seconds = 0;
     }
 
 protected:
-    //Override default signal handler:
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
 
+    void invalidateRect();
+
+    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
     bool on_timeout();
 
-    int m_seconds;
-    std::atomic<unsigned int> m_minutes;
-    std::atomic<unsigned int> m_hours;
+    std::atomic<unsigned int> m_seconds{0};
+    std::atomic<unsigned int> m_minutes{0};
+    std::atomic<unsigned int> m_hours{0};
     std::atomic<unsigned int> m_multiplier{180}; // factor 60 bedeutet: 1 Sek Echtzeit = 60 Sek Modellbahnzeit
 
     std::atomic<bool> m_run;
