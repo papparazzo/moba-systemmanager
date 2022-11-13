@@ -23,7 +23,7 @@
 #include <glibmm/main.h>
 #include "clock.h"
 
-Clock::Clock() : m_run{false} {
+Clock::Clock() {
     Glib::signal_timeout().connect(sigc::mem_fun(*this, &Clock::on_timeout), 250);
 }
 
@@ -144,7 +144,62 @@ bool Clock::on_timeout() {
         m_seconds = 0;
     }
 
-    m_minutes += m_multiplier / 240;
+    m_ticks = (++m_ticks % 8);
+
+    switch(m_ticks) {
+        case 0:
+        case 4:
+            m_minutes++;
+            break;
+
+        case 1:
+        case 3:
+        case 5:
+            if(m_multiplier > 150) {
+                m_minutes++;
+            } else {
+                invalidateRect();
+                return true;
+            }
+            break;
+
+        case 2:
+            if(m_multiplier == 150 || m_multiplier == 120 || m_multiplier == 210 || m_multiplier == 240) {
+                m_minutes++;
+            } else {
+                invalidateRect();
+                return true;
+            }
+            break;
+
+        case 6:
+            if(m_multiplier != 60 && m_multiplier != 180) {
+                m_minutes++;
+            } else {
+                invalidateRect();
+                return true;
+            }
+            break;
+
+        case 7:
+            if(m_multiplier == 150 || m_multiplier == 180 || m_multiplier == 240) {
+                m_minutes++;
+            } else {
+                invalidateRect();
+                return true;
+            }
+            break;
+    }
+
+    /*
+    60	1 Sek	1 Min	0,      4
+    90	1 Sek	1,5 Min	0,      4   6
+    120	1 Sek	2 Min	0,  2,  4,  6
+    150	1 Sek	2,5 Min	0,  2,  4,  6,7
+    180	1 Sek	3 Min	0,1,  3,4,5,  7
+    210	1 Sek	3,5 Min	0,1,2,3,4,5,6
+    240	1 Sek	4 Min	0,1,2,3,4,5,6,7
+     */
 
     if(m_minutes % 60 == 0) {
         m_minutes = 0;
