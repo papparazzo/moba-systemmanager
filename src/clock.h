@@ -62,9 +62,9 @@ protected:
     std::atomic<unsigned int> m_hours{0};
     std::atomic<unsigned int> m_multiplier{180}; // factor 60 bedeutet: 1 Sek Echtzeit = 60 Sek Modellbahnzeit
 
-    std::atomic<bool> m_run;
+    std::atomic<bool> m_run{false};
 
-    unsigned int m_ticks{0};
+    std::atomic<unsigned int> m_ticks{0};
 
     const double m_factor = 1;
     const double m_radius = 0.42 * m_factor;
