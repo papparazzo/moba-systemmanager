@@ -95,21 +95,17 @@ FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp}
     m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
     m_Button_About.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_about_clicked));
 
-    m_ButtonBox.pack_start(m_Button_Emegerency, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_Button_Emegerency.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_emegency_clicked));
-    m_Button_Emegerency.set_label("Nothalt");
-
-    m_Button_TimeControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_time_control_set_clicked));
+    m_ButtonBox.pack_start(m_Button_Emergency, Gtk::PACK_EXPAND_WIDGET, 5);
+    m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_emergency_clicked));
 
     initAboutDialog();
     initActiveApps();
     initServerData();
     initSystemControl();
+    initAutomaticController();
     initNoticeLogger();
-    initTimeController();
 
-    m_Button_Emegerency.set_sensitive(false);
-    m_Button_TimeControl_Set.set_sensitive(false);
+    m_Button_Emergency.set_sensitive(false);
 
     registry.registerHandler<ServerInfoRes>(std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
@@ -190,84 +186,97 @@ void FrmMain::initSystemControl() {
 
     m_ButtonBox_System.pack_start(m_Button_SystemShutdown);
     m_ButtonBox_System.pack_start(m_Button_SystemReset);
-    m_ButtonBox_System.pack_start(m_Button_SystemAutomatic);
     m_ButtonBox_System.pack_start(m_Button_SystemStandby);
     m_ButtonBox_System.pack_start(m_Button_SystemPing);
     m_ButtonBox_System.set_layout(Gtk::BUTTONBOX_CENTER);
     m_ButtonBox_System.set_sensitive(false);
 
-    m_Button_SystemShutdown.set_label("Shutdown");
-    m_Button_SystemReset.set_label("Reset");
-    m_Button_SystemStandby.set_label("Standby");
-    m_Button_SystemAutomatic.set_label("Automatik");
-    m_Button_SystemPing.set_label("Ping");
-
     m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_shutdown_clicked));
     m_Button_SystemReset.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_reset_clicked));
     m_Button_SystemStandby.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_standby_clicked));
-    m_Button_SystemAutomatic.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_automatic_clicked));
     m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_ping_clicked));
 }
 
-void FrmMain::initTimeController() {
-    m_Notebook.append_page(m_HBox_TimeControl, "Time Control");
+void FrmMain::initAutomaticController() {
+    m_Notebook.append_page(m_HBox_AutomaticControl, "Automatic Control");
 
-    m_refTreeModel = Gtk::ListStore::create(m_Columns);
-    m_Combo_CurModelDay.set_model(m_refTreeModel);
+    m_refListModel_CurModelDay = Gtk::ListStore::create(m_Columns_CurModelDay);
+    m_Combo_CurModelDay.set_model(m_refListModel_CurModelDay);
 
-    auto row = *(m_refTreeModel->append());
-    row[m_Columns.m_col_id] = Day::MONDAY;
-    row[m_Columns.m_col_name] = "Montag";
+    auto row = *(m_refListModel_CurModelDay->append());
+    row[m_Columns_CurModelDay.m_col_id] = Day::MONDAY;
+    row[m_Columns_CurModelDay.m_col_name] = "Montag";
 
-    row = *(m_refTreeModel->append());
-    row[m_Columns.m_col_id] = Day::TUESDAY;
-    row[m_Columns.m_col_name] = "Dienstag";
+    row = *(m_refListModel_CurModelDay->append());
+    row[m_Columns_CurModelDay.m_col_id] = Day::TUESDAY;
+    row[m_Columns_CurModelDay.m_col_name] = "Dienstag";
 
-    row = *(m_refTreeModel->append());
-    row[m_Columns.m_col_id] = Day::WEDNESDAY;
-    row[m_Columns.m_col_name] = "Mittwoch";
+    row = *(m_refListModel_CurModelDay->append());
+    row[m_Columns_CurModelDay.m_col_id] = Day::WEDNESDAY;
+    row[m_Columns_CurModelDay.m_col_name] = "Mittwoch";
 
-    row = *(m_refTreeModel->append());
-    row[m_Columns.m_col_id] = Day::THURSDAY;
-    row[m_Columns.m_col_name] = "Donnerstag";
+    row = *(m_refListModel_CurModelDay->append());
+    row[m_Columns_CurModelDay.m_col_id] = Day::THURSDAY;
+    row[m_Columns_CurModelDay.m_col_name] = "Donnerstag";
 
-    row = *(m_refTreeModel->append());
-    row[m_Columns.m_col_id] = Day::FRIDAY;
-    row[m_Columns.m_col_name] = "Freitag";
+    row = *(m_refListModel_CurModelDay->append());
+    row[m_Columns_CurModelDay.m_col_id] = Day::FRIDAY;
+    row[m_Columns_CurModelDay.m_col_name] = "Freitag";
 
-    row = *(m_refTreeModel->append());
-    row[m_Columns.m_col_id] = Day::SATURDAY;
-    row[m_Columns.m_col_name] = "Samstag";
+    row = *(m_refListModel_CurModelDay->append());
+    row[m_Columns_CurModelDay.m_col_id] = Day::SATURDAY;
+    row[m_Columns_CurModelDay.m_col_name] = "Samstag";
 
-    row = *(m_refTreeModel->append());
-    row[m_Columns.m_col_id] = Day::SUNDAY;
-    row[m_Columns.m_col_name] = "Sonntag";
+    row = *(m_refListModel_CurModelDay->append());
+    row[m_Columns_CurModelDay.m_col_id] = Day::SUNDAY;
+    row[m_Columns_CurModelDay.m_col_name] = "Sonntag";
 
-    m_Combo_CurModelDay.pack_start(m_Columns.m_col_name);
+    m_Combo_CurModelDay.pack_start(m_Columns_CurModelDay.m_col_name);
 
-    m_HBox_TimeControl.set_homogeneous(true);
-    m_HBox_TimeControl.add(m_VBox_TimeControl);
-    m_HBox_TimeControl.add(m_HBox_TimeControl_Clock);
+    m_refListModel_Multiplicator = Gtk::ListStore::create(m_Columns_Multiplicator);
+    m_Combo_Multiplicator.set_model(m_refListModel_Multiplicator);
 
-    m_HBox_TimeControl_Clock.pack_start(m_Clock);
-    m_HBox_TimeControl_Clock.pack_start(m_Label_Date, Gtk::PACK_SHRINK, 10);
+    for(unsigned int i = 60; i <= 240; i += 30) {
+        std::stringstream ss;
 
-    m_VBox_TimeControl.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
-    m_VBox_TimeControl.pack_start(m_HBox_CurModelTime, Gtk::PACK_SHRINK);
-    m_VBox_TimeControl.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
-    m_VBox_TimeControl.pack_end(m_ButtonBox_TimeControl, Gtk::PACK_SHRINK, 15);
+        ss << "1min -> " << static_cast<float>(i) / 60.0 << "h";
 
-    m_ButtonBox_TimeControl.pack_start(m_Button_TimeControl_Set, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_ButtonBox_TimeControl.set_layout(Gtk::BUTTONBOX_END);
+        auto row1 = *(m_refListModel_Multiplicator->append());
+        row1[m_Columns_Multiplicator.m_col_factor] = i;
+        row1[m_Columns_Multiplicator.m_col_label] = ss.str();
+    }
 
-    m_HBox_CurModelDay.pack_start(m_Label_CurModelDay, Gtk::PACK_SHRINK);
-    m_HBox_CurModelDay.pack_end(m_Combo_CurModelDay, Gtk::PACK_SHRINK);
+    m_Combo_Multiplicator.pack_start(m_Columns_Multiplicator.m_col_label);
 
-    m_HBox_CurModelTime.pack_start(m_Label_CurModelTime, Gtk::PACK_SHRINK);
-    m_HBox_CurModelTime.pack_end(m_Entry_CurModelTime, Gtk::PACK_SHRINK);
+    m_HBox_AutomaticControl.set_homogeneous(true);
+    m_HBox_AutomaticControl.add(m_VBox_AutomaticControl);
+    m_HBox_AutomaticControl.add(m_HBox_AutomaticControl_Clock);
 
-    m_HBox_Multiplicator.pack_start(m_Label_Multiplicator, Gtk::PACK_SHRINK);
-    m_HBox_Multiplicator.pack_end(m_Entry_Multiplicator, Gtk::PACK_SHRINK);
+    m_HBox_AutomaticControl_Clock.pack_start(m_Clock);
+    m_HBox_AutomaticControl_Clock.pack_start(m_Label_Date, Gtk::PACK_SHRINK, 10);
+
+    m_VBox_AutomaticControl.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
+    m_VBox_AutomaticControl.pack_start(m_HBox_CurModelTime, Gtk::PACK_SHRINK);
+    m_VBox_AutomaticControl.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
+    m_VBox_AutomaticControl.pack_end(m_ButtonBox_AutomaticControl, Gtk::PACK_SHRINK, 15);
+
+    m_ButtonBox_AutomaticControl.pack_start(m_Button_AutomaticControl_Enable);
+    m_ButtonBox_AutomaticControl.pack_start(m_Button_AutomaticControl_Set, Gtk::PACK_EXPAND_WIDGET, 5);
+    m_ButtonBox_AutomaticControl.set_layout(Gtk::BUTTONBOX_END);
+
+    m_HBox_CurModelDay.pack_start(m_Label_CurModelDay, Gtk::PACK_SHRINK, 5);
+    m_HBox_CurModelDay.pack_end(m_Combo_CurModelDay, Gtk::PACK_SHRINK, 5);
+
+    m_HBox_CurModelTime.pack_start(m_Label_CurModelTime, Gtk::PACK_SHRINK, 5);
+    m_HBox_CurModelTime.pack_end(m_Entry_CurModelTime, Gtk::PACK_SHRINK, 5);
+
+    m_HBox_Multiplicator.pack_start(m_Label_Multiplicator, Gtk::PACK_SHRINK, 5);
+    m_HBox_Multiplicator.pack_end(m_Combo_Multiplicator, Gtk::PACK_SHRINK, 5);
+
+    m_ButtonBox_AutomaticControl.set_sensitive(false);
+
+    m_Button_AutomaticControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_time_control_set_clicked));
+    m_Button_AutomaticControl_Enable.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_automatic_clicked));
 }
 
 void FrmMain::initNoticeLogger() {
@@ -291,6 +300,7 @@ void FrmMain::initNoticeLogger() {
     // HBox
     m_ButtonBox_NoticeLogger.pack_start(m_Button_NoticesClear, Gtk::PACK_EXPAND_WIDGET, 5);
     m_ButtonBox_NoticeLogger.set_layout(Gtk::BUTTONBOX_END);
+    m_ButtonBox_NoticeLogger.set_sensitive(false);
 
     m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_notices_clear_clicked));
 }
@@ -332,6 +342,7 @@ void FrmMain::setNotice(Gtk::MessageType noticeType, std::string caption, std::s
     m_Label_InfoBarMessage.set_markup(ss.str());
     m_InfoBar.set_message_type(noticeType);
     m_InfoBar.show();
+    m_ButtonBox_NoticeLogger.set_sensitive(true);
 }
 
 void FrmMain::setHardwareStateLabel(const std::string &status) {
@@ -422,8 +433,8 @@ void FrmMain::on_button_about_clicked() {
     m_Dialog.present();
 }
 
-void FrmMain::on_button_emegency_clicked() {
-    if(m_Button_Emegerency.get_label() == "Nothalt") {
+void FrmMain::on_button_emergency_clicked() {
+    if(m_Button_Emergency.get_label() == "Nothalt") {
         msgEndpoint->sendMsg(SystemTriggerEmergencyStop{});
     } else {
         msgEndpoint->sendMsg(SystemReleaseEmergencyStop{});
@@ -444,8 +455,9 @@ bool FrmMain::on_timeout(int) {
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
-            m_Button_TimeControl_Set.set_sensitive(true);
+            m_Button_AutomaticControl_Set.set_sensitive(true);
             m_ButtonBox_System.set_sensitive(true);
+            m_ButtonBox_AutomaticControl.set_sensitive(true);
             msgEndpoint->sendMsg(ServerInfoReq{});
             msgEndpoint->sendMsg(ServerConClientsReq{});
             msgEndpoint->sendMsg(SystemGetHardwareState{});
@@ -457,9 +469,10 @@ bool FrmMain::on_timeout(int) {
 
     } catch(std::exception &e) {
         if(connected) {
-            m_Button_TimeControl_Set.set_sensitive(false);
+            m_Button_AutomaticControl_Set.set_sensitive(false);
             m_ButtonBox_System.set_sensitive(false);
-            m_Button_Emegerency.set_sensitive(false);
+            m_ButtonBox_AutomaticControl.set_sensitive(false);
+            m_Button_Emergency.set_sensitive(false);
             m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
@@ -497,7 +510,7 @@ void FrmMain::on_button_system_standby_clicked() {
 }
 
 void FrmMain::on_button_system_automatic_clicked() {
-    if(m_Button_SystemAutomatic.get_label() == "Automatik (aus)") {
+    if(m_Button_AutomaticControl_Enable.get_label() == "Automatik (aus)") {
         msgEndpoint->sendMsg(SystemSetAutomaticMode{true});
     } else {
         msgEndpoint->sendMsg(SystemSetAutomaticMode{false});
@@ -512,22 +525,21 @@ void FrmMain::on_button_system_ping_clicked() {
 }
 
 void FrmMain::on_button_notices_clear_clicked() {
+    m_ButtonBox_NoticeLogger.set_sensitive(false);
     m_refTreeModel_Notices->clear();
 }
 
 void FrmMain::on_button_time_control_set_clicked() {
-    const auto iter = m_Combo_CurModelDay.get_active();
+    auto iter = m_Combo_CurModelDay.get_active();
     assert(iter);
 
-    const auto row = *iter;
-    assert(row);
-
-    Day day = row[m_Columns.m_col_id];
+    auto iter1 = m_Combo_Multiplicator.get_active();
+    assert(iter1);
 
     msgEndpoint->sendMsg(TimerSetGlobalTimer{
-        day,
+        (*iter)[m_Columns_CurModelDay.m_col_id],
         m_Entry_CurModelTime.get_text(),
-        static_cast<unsigned int>(std::stoi(m_Entry_Multiplicator.get_text()))
+        (*iter1)[m_Columns_Multiplicator.m_col_factor]
     });
 }
 // </editor-fold>
@@ -609,28 +621,28 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
-        m_Button_Emegerency.set_sensitive(false);
+        m_Button_Emergency.set_sensitive(false);
         m_Button_SystemStandby.set_sensitive(false);
-        m_Button_SystemAutomatic.set_sensitive(false);
+        m_Button_AutomaticControl_Enable.set_sensitive(false);
         setHardwareStateLabel("Hardwarefehler");
         return;
     }
-    m_Button_Emegerency.set_sensitive(true);
+    m_Button_Emergency.set_sensitive(true);
     m_Button_SystemStandby.set_sensitive(true);
-    m_Button_SystemAutomatic.set_sensitive(true);
+    m_Button_AutomaticControl_Enable.set_sensitive(true);
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
         m_Clock.stop();
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
-        m_Button_Emegerency.set_label("Freigabe");
-        m_Button_SystemAutomatic.set_sensitive(false);
+        m_Button_Emergency.set_label("Freigabe");
+        m_Button_AutomaticControl_Enable.set_sensitive(false);
         m_Button_SystemStandby.set_sensitive(false);
         setHardwareStateLabel("Nothalt");
         return;
     }
-    m_Button_Emegerency.set_label("Nothalt");
+    m_Button_Emergency.set_label("Nothalt");
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
         m_Clock.stop();
         m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
@@ -638,8 +650,8 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
         m_Button_SystemStandby.set_label("Standby (an)");
-        m_Button_Emegerency.set_sensitive(false);
-        m_Button_SystemAutomatic.set_sensitive(false);
+        m_Button_Emergency.set_sensitive(false);
+        m_Button_AutomaticControl_Enable.set_sensitive(false);
         setHardwareStateLabel("standby");
         return;
     }
@@ -650,7 +662,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> manuell");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> manuell");
-        m_Button_SystemAutomatic.set_label("Automatik (aus)");
+        m_Button_AutomaticControl_Enable.set_label("Automatik (aus)");
         setHardwareStateLabel("manuell");
         return;
     }
@@ -660,7 +672,7 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
         m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> automatisch");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> automatisch");
-        m_Button_SystemAutomatic.set_label("Automatik (an)");
+        m_Button_AutomaticControl_Enable.set_label("Automatik (an)");
         setHardwareStateLabel("automatisch");
     }
 }
@@ -686,7 +698,15 @@ void FrmMain::setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data) {
 void FrmMain::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     m_Combo_CurModelDay.set_active(static_cast<int>(data.curModelDay));
     m_Entry_CurModelTime.set_text(data.curModelTime);
-    m_Entry_Multiplicator.set_text(std::to_string(data.multiplicator));
+
+    auto children = m_refListModel_Multiplicator->children();
+
+    for(auto iter : children) {
+        if(data.multiplicator == (*iter)[m_Columns_Multiplicator.m_col_factor]) {
+            m_Combo_Multiplicator.set_active(iter);
+            break;
+        }
+    }
 
     m_Clock.setMultiplier(data.multiplicator);
     m_Clock.setTime(data.hours, data.minutes, true);
@@ -703,9 +723,7 @@ void FrmMain::setPingResult(const ClientEchoRes&) {
     ftime(&sTimeB);
     strftime(buffer, 21, "%d.%m.%Y %H:%M:%S", localtime(&sTimeB.time));
 
-    std::chrono::time_point<std::chrono::system_clock>
-        end = std::chrono::system_clock::now();
-
+    std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
     int elapsed_millis = std::chrono::duration_cast<std::chrono::milliseconds> (end - start).count();
 
     ss << "<b>Ping " << (pingctr + 1) << ":</b> " << buffer << " -> " << " elapsed time: " << elapsed_millis << " ms";

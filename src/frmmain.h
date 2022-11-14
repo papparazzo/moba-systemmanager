@@ -49,7 +49,7 @@ class FrmMain : public Gtk::Window {
     protected:
         Gtk::Notebook  m_Notebook;
         Gtk::ButtonBox m_ButtonBox;
-        Gtk::Button    m_Button_Emegerency;
+        Gtk::Button    m_Button_Emergency{"Nothalt"};
         Gtk::Box       m_VBox{Gtk::ORIENTATION_VERTICAL, 6};
         Gtk::Box       m_HBox{Gtk::ORIENTATION_HORIZONTAL, 6};
         Gtk::Label     m_Label_Connectivity_HW{" \xe2\x96\x84"};
@@ -67,23 +67,23 @@ class FrmMain : public Gtk::Window {
         Gtk::ScrolledWindow m_ScrolledWindow;
         TreeView_ActiveApps m_TreeView_ActiveApps;
 
-        // time-control
-        Gtk::HBox           m_HBox_TimeControl;
+        // atuomatic-control
+        Gtk::HBox           m_HBox_AutomaticControl;
 
-        Gtk::VBox           m_HBox_TimeControl_Clock;
+        Gtk::VBox           m_HBox_AutomaticControl_Clock;
         Gtk::Label          m_Label_Date;
 
         Clock               m_Clock;
 
-        Gtk::Box            m_VBox_TimeControl{Gtk::ORIENTATION_VERTICAL, 6};
+        Gtk::Box            m_VBox_AutomaticControl{Gtk::ORIENTATION_VERTICAL, 6};
 
         Gtk::Box            m_HBox_CurModelDay{Gtk::ORIENTATION_HORIZONTAL, 6};
         Gtk::Box            m_HBox_CurModelTime{Gtk::ORIENTATION_HORIZONTAL, 6};
         Gtk::Box            m_HBox_Multiplicator{Gtk::ORIENTATION_HORIZONTAL, 6};
 
-        class ModelColumns : public Gtk::TreeModel::ColumnRecord {
+        class ModelColumns_CurModelDay : public Gtk::TreeModel::ColumnRecord {
         public:
-            ModelColumns() {
+            ModelColumns_CurModelDay() {
                 add(m_col_name);
                 add(m_col_id);
             }
@@ -92,21 +92,36 @@ class FrmMain : public Gtk::Window {
             Gtk::TreeModelColumn<Day>           m_col_id;
         };
 
-        ModelColumns m_Columns;
+        class ModelColumns_Multiplicator : public Gtk::TreeModel::ColumnRecord {
+        public:
+            ModelColumns_Multiplicator() {
+                add(m_col_label);
+                add(m_col_factor);
+            }
 
-        Glib::RefPtr<Gtk::ListStore> m_refTreeModel;
+            Gtk::TreeModelColumn<Glib::ustring> m_col_label;
+            Gtk::TreeModelColumn<unsigned int>  m_col_factor;
+        };
 
-        Gtk::ComboBox       m_Combo_CurModelDay;
-        Gtk::Label          m_Label_CurModelDay{"Tag:"};
 
-        Gtk::Entry          m_Entry_CurModelTime;
-        Gtk::Label          m_Label_CurModelTime{"Uhrzeit (hh:mm):"};
+        ModelColumns_CurModelDay     m_Columns_CurModelDay;
+        ModelColumns_Multiplicator   m_Columns_Multiplicator;
 
-        Gtk::Entry          m_Entry_Multiplicator;
-        Gtk::Label          m_Label_Multiplicator{"Multiplikator"};
+        Glib::RefPtr<Gtk::ListStore> m_refListModel_CurModelDay;
+        Glib::RefPtr<Gtk::ListStore> m_refListModel_Multiplicator;
 
-        Gtk::ButtonBox      m_ButtonBox_TimeControl;
-        Gtk::Button         m_Button_TimeControl_Set{"Werte setzen"};
+        Gtk::ComboBox  m_Combo_CurModelDay;
+        Gtk::Label     m_Label_CurModelDay{"Tag:"};
+
+        Gtk::Entry     m_Entry_CurModelTime;
+        Gtk::Label     m_Label_CurModelTime{"Uhrzeit (hh:mm):"};
+
+        Gtk::ComboBox  m_Combo_Multiplicator;
+        Gtk::Label     m_Label_Multiplicator{"Multiplikator"};
+
+        Gtk::ButtonBox m_ButtonBox_AutomaticControl;
+        Gtk::Button    m_Button_AutomaticControl_Set{"Werte setzen"};
+        Gtk::Button    m_Button_AutomaticControl_Enable{"Automatik"};
 
         // notice-logger
         Gtk::ScrolledWindow m_ScrolledWindow_NoticeLogger;
@@ -125,11 +140,10 @@ class FrmMain : public Gtk::Window {
 
         // system-control
         Gtk::ButtonBox m_ButtonBox_System;
-        Gtk::Button    m_Button_SystemStandby;
-        Gtk::Button    m_Button_SystemAutomatic;
-        Gtk::Button    m_Button_SystemShutdown;
-        Gtk::Button    m_Button_SystemReset;
-        Gtk::Button    m_Button_SystemPing;
+        Gtk::Button    m_Button_SystemStandby{"Standby"};
+        Gtk::Button    m_Button_SystemShutdown{"Shutdown"};
+        Gtk::Button    m_Button_SystemReset{"Reset"};
+        Gtk::Button    m_Button_SystemPing{"Ping"};
         Gtk::Box       m_VBox_SystemControl{Gtk::ORIENTATION_VERTICAL, 6};
         Gtk::Label     m_Label_HardwareState;
         Gtk::Label     m_Label_PingResult[4];
@@ -155,7 +169,7 @@ class FrmMain : public Gtk::Window {
         void initActiveApps();
         void initServerData();
         void initSystemControl();
-        void initTimeController();
+        void initAutomaticController();
         void initNoticeLogger();
 
         EndpointPtr msgEndpoint;
@@ -171,7 +185,7 @@ class FrmMain : public Gtk::Window {
         // Signal handlers:
         bool on_timeout(int timer_number);
         void on_button_about_clicked();
-        void on_button_emegency_clicked();
+        void on_button_emergency_clicked();
         void on_button_system_shutdown_clicked();
         void on_button_system_reset_clicked();
         void on_button_system_automatic_clicked();
