@@ -32,7 +32,7 @@
 namespace {
     moba::common::AppData appData = {
         PACKAGE_NAME,
-        moba::common::Version(PACKAGE_VERSION),
+        moba::common::Version{PACKAGE_VERSION},
         __DATE__,
         __TIME__,
         "::1",
