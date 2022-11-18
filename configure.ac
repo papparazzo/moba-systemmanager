@@ -1,3 +1,6 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
 AC_PREREQ([2.69])
 AC_INIT([moba-systemmanager], [0.1.0-0000], [pappi-@gmx.de])
 
