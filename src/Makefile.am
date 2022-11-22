@@ -8,7 +8,6 @@ moba_systemmanager_SOURCES = \
     frmmain.cpp \
     main.cpp
 
-
 moba_systemmanager_LDADD = \
     -lmobacommon \
     $(GTKMM_LIBS) \
@@ -16,6 +15,9 @@ moba_systemmanager_LDADD = \
 
 AM_LDFLAGS = -L/usr/local/lib
 
-AM_CPPFLAGS = $(GTKMM_CFLAGS) -I$(srcdir)/../modules/lib-msghandling/src -ggdb -g3 -O3 -Wall -Wno-deprecated-declarations
+AM_CPPFLAGS = \
+    $(GTKMM_CFLAGS) \
+    -I$(srcdir)/../modules/lib-msghandling/src \
+    -ggdb -g3 -O3 -Wall -Wno-deprecated-declarations
 
 CLEANFILES = *~
