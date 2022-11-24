@@ -75,3 +75,4 @@ core
 
 *.o
 *~
+!.gitkeep
