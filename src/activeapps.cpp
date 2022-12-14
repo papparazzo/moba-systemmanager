@@ -21,7 +21,7 @@
 #include "activeapps.h"
 #include "moba/servermessages.h"
 
-TreeView_ActiveApps::TreeView_ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(msgEndpoint) {
+ActiveApps::ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(msgEndpoint) {
     m_refTreeModel_ActiveApps = Gtk::ListStore::create(m_Columns_ActiveApps);
     set_model(m_refTreeModel_ActiveApps);
 
@@ -34,11 +34,11 @@ TreeView_ActiveApps::TreeView_ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(
 
     auto item = Gtk::manage(new Gtk::MenuItem("_Selftest", true));
 
-    item->signal_activate().connect(sigc::mem_fun(*this, &TreeView_ActiveApps::on_menu_popup_selftest));
+    item->signal_activate().connect(sigc::mem_fun(*this, &ActiveApps::on_menu_popup_selftest));
     m_Menu_Popup.append(*item);
 
     item = Gtk::manage(new Gtk::MenuItem("_Reset", true));
-    item->signal_activate().connect(sigc::mem_fun(*this, &TreeView_ActiveApps::on_menu_popup_reset));
+    item->signal_activate().connect(sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
     m_Menu_Popup.append(*item);
 
 
@@ -46,10 +46,10 @@ TreeView_ActiveApps::TreeView_ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(
     m_Menu_Popup.show_all();
 }
 
-TreeView_ActiveApps::~TreeView_ActiveApps() {
+ActiveApps::~ActiveApps() {
 }
 
-void TreeView_ActiveApps::removeActiveApp(long id) {
+void ActiveApps::removeActiveApp(long id) {
     Gtk::TreeModel::Children children = m_refTreeModel_ActiveApps->children();
 
     for(auto iter = children.begin(); iter != children.end(); ++iter) {
@@ -61,11 +61,11 @@ void TreeView_ActiveApps::removeActiveApp(long id) {
     }
 }
 
-void TreeView_ActiveApps::clearList() {
+void ActiveApps::clearList() {
     m_refTreeModel_ActiveApps->clear();
 }
 
-void TreeView_ActiveApps::addActiveApp(
+void ActiveApps::addActiveApp(
     int id, const std::string &name, const std::string &version,
     const std::string &addr, int port, const std::string startTime
 ) {
@@ -79,7 +79,7 @@ void TreeView_ActiveApps::addActiveApp(
     row[m_Columns_ActiveApps.m_col_startTime] = startTime;
 }
 
-bool TreeView_ActiveApps::on_button_press_event(GdkEventButton *button_event) {
+bool ActiveApps::on_button_press_event(GdkEventButton *button_event) {
     bool return_value = Gtk::TreeView::on_button_press_event(button_event);
 
     if((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3)) {
@@ -89,7 +89,7 @@ bool TreeView_ActiveApps::on_button_press_event(GdkEventButton *button_event) {
     return return_value;
 }
 
-void TreeView_ActiveApps::on_menu_popup_reset() {
+void ActiveApps::on_menu_popup_reset() {
     auto refSelection = get_selection();
     if(!refSelection) {
         return;
@@ -102,7 +102,7 @@ void TreeView_ActiveApps::on_menu_popup_reset() {
     msgEndpoint->sendMsg(ServerResetClient{id});
 }
 
-void TreeView_ActiveApps::on_menu_popup_selftest() {
+void ActiveApps::on_menu_popup_selftest() {
     auto refSelection = get_selection();
     if(!refSelection) {
         return;

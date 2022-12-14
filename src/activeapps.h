@@ -23,52 +23,50 @@
 
 #include "moba/endpoint.h"
 
-class TreeView_ActiveApps : public Gtk::TreeView {
-    public:
-        TreeView_ActiveApps(EndpointPtr msgEndpoint);
-        virtual ~TreeView_ActiveApps();
+class ActiveApps : public Gtk::TreeView {
+public:
+    ActiveApps(EndpointPtr msgEndpoint);
+    virtual ~ActiveApps();
 
-        void clearList();
+    void clearList();
 
-        void addActiveApp(
-            int id, const std::string &name, const std::string &version,
-            const std::string &addr, int port, const std::string startTime
-        );
-        void removeActiveApp(long id);
+    void addActiveApp(
+        int id, const std::string &name, const std::string &version,
+        const std::string &addr, int port, const std::string startTime
+    );
+    void removeActiveApp(long id);
 
-    protected:
+protected:
 
-        class ModelColumnsActiveApps : public Gtk::TreeModel::ColumnRecord {
-            public:
+    struct ModelColumnsActiveApps: public Gtk::TreeModel::ColumnRecord {
+        ModelColumnsActiveApps() {
+            add(m_col_id);
+            add(m_col_name);
+            add(m_col_version);
+            add(m_col_ipAddr);
+            add(m_col_port);
+            add(m_col_startTime);
+        }
 
-                ModelColumnsActiveApps() {
-                    add(m_col_id);
-                    add(m_col_name);
-                    add(m_col_version);
-                    add(m_col_ipAddr);
-                    add(m_col_port);
-                    add(m_col_startTime);
-                }
+        Gtk::TreeModelColumn<unsigned int>  m_col_id;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_version;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_ipAddr;
+        Gtk::TreeModelColumn<unsigned int>  m_col_port;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_startTime;
+    };
 
-                Gtk::TreeModelColumn<unsigned int>  m_col_id;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_name;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_version;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_ipAddr;
-                Gtk::TreeModelColumn<unsigned int>  m_col_port;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_startTime;
-        };
+    ModelColumnsActiveApps m_Columns_ActiveApps;
 
-        ModelColumnsActiveApps m_Columns_ActiveApps;
+    Glib::RefPtr<Gtk::ListStore> m_refTreeModel_ActiveApps;
 
-        Glib::RefPtr<Gtk::ListStore> m_refTreeModel_ActiveApps;
+    Gtk::Menu m_Menu_Popup;
 
-        Gtk::Menu m_Menu_Popup;
+    EndpointPtr msgEndpoint;
 
-        EndpointPtr msgEndpoint;
-
-        void on_menu_popup_reset();
-        void on_menu_popup_selftest();
-        bool on_button_press_event(GdkEventButton* button_event) override;
-        void on_menu_file_popup_generic();
+    void on_menu_popup_reset();
+    void on_menu_popup_selftest();
+    bool on_button_press_event(GdkEventButton* button_event) override;
+    void on_menu_file_popup_generic();
 
 };

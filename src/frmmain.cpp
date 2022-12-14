@@ -51,7 +51,7 @@ namespace {
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
 }
 
-FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp} {
+FrmMain::FrmMain(EndpointPtr mhp) : m_ActiveApps{mhp}, msgEndpoint{mhp} {
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 25 ms
 
@@ -98,13 +98,13 @@ FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp}
     m_ButtonBox.pack_start(m_Button_Emergency, Gtk::PACK_EXPAND_WIDGET, 5);
     m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_emergency_clicked));
 
-    m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
-
     initAboutDialog();
     initActiveApps();
     initServerData();
     initSystemControl();
     initAutomaticController();
+
+    m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
 
     m_Button_Emergency.set_sensitive(false);
 
@@ -149,7 +149,7 @@ void FrmMain::initAboutDialog() {
 void FrmMain::initActiveApps() {
     m_Notebook.append_page(m_ScrolledWindow, "Active Apps");
 
-    m_ScrolledWindow.add(m_TreeView_ActiveApps);
+    m_ScrolledWindow.add(m_ActiveApps);
     m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 }
 
@@ -512,10 +512,10 @@ void FrmMain::setServerInfoRes(const ServerInfoRes &data) {
 }
 
 void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
-    m_TreeView_ActiveApps.clearList();
+    m_ActiveApps.clearList();
 
     for(auto iter : data.endpoints) {
-        m_TreeView_ActiveApps.addActiveApp(
+        m_ActiveApps.addActiveApp(
             iter.appId, iter.appInfo.appName, iter.appInfo.version.getString(), iter.addr, iter.port, iter.startTime
         );
     }
@@ -608,14 +608,14 @@ void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
 }
 
 void FrmMain::setNewClient(const ServerNewClientStarted &data) {
-    m_TreeView_ActiveApps.addActiveApp(
+    m_ActiveApps.addActiveApp(
         data.endpoint.appId, data.endpoint.appInfo.appName, data.endpoint.appInfo.version.getString(),
         data.endpoint.addr, data.endpoint.port, data.endpoint.startTime
     );
 }
 
 void FrmMain::setRemoveClient(const ServerClientClosed &data) {
-    m_TreeView_ActiveApps.removeActiveApp(data.clientId);
+    m_ActiveApps.removeActiveApp(data.clientId);
 }
 
 void FrmMain::setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data) {

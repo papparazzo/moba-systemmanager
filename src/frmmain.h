@@ -66,7 +66,7 @@ class FrmMain : public Gtk::Window {
 
         // active-apps
         Gtk::ScrolledWindow m_ScrolledWindow;
-        TreeView_ActiveApps m_TreeView_ActiveApps;
+        ActiveApps m_ActiveApps;
 
         NoticeLogger m_Notice_Logger;
 
