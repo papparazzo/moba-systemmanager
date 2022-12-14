@@ -67,7 +67,7 @@ class FrmMain : public Gtk::Window {
         Gtk::ScrolledWindow m_ScrolledWindow;
         TreeView_ActiveApps m_TreeView_ActiveApps;
 
-        // atuomatic-control
+        // automatic-control
         Gtk::HBox           m_HBox_AutomaticControl;
 
         Gtk::VBox           m_HBox_AutomaticControl_Clock;
