@@ -21,7 +21,8 @@
 #include "noticelogger.h"
 
 #include <ctime>
-#include <sys/timeb.h>
+#include <sstream>
+#include <iomanip>
 
 NoticeLogger::NoticeLogger(): Gtk::Box{Gtk::ORIENTATION_VERTICAL, 2} {
 
@@ -52,14 +53,15 @@ NoticeLogger::~NoticeLogger() {
 }
 
 void NoticeLogger::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    timeb sTimeB;
-    char buffer[25] = "";
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
 
-    ftime(&sTimeB);
-    strftime(buffer, 21, "%d.%m.%Y %H:%M:%S", localtime(&sTimeB.time));
+    std::ostringstream oss;
+
+    oss << std::put_time(&tm, "%d.%m.%Y %H:%M:%S");
 
     Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
-    row[m_Columns_Notices.m_col_timestamp] = std::string(buffer);
+    row[m_Columns_Notices.m_col_timestamp] = oss.str();
     row[m_Columns_Notices.m_col_caption  ] = caption;
     row[m_Columns_Notices.m_col_text     ] = text;
 
@@ -76,18 +78,6 @@ void NoticeLogger::setNotice(Gtk::MessageType noticeType, std::string caption, s
             row[m_Columns_Notices.m_col_type] = "INFO";
             break;
     }
-
-    std::replace(caption.begin(), caption.end(), '<', '"');
-    std::replace(caption.begin(), caption.end(), '>', '"');
-    std::replace(text.begin(), text.end(), '<', '"');
-    std::replace(text.begin(), text.end(), '>', '"');
-
-    std::stringstream ss;
-    ss << "<b>" << caption << "!</b>\n" << text;
-
-//    m_Label_InfoBarMessage.set_markup(ss.str());
-//    m_InfoBar.set_message_type(noticeType);
-//    m_InfoBar.show();
     m_ButtonBox_NoticeLogger.set_sensitive(true);
 }
 

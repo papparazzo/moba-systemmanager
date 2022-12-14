@@ -21,8 +21,6 @@
 
 #include <gtkmm.h>
 
-#include <chrono>
-
 #include "moba/endpoint.h"
 
 #include "moba/registry.h"
@@ -39,6 +37,7 @@
 
 #include "activeapps.h"
 #include "noticelogger.h"
+#include "systemcontrol.h"
 #include "clock.h"
 
 class FrmMain : public Gtk::Window {
@@ -69,6 +68,8 @@ class FrmMain : public Gtk::Window {
         ActiveApps m_ActiveApps;
 
         NoticeLogger m_Notice_Logger;
+
+        SystemControl m_System_Control;
 
         // automatic-control
         Gtk::HBox           m_HBox_AutomaticControl;
@@ -132,40 +133,22 @@ class FrmMain : public Gtk::Window {
         Gtk::VBox  m_VBox_ServerDataValue{Gtk::ORIENTATION_VERTICAL, 6};
         Gtk::HBox  m_HBox_ServerData;
 
-        // system-control
-        Gtk::ButtonBox m_ButtonBox_System;
-        Gtk::Button    m_Button_SystemStandby{"Standby"};
-        Gtk::Button    m_Button_SystemShutdown{"Shutdown"};
-        Gtk::Button    m_Button_SystemReset{"Reset"};
-        Gtk::Button    m_Button_SystemPing{"Ping"};
-        Gtk::Box       m_VBox_SystemControl{Gtk::ORIENTATION_VERTICAL, 6};
-        Gtk::Label     m_Label_HardwareState;
-        Gtk::Label     m_Label_PingResult[4];
-
         void initAboutDialog();
         void initActiveApps();
         void initServerData();
-        void initSystemControl();
         void initAutomaticController();
 
         EndpointPtr msgEndpoint;
         Registry    registry;
 
-        std::chrono::time_point<std::chrono::system_clock> start;
-        int pingctr;
-
-        void setHardwareStateLabel(const std::string &status);
+        void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
         void setClock(Day day, unsigned int hours);
 
         // Signal handlers:
         bool on_timeout(int timer_number);
         void on_button_about_clicked();
         void on_button_emergency_clicked();
-        void on_button_system_shutdown_clicked();
-        void on_button_system_reset_clicked();
-        void on_button_system_automatic_clicked();
-        void on_button_system_standby_clicked();
-        void on_button_system_ping_clicked();
+        void on_button_automatic_clicked();
         void on_about_dialog_response(int response_id);
         void on_infobar_response(int response);
         void on_button_time_control_set_clicked();
@@ -180,5 +163,4 @@ class FrmMain : public Gtk::Window {
         void setRemoveClient(const ServerClientClosed &data);
         void setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data);
         void setTimerSetGlobalTimer(const TimerSetGlobalTimer &data);
-        void setPingResult(const ClientEchoRes&);
 };

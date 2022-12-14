@@ -7,7 +7,8 @@ moba_systemmanager_SOURCES = \
     clock.cpp \
     frmmain.cpp \
     main.cpp \
-    noticelogger.cpp
+    noticelogger.cpp \
+    systemcontrol.cpp
 
 moba_systemmanager_LDADD = \
     -lmobacommon \

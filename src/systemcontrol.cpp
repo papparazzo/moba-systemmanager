@@ -1,0 +1,147 @@
+/*
+ *  Project:    moba-systemmanager
+ *
+ *  Copyright (C) 2022 Stefan Paproth <pappi-@gmx.de>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.
+ *
+ */
+
+#include "systemcontrol.h"
+#include <sstream>
+#include <ctime>
+#include <iomanip>
+
+#include "moba/clientmessages.h"
+
+SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::ORIENTATION_VERTICAL, 6}, msgEndpoint{msgEndpoint} {
+
+    pack_start(m_Label_HardwareState, Gtk::PACK_SHRINK, 50);
+    pack_start(m_Label_PingResult[0], Gtk::PACK_SHRINK);
+    pack_start(m_Label_PingResult[1], Gtk::PACK_SHRINK);
+    pack_start(m_Label_PingResult[2], Gtk::PACK_SHRINK);
+    pack_start(m_Label_PingResult[3], Gtk::PACK_SHRINK);
+    pack_end(m_ButtonBox_System, Gtk::PACK_SHRINK);
+
+    m_Label_HardwareState.set_markup("<b>Hardwarestatus:</b> [unbekannt]");
+    m_Label_PingResult[0].set_markup("<b>Ping 1:</b> [unbekannt]");
+    m_Label_PingResult[1].set_markup("<b>Ping 2:</b> [unbekannt]");
+    m_Label_PingResult[2].set_markup("<b>Ping 3:</b> [unbekannt]");
+    m_Label_PingResult[3].set_markup("<b>Ping 4:</b> [unbekannt]");
+
+    m_ButtonBox_System.pack_start(m_Button_SystemShutdown);
+    m_ButtonBox_System.pack_start(m_Button_SystemReset);
+    m_ButtonBox_System.pack_start(m_Button_SystemStandby);
+    m_ButtonBox_System.pack_start(m_Button_SystemPing);
+    m_ButtonBox_System.set_layout(Gtk::BUTTONBOX_CENTER);
+    m_ButtonBox_System.set_sensitive(false);
+
+    m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_shutdown_clicked));
+    m_Button_SystemReset.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_reset_clicked));
+    m_Button_SystemStandby.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_standby_clicked));
+    m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_ping_clicked));
+}
+
+SystemControl::~SystemControl() {
+}
+
+void SystemControl::on_button_reset_clicked() {
+    msgEndpoint->sendMsg(SystemHardwareReset{});
+}
+
+void SystemControl::on_button_shutdown_clicked() {
+    msgEndpoint->sendMsg(SystemHardwareShutdown{});
+}
+
+void SystemControl::on_button_standby_clicked() {
+    if(m_Button_SystemStandby.get_label() == "Standby (aus)") {
+        msgEndpoint->sendMsg(SystemSetStandbyMode{true});
+    } else {
+        msgEndpoint->sendMsg(SystemSetStandbyMode{false});
+    }
+}
+
+void SystemControl::on_button_ping_clicked() {
+    msgEndpoint->sendMsg(ClientEchoReq{"test"});
+    start = std::chrono::system_clock::now();
+    pingctr = 0;
+    m_Button_SystemPing.set_sensitive(false);
+}
+
+void SystemControl::setHardwareStateLabel(const std::string &status) {
+    std::stringstream ss;
+    ss << "<b>Hardwarestatus:</b> " << status;
+    m_Label_HardwareState.set_markup(ss.str());
+}
+
+void SystemControl::setPingResult() {
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+
+    std::ostringstream oss;
+
+    std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
+    int elapsed_millis = std::chrono::duration_cast<std::chrono::milliseconds> (end - start).count();
+
+    oss << "<b>Ping " << (pingctr + 1) << ":</b> " << std::put_time(&tm, "%d.%m.%Y %H:%M:%S") << " -> " << " elapsed time: " << elapsed_millis << " ms";
+    m_Label_PingResult[pingctr].set_markup(oss.str());
+
+    if(pingctr < 3) {
+        msgEndpoint->sendMsg(ClientEchoReq{"test"});
+        start = std::chrono::system_clock::now();
+        pingctr++;
+        return;
+    }
+    m_Button_SystemPing.set_sensitive(true);
+}
+
+void SystemControl::enable() {
+    m_ButtonBox_System.set_sensitive(true);
+}
+
+void SystemControl::disable() {
+    m_ButtonBox_System.set_sensitive(false);
+}
+
+void SystemControl::setHardwareState(SystemHardwareStateChanged::HardwareState state) {
+    switch(state) {
+        case SystemHardwareStateChanged::HardwareState::ERROR:
+            m_Button_SystemStandby.set_sensitive(false);
+            setHardwareStateLabel("Hardwarefehler");
+            break;
+
+        case SystemHardwareStateChanged::HardwareState::STANDBY:
+            m_Button_SystemStandby.set_sensitive(true);
+            m_Button_SystemStandby.set_label("Standby (an)");
+            setHardwareStateLabel("standby");
+            break;
+
+        case SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP:
+            m_Button_SystemStandby.set_sensitive(false);
+            setHardwareStateLabel("Nothalt");
+            break;
+
+        case SystemHardwareStateChanged::HardwareState::MANUEL:
+            m_Button_SystemStandby.set_sensitive(true);
+            m_Button_SystemStandby.set_label("Standby (aus)");
+            setHardwareStateLabel("manuell");
+            break;
+
+        case SystemHardwareStateChanged::HardwareState::AUTOMATIC:
+            m_Button_SystemStandby.set_sensitive(true);
+            m_Button_SystemStandby.set_label("Standby (aus)");
+            setHardwareStateLabel("automatisch");
+            break;
+    }
+}

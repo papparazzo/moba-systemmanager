@@ -41,7 +41,6 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(msgEndpoint) {
     item->signal_activate().connect(sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
     m_Menu_Popup.append(*item);
 
-
     m_Menu_Popup.accelerate(*this);
     m_Menu_Popup.show_all();
 }
