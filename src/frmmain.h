@@ -38,6 +38,7 @@
 #include <gtkmm/liststore.h>
 
 #include "activeapps.h"
+#include "noticelogger.h"
 #include "clock.h"
 
 class FrmMain : public Gtk::Window {
@@ -66,6 +67,8 @@ class FrmMain : public Gtk::Window {
         // active-apps
         Gtk::ScrolledWindow m_ScrolledWindow;
         TreeView_ActiveApps m_TreeView_ActiveApps;
+
+        NoticeLogger m_Notice_Logger;
 
         // automatic-control
         Gtk::HBox           m_HBox_AutomaticControl;
@@ -123,15 +126,6 @@ class FrmMain : public Gtk::Window {
         Gtk::Button    m_Button_AutomaticControl_Set{"Werte setzen"};
         Gtk::Button    m_Button_AutomaticControl_Enable{"Automatik"};
 
-        // notice-logger
-        Gtk::ScrolledWindow m_ScrolledWindow_NoticeLogger;
-        Gtk::TreeView       m_TreeView_Notices;
-        Glib::RefPtr<Gtk::ListStore> m_refTreeModel_Notices;
-
-        Gtk::Box         m_VBox_NoticeLogger{Gtk::ORIENTATION_VERTICAL, 2};
-        Gtk::ButtonBox   m_ButtonBox_NoticeLogger;
-        Gtk::Button      m_Button_NoticesClear{"Liste leeren"};
-
         // server-data
         Gtk::Label lblName[2][11];
         Gtk::VBox  m_VBox_ServerDataKey{Gtk::ORIENTATION_VERTICAL, 6};
@@ -148,29 +142,11 @@ class FrmMain : public Gtk::Window {
         Gtk::Label     m_Label_HardwareState;
         Gtk::Label     m_Label_PingResult[4];
 
-        class ModelColumnsNotices : public Gtk::TreeModel::ColumnRecord {
-            public:
-                ModelColumnsNotices() {
-                    add(m_col_timestamp);
-                    add(m_col_type);
-                    add(m_col_caption);
-                    add(m_col_text);
-                }
-
-                Gtk::TreeModelColumn<Glib::ustring> m_col_timestamp;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_type;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_caption;
-                Gtk::TreeModelColumn<Glib::ustring> m_col_text;
-        };
-
-        ModelColumnsNotices m_Columns_Notices;
-
         void initAboutDialog();
         void initActiveApps();
         void initServerData();
         void initSystemControl();
         void initAutomaticController();
-        void initNoticeLogger();
 
         EndpointPtr msgEndpoint;
         Registry    registry;
@@ -178,7 +154,6 @@ class FrmMain : public Gtk::Window {
         std::chrono::time_point<std::chrono::system_clock> start;
         int pingctr;
 
-        void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
         void setHardwareStateLabel(const std::string &status);
         void setClock(Day day, unsigned int hours);
 
@@ -191,7 +166,6 @@ class FrmMain : public Gtk::Window {
         void on_button_system_automatic_clicked();
         void on_button_system_standby_clicked();
         void on_button_system_ping_clicked();
-        void on_button_notices_clear_clicked();
         void on_about_dialog_response(int response_id);
         void on_infobar_response(int response);
         void on_button_time_control_set_clicked();

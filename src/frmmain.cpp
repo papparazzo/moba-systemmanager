@@ -98,12 +98,13 @@ FrmMain::FrmMain(EndpointPtr mhp) : m_TreeView_ActiveApps{mhp}, msgEndpoint{mhp}
     m_ButtonBox.pack_start(m_Button_Emergency, Gtk::PACK_EXPAND_WIDGET, 5);
     m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_emergency_clicked));
 
+    m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
+
     initAboutDialog();
     initActiveApps();
     initServerData();
     initSystemControl();
     initAutomaticController();
-    initNoticeLogger();
 
     m_Button_Emergency.set_sensitive(false);
 
@@ -277,72 +278,6 @@ void FrmMain::initAutomaticController() {
 
     m_Button_AutomaticControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_time_control_set_clicked));
     m_Button_AutomaticControl_Enable.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_system_automatic_clicked));
-}
-
-void FrmMain::initNoticeLogger() {
-    m_Notebook.append_page(m_VBox_NoticeLogger, "Notice Logger");
-
-    m_VBox_NoticeLogger.pack_start(m_ScrolledWindow_NoticeLogger);
-    m_VBox_NoticeLogger.pack_end(m_ButtonBox_NoticeLogger, Gtk::PACK_SHRINK);
-
-    // TreeView
-    m_ScrolledWindow_NoticeLogger.add(m_TreeView_Notices);
-    m_ScrolledWindow_NoticeLogger.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-
-    m_refTreeModel_Notices = Gtk::ListStore::create(m_Columns_Notices);
-    m_TreeView_Notices.set_model(m_refTreeModel_Notices);
-
-    m_TreeView_Notices.append_column("Timestamp", m_Columns_Notices.m_col_timestamp);
-    m_TreeView_Notices.append_column("Type",      m_Columns_Notices.m_col_type);
-    m_TreeView_Notices.append_column("Caption",   m_Columns_Notices.m_col_caption);
-    m_TreeView_Notices.append_column("Text",      m_Columns_Notices.m_col_text);
-
-    // HBox
-    m_ButtonBox_NoticeLogger.pack_start(m_Button_NoticesClear, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_ButtonBox_NoticeLogger.set_layout(Gtk::BUTTONBOX_END);
-    m_ButtonBox_NoticeLogger.set_sensitive(false);
-
-    m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_notices_clear_clicked));
-}
-
-void FrmMain::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    timeb sTimeB;
-    char buffer[25] = "";
-
-    ftime(&sTimeB);
-    strftime(buffer, 21, "%d.%m.%Y %H:%M:%S", localtime(&sTimeB.time));
-
-    Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
-    row[m_Columns_Notices.m_col_timestamp] = std::string(buffer);
-    row[m_Columns_Notices.m_col_caption  ] = caption;
-    row[m_Columns_Notices.m_col_text     ] = text;
-
-    switch(noticeType) {
-        case Gtk::MESSAGE_ERROR:
-            row[m_Columns_Notices.m_col_type] = "ERROR";
-            break;
-
-        case Gtk::MESSAGE_WARNING:
-            row[m_Columns_Notices.m_col_type] = "WARNING";
-            break;
-
-        default:
-            row[m_Columns_Notices.m_col_type] = "INFO";
-            break;
-    }
-
-    std::replace(caption.begin(), caption.end(), '<', '"');
-    std::replace(caption.begin(), caption.end(), '>', '"');
-    std::replace(text.begin(), text.end(), '<', '"');
-    std::replace(text.begin(), text.end(), '>', '"');
-
-    std::stringstream ss;
-    ss << "<b>" << caption << "!</b>\n" << text;
-
-    m_Label_InfoBarMessage.set_markup(ss.str());
-    m_InfoBar.set_message_type(noticeType);
-    m_InfoBar.show();
-    m_ButtonBox_NoticeLogger.set_sensitive(true);
 }
 
 void FrmMain::setHardwareStateLabel(const std::string &status) {
@@ -524,11 +459,6 @@ void FrmMain::on_button_system_ping_clicked() {
     m_Button_SystemPing.set_sensitive(false);
 }
 
-void FrmMain::on_button_notices_clear_clicked() {
-    m_ButtonBox_NoticeLogger.set_sensitive(false);
-    m_refTreeModel_Notices->clear();
-}
-
 void FrmMain::on_button_time_control_set_clicked() {
     auto iter = m_Combo_CurModelDay.get_active();
     assert(iter);
@@ -592,7 +522,7 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
 }
 
 void FrmMain::setErrorNotice(const ClientError &data) {
-    setNotice(Gtk::MESSAGE_ERROR, data.errorId, data.additionalMsg);
+    m_Notice_Logger.setNotice(Gtk::MESSAGE_ERROR, data.errorId, data.additionalMsg);
 }
 
 void FrmMain::setSystemNotice(const GuiSystemNotice &data) {
@@ -611,7 +541,7 @@ void FrmMain::setSystemNotice(const GuiSystemNotice &data) {
             mt = Gtk::MESSAGE_INFO;
             break;
     }
-    setNotice(mt, data.caption, data.text);
+    m_Notice_Logger.setNotice(mt, data.caption, data.text);
 }
 
 void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {

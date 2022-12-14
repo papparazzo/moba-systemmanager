@@ -3,10 +3,11 @@ bin_PROGRAMS = \
     moba-systemmanager
 
 moba_systemmanager_SOURCES = \
-    clock.cpp \
     activeapps.cpp \
+    clock.cpp \
     frmmain.cpp \
-    main.cpp
+    main.cpp \
+    noticelogger.cpp
 
 moba_systemmanager_LDADD = \
     -lmobacommon \
