@@ -9,6 +9,7 @@ moba_systemmanager_SOURCES = \
     frmmain.cpp \
     main.cpp \
     noticelogger.cpp \
+    serverdata.cpp \
     systemcontrol.cpp
 
 moba_systemmanager_LDADD = \

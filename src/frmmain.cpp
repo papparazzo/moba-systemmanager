@@ -101,14 +101,14 @@ FrmMain::FrmMain(EndpointPtr mhp): m_ActiveApps{mhp}, m_System_Control{mhp}, m_A
 
     initAboutDialog();
     initActiveApps();
-    initServerData();
+    m_Notebook.append_page(m_Server_Data, "Server Data");
     m_Notebook.append_page(m_System_Control, "System Control");
     m_Notebook.append_page(m_Automatic_Control, "Automatic Control");
     m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
 
     m_Button_Emergency.set_sensitive(false);
 
-    registry.registerHandler<ServerInfoRes>(std::bind(&FrmMain::setServerInfoRes, this, std::placeholders::_1));
+    registry.registerHandler<ServerInfoRes>(std::bind(&ServerData::setServerInfoRes, &m_Server_Data, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
     registry.registerHandler<GuiSystemNotice>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
     registry.registerHandler<ClientError>(std::bind(&FrmMain::setErrorNotice, this, std::placeholders::_1));
@@ -151,22 +151,6 @@ void FrmMain::initActiveApps() {
 
     m_ScrolledWindow.add(m_ActiveApps);
     m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
-}
-
-void FrmMain::initServerData() {
-    m_Notebook.append_page(m_HBox_ServerData, "Server Data");
-
-    m_HBox_ServerData.set_border_width(2);
-
-    m_HBox_ServerData.add(m_VBox_ServerDataKey);
-    m_HBox_ServerData.add(m_VBox_ServerDataValue);
-
-    for(int i = 0; i < 11; ++i) {
-        m_VBox_ServerDataKey.pack_start(lblName[0][i]);
-        m_VBox_ServerDataValue.pack_start(lblName[1][i]);
-        lblName[0][i].set_justify(Gtk::JUSTIFY_RIGHT);
-        lblName[0][i].set_justify(Gtk::JUSTIFY_LEFT);
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,41 +222,6 @@ void FrmMain::on_infobar_response(int) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // <editor-fold defaultstate="collapsed" desc="msg-response">
-void FrmMain::setServerInfoRes(const ServerInfoRes &data) {
-    lblName[0][0].set_markup("<b>AppName:</b>");
-    lblName[1][0].set_label(data.appName);
-
-    lblName[0][1].set_markup("<b>Version:</b>");
-    lblName[1][1].set_label(data.version.getString());
-
-    lblName[0][2].set_markup("<b>Build-Date:</b>");
-    lblName[1][2].set_label(data.buildDate);
-
-    lblName[0][3].set_markup("<b>Start-Time:</b>");
-    lblName[1][3].set_label(data.startTime);
-
-    lblName[0][4].set_markup("<b>max. Clients:</b>");
-    lblName[1][4].set_label(std::to_string(data.maxClients));
-
-    lblName[0][5].set_markup("<b>connected Clients:</b>");
-    lblName[1][5].set_label(std::to_string(data.connectedClients));
-
-    lblName[0][6].set_markup("<b>osArch:</b>");
-    lblName[1][6].set_label(data.osArch);
-
-    lblName[0][7].set_markup("<b>osName:</b>");
-    lblName[1][7].set_label(data.osName);
-
-    lblName[0][8].set_markup("<b>osVersion:</b>");
-    lblName[1][8].set_label(data.osVersion);
-
-    lblName[0][9].set_markup("<b>fwType:</b>");
-    lblName[1][9].set_label(data.fwType);
-
-    lblName[0][10].set_markup("<b>fwVersion:</b>");
-    lblName[1][10].set_label(data.fwVersion);
-}
-
 void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
     m_ActiveApps.clearList();
 

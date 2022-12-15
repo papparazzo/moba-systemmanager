@@ -38,6 +38,7 @@
 #include "noticelogger.h"
 #include "systemcontrol.h"
 #include "automaticcontrol.h"
+#include "serverdata.h"
 
 class FrmMain : public Gtk::Window {
     public:
@@ -69,16 +70,10 @@ class FrmMain : public Gtk::Window {
         NoticeLogger     m_Notice_Logger;
         SystemControl    m_System_Control;
         AutomaticControl m_Automatic_Control;
-
-        // server-data
-        Gtk::Label lblName[2][11];
-        Gtk::VBox  m_VBox_ServerDataKey{Gtk::ORIENTATION_VERTICAL, 6};
-        Gtk::VBox  m_VBox_ServerDataValue{Gtk::ORIENTATION_VERTICAL, 6};
-        Gtk::HBox  m_HBox_ServerData;
+        ServerData       m_Server_Data;
 
         void initAboutDialog();
         void initActiveApps();
-        void initServerData();
 
         EndpointPtr msgEndpoint;
         Registry    registry;
