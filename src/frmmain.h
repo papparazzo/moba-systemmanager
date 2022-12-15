@@ -29,7 +29,6 @@
 #include "moba/clientmessages.h"
 #include "moba/systemmessages.h"
 #include "moba/timermessages.h"
-#include "moba/day.h"
 
 #include <gtkmm/window.h>
 #include <gtkmm/comboboxtext.h>
@@ -38,7 +37,7 @@
 #include "activeapps.h"
 #include "noticelogger.h"
 #include "systemcontrol.h"
-#include "clock.h"
+#include "automaticcontrol.h"
 
 class FrmMain : public Gtk::Window {
     public:
@@ -65,67 +64,11 @@ class FrmMain : public Gtk::Window {
 
         // active-apps
         Gtk::ScrolledWindow m_ScrolledWindow;
-        ActiveApps m_ActiveApps;
+        ActiveApps          m_ActiveApps;
 
-        NoticeLogger m_Notice_Logger;
-
-        SystemControl m_System_Control;
-
-        // automatic-control
-        Gtk::HBox           m_HBox_AutomaticControl;
-
-        Gtk::VBox           m_HBox_AutomaticControl_Clock;
-        Gtk::Label          m_Label_Date;
-
-        Clock               m_Clock;
-
-        Gtk::Box            m_VBox_AutomaticControl{Gtk::ORIENTATION_VERTICAL, 6};
-
-        Gtk::Box            m_HBox_CurModelDay{Gtk::ORIENTATION_HORIZONTAL, 6};
-        Gtk::Box            m_HBox_CurModelTime{Gtk::ORIENTATION_HORIZONTAL, 6};
-        Gtk::Box            m_HBox_Multiplicator{Gtk::ORIENTATION_HORIZONTAL, 6};
-
-        class ModelColumns_CurModelDay : public Gtk::TreeModel::ColumnRecord {
-        public:
-            ModelColumns_CurModelDay() {
-                add(m_col_name);
-                add(m_col_id);
-            }
-
-            Gtk::TreeModelColumn<Glib::ustring> m_col_name; //The data to choose - this must be text.
-            Gtk::TreeModelColumn<Day>           m_col_id;
-        };
-
-        class ModelColumns_Multiplicator : public Gtk::TreeModel::ColumnRecord {
-        public:
-            ModelColumns_Multiplicator() {
-                add(m_col_label);
-                add(m_col_factor);
-            }
-
-            Gtk::TreeModelColumn<Glib::ustring> m_col_label;
-            Gtk::TreeModelColumn<unsigned int>  m_col_factor;
-        };
-
-
-        ModelColumns_CurModelDay     m_Columns_CurModelDay;
-        ModelColumns_Multiplicator   m_Columns_Multiplicator;
-
-        Glib::RefPtr<Gtk::ListStore> m_refListModel_CurModelDay;
-        Glib::RefPtr<Gtk::ListStore> m_refListModel_Multiplicator;
-
-        Gtk::ComboBox  m_Combo_CurModelDay;
-        Gtk::Label     m_Label_CurModelDay{"Tag:"};
-
-        Gtk::Entry     m_Entry_CurModelTime;
-        Gtk::Label     m_Label_CurModelTime{"Uhrzeit (hh:mm):"};
-
-        Gtk::ComboBox  m_Combo_Multiplicator;
-        Gtk::Label     m_Label_Multiplicator{"Multiplikator"};
-
-        Gtk::ButtonBox m_ButtonBox_AutomaticControl;
-        Gtk::Button    m_Button_AutomaticControl_Set{"Werte setzen"};
-        Gtk::Button    m_Button_AutomaticControl_Enable{"Automatik"};
+        NoticeLogger     m_Notice_Logger;
+        SystemControl    m_System_Control;
+        AutomaticControl m_Automatic_Control;
 
         // server-data
         Gtk::Label lblName[2][11];
@@ -136,22 +79,18 @@ class FrmMain : public Gtk::Window {
         void initAboutDialog();
         void initActiveApps();
         void initServerData();
-        void initAutomaticController();
 
         EndpointPtr msgEndpoint;
         Registry    registry;
 
         void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
-        void setClock(Day day, unsigned int hours);
 
         // Signal handlers:
         bool on_timeout(int timer_number);
         void on_button_about_clicked();
         void on_button_emergency_clicked();
-        void on_button_automatic_clicked();
         void on_about_dialog_response(int response_id);
         void on_infobar_response(int response);
-        void on_button_time_control_set_clicked();
 
         // msg-response
         void setServerInfoRes(const ServerInfoRes &data);
@@ -161,6 +100,4 @@ class FrmMain : public Gtk::Window {
         void setHardwareState(const SystemHardwareStateChanged &data);
         void setNewClient(const ServerNewClientStarted &data);
         void setRemoveClient(const ServerClientClosed &data);
-        void setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data);
-        void setTimerSetGlobalTimer(const TimerSetGlobalTimer &data);
 };

@@ -4,6 +4,7 @@ bin_PROGRAMS = \
 
 moba_systemmanager_SOURCES = \
     activeapps.cpp \
+    automaticcontrol.cpp \
     clock.cpp \
     frmmain.cpp \
     main.cpp \
