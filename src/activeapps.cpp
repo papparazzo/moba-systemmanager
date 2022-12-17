@@ -21,7 +21,7 @@
 #include "activeapps.h"
 #include "moba/servermessages.h"
 
-ActiveApps::ActiveApps(EndpointPtr msgEndpoint) : msgEndpoint(msgEndpoint) {
+ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     m_refTreeModel_ActiveApps = Gtk::ListStore::create(m_Columns_ActiveApps);
     set_model(m_refTreeModel_ActiveApps);
 
