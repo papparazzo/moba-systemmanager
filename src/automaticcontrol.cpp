@@ -71,16 +71,17 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     m_Combo_Multiplicator.pack_start(m_Columns_Multiplicator.m_col_label);
 
     set_homogeneous(true);
-    add(m_VBox_AutomaticControl);
-    add(m_HBox_AutomaticControl_Clock);
+    add(m_VBox_Settings);
+    add(m_VBox_Clock);
 
-    m_HBox_AutomaticControl_Clock.pack_start(m_Clock);
-    m_HBox_AutomaticControl_Clock.pack_start(m_Label_Date, Gtk::PACK_SHRINK, 10);
+    m_VBox_Clock.pack_start(m_Clock);
+    m_VBox_Clock.pack_start(m_Label_Date, Gtk::PACK_SHRINK, 10);
 
-    m_VBox_AutomaticControl.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
-    m_VBox_AutomaticControl.pack_start(m_HBox_CurModelTime, Gtk::PACK_SHRINK);
-    m_VBox_AutomaticControl.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
-    m_VBox_AutomaticControl.pack_end(m_ButtonBox_AutomaticControl, Gtk::PACK_SHRINK, 15);
+    m_VBox_Settings.pack_start(m_Label_Spacer, Gtk::PACK_SHRINK, 5);
+    m_VBox_Settings.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
+    m_VBox_Settings.pack_start(m_HBox_CurModelTime, Gtk::PACK_SHRINK);
+    m_VBox_Settings.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
+    m_VBox_Settings.pack_end(m_ButtonBox_AutomaticControl, Gtk::PACK_SHRINK, 15);
 
     m_ButtonBox_AutomaticControl.pack_start(m_Button_AutomaticControl_Enable);
     m_ButtonBox_AutomaticControl.pack_start(m_Button_AutomaticControl_Set, Gtk::PACK_EXPAND_WIDGET, 5);
@@ -266,4 +267,13 @@ void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     m_Clock.setTime(data.hours, data.minutes, true);
 
     setClock(data.curModelDay, data.hours);
+}
+
+void AutomaticControl::setNightLight(bool activate) {
+    Glib::RefPtr<Gio::Settings> s = Gio::Settings::create("org.gnome.settings-daemon.plugins.color");
+
+    if(activate) {
+        s->set_uint("night-light-temperature", 1000);
+    }
+    s->set_boolean("night-light-enabled", activate);
 }

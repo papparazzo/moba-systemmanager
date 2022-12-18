@@ -21,6 +21,8 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <giomm/settings.h>
+
 #include "clock.h"
 
 #include "moba/endpoint.h"
@@ -45,16 +47,17 @@ public:
 
 private:
     void setClock(Day day, unsigned int hours);
+    void setNightLight(bool activate);
 
     void on_button_time_control_set_clicked();
     void on_button_automatic_clicked();
 
-    Gtk::VBox    m_HBox_AutomaticControl_Clock;
+    Gtk::VBox    m_VBox_Clock;
     Gtk::Label   m_Label_Date;
 
     Clock        m_Clock;
 
-    Gtk::Box     m_VBox_AutomaticControl{Gtk::ORIENTATION_VERTICAL, 6};
+    Gtk::Box     m_VBox_Settings{Gtk::ORIENTATION_VERTICAL, 6};
 
     Gtk::Box     m_HBox_CurModelDay{Gtk::ORIENTATION_HORIZONTAL, 6};
     Gtk::Box     m_HBox_CurModelTime{Gtk::ORIENTATION_HORIZONTAL, 6};
@@ -86,6 +89,8 @@ private:
 
     Glib::RefPtr<Gtk::ListStore> m_refListModel_CurModelDay;
     Glib::RefPtr<Gtk::ListStore> m_refListModel_Multiplicator;
+
+    Gtk::Label     m_Label_Spacer;
 
     Gtk::ComboBox  m_Combo_CurModelDay;
     Gtk::Label     m_Label_CurModelDay{"Tag:"};
