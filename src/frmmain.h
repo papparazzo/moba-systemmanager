@@ -38,6 +38,7 @@
 #include "noticelogger.h"
 #include "systemcontrol.h"
 #include "automaticcontrol.h"
+#include "environmentcontrol.h"
 #include "serverdata.h"
 
 class FrmMain : public Gtk::Window {
@@ -67,10 +68,11 @@ class FrmMain : public Gtk::Window {
         Gtk::ScrolledWindow m_ScrolledWindow;
         ActiveApps          m_ActiveApps;
 
-        NoticeLogger     m_Notice_Logger;
-        SystemControl    m_System_Control;
-        AutomaticControl m_Automatic_Control;
-        ServerData       m_Server_Data;
+        NoticeLogger       m_Notice_Logger;
+        SystemControl      m_System_Control;
+        AutomaticControl   m_Automatic_Control;
+        ServerData         m_Server_Data;
+        EnvironmentControl m_Environment_Control;
 
         void initAboutDialog();
         void initActiveApps();

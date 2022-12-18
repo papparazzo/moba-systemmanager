@@ -30,6 +30,8 @@
 #include "frmmain.h"
 #include "config.h"
 
+#include "moba/environmentmessages.h"
+
 namespace {
     const char license[] =
         "Project:    moba-systemmanager\n"
@@ -50,7 +52,10 @@ namespace {
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
 }
 
-FrmMain::FrmMain(EndpointPtr mhp): m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp}, msgEndpoint{mhp} {
+FrmMain::FrmMain(EndpointPtr mhp):
+m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
+m_Environment_Control{mhp}, msgEndpoint{mhp}
+{
     sigc::slot<bool> my_slot = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn = Glib::signal_timeout().connect(my_slot, 25); // 25 ms
 
@@ -101,9 +106,10 @@ FrmMain::FrmMain(EndpointPtr mhp): m_ActiveApps{mhp}, m_System_Control{mhp}, m_A
 
     initAboutDialog();
     initActiveApps();
-    m_Notebook.append_page(m_Server_Data, "Server Data");
-    m_Notebook.append_page(m_System_Control, "System Control");
+    m_Notebook.append_page(m_Server_Data, "Server Info");
+    m_Notebook.append_page(m_System_Control, "Systemsteuerung");
     m_Notebook.append_page(m_Automatic_Control, "Automatic Control");
+    m_Notebook.append_page(m_Environment_Control, "Umgebung");
     m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
 
     m_Button_Emergency.set_sensitive(false);
@@ -184,6 +190,7 @@ bool FrmMain::on_timeout(int) {
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             m_Automatic_Control.enable();
             m_System_Control.enable();
+            m_Environment_Control.enable();
             msgEndpoint->sendMsg(ServerInfoReq{});
             msgEndpoint->sendMsg(ServerConClientsReq{});
             msgEndpoint->sendMsg(SystemGetHardwareState{});
@@ -197,6 +204,7 @@ bool FrmMain::on_timeout(int) {
         if(connected) {
             m_Automatic_Control.disable();
             m_System_Control.disable();
+            m_Environment_Control.disable();
             m_Button_Emergency.set_sensitive(false);
             m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
