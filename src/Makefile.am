@@ -6,6 +6,7 @@ moba_systemmanager_SOURCES = \
     activeapps.cpp \
     automaticcontrol.cpp \
     clock.cpp \
+    environmentcontrol.cpp \
     frmmain.cpp \
     main.cpp \
     noticelogger.cpp \
