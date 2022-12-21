@@ -33,6 +33,8 @@ public:
 
     void setServerInfoRes(const ServerInfoRes &data);
 
+    void clear();
+
 private:
     // server-data
     Gtk::Label lblName[2][11];

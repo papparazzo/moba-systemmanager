@@ -204,6 +204,8 @@ bool FrmMain::on_timeout(int) {
         if(connected) {
             m_Automatic_Control.disable();
             m_System_Control.disable();
+            m_ActiveApps.clearList();
+            m_Server_Data.clear();
             m_Environment_Control.disable();
             m_Button_Emergency.set_sensitive(false);
             m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);

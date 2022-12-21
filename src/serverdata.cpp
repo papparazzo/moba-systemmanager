@@ -62,3 +62,9 @@ void ServerData::setServerInfoRes(const ServerInfoRes &data) {
     lblName[1][9].set_label(data.fwType);
     lblName[1][10].set_label(data.fwVersion);
 }
+
+void ServerData::clear() {
+   for(auto i = 0; i <= 10; ++i) {
+       lblName[1][i].set_label("");
+   }
+}
