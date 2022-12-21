@@ -34,12 +34,14 @@ EnvironmentControl::EnvironmentControl(EndpointPtr msgEndpoint): m_adjustment(Gt
     m_HBox_Curtain.pack_end(m_Button_Curtain_Down, Gtk::PACK_SHRINK, 5);
 
     m_HBox_MainLight.pack_start(m_Label_MainLight, Gtk::PACK_SHRINK, 5);
-    m_HBox_MainLight.pack_end(m_Button_MainLight, Gtk::PACK_SHRINK, 5);
+    m_HBox_MainLight.pack_end(m_Button_MainLight_On, Gtk::PACK_SHRINK, 5);
+    m_HBox_MainLight.pack_end(m_Button_MainLight_Off, Gtk::PACK_SHRINK, 5);
 
 
     m_Button_Curtain_Up.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_curtain_up_clicked));
     m_Button_Curtain_Down.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_curtain_down_clicked));
-    m_Button_MainLight.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_main_light_clicked));
+    m_Button_MainLight_On.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_main_light_on_clicked));
+    m_Button_MainLight_Off.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_main_light_off_clicked));
 
     //m_HBox_Digits.append(*Gtk::make_managed<Gtk::Label>("Scale Digits:", 0));
 /*
@@ -55,20 +57,19 @@ EnvironmentControl::~EnvironmentControl() {
 }
 
 void EnvironmentControl::on_button_curtain_up_clicked() {
-    //msgEndpoint->sendMsg();
+    msgEndpoint->sendMsg(EnvironmentSetAmbience{ToggleState::ON, ToggleState::UNSET});
 }
 
 void EnvironmentControl::on_button_curtain_down_clicked() {
-    //msgEndpoint->sendMsg();
+    msgEndpoint->sendMsg(EnvironmentSetAmbience{ToggleState::OFF, ToggleState::UNSET});
 }
 
-void EnvironmentControl::on_button_main_light_clicked() {
-    if(m_Button_MainLight.get_active()) {
-        m_Button_MainLight.set_label("aus");
-    } else {
-        m_Button_MainLight.set_label("an");
-    }
-    //msgEndpoint->sendMsg();
+void EnvironmentControl::on_button_main_light_on_clicked() {
+    msgEndpoint->sendMsg(EnvironmentSetAmbience{ToggleState::UNSET, ToggleState::ON});
+}
+
+void EnvironmentControl::on_button_main_light_off_clicked() {
+    msgEndpoint->sendMsg(EnvironmentSetAmbience{ToggleState::UNSET, ToggleState::OFF});
 }
 
 void EnvironmentControl::enable() {
@@ -78,16 +79,6 @@ void EnvironmentControl::enable() {
 void EnvironmentControl::disable() {
     set_sensitive(false);
 }
-
-void EnvironmentControl::setMainLightActive(bool active) {
-    if(active) {
-        m_Button_MainLight.set_label("aus");
-    } else {
-        m_Button_MainLight.set_label("an");
-    }
-    m_Button_MainLight.set_active(active);
-}
-
 
 void EnvironmentControl::setHardwareState(SystemHardwareStateChanged::HardwareState state) {
     switch(state) {

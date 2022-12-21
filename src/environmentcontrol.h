@@ -24,6 +24,7 @@
 
 #include "moba/endpoint.h"
 #include "moba/systemmessages.h"
+#include "moba/environmentmessages.h"
 
 class EnvironmentControl: public Gtk::HBox {
 public:
@@ -37,12 +38,12 @@ public:
     void disable();
 
     void setHardwareState(SystemHardwareStateChanged::HardwareState state);
-    void setMainLightActive(bool active);
 
 private:
     void on_button_curtain_up_clicked();
     void on_button_curtain_down_clicked();
-    void on_button_main_light_clicked();
+    void on_button_main_light_on_clicked();
+    void on_button_main_light_off_clicked();
 
     Gtk::Label     m_Label_Spacer;
 
@@ -58,7 +59,8 @@ private:
     Gtk::Button                   m_Button_Curtain_Down{"runter"};
 
     Gtk::Label                    m_Label_MainLight{"Licht:"};
-    Gtk::ToggleButton             m_Button_MainLight{"an"};
+    Gtk::Button                   m_Button_MainLight_On{"an"};
+    Gtk::Button                   m_Button_MainLight_Off{"aus"};
 
     Gtk::Label                    m_Label_AbientLight[4];
     Gtk::Scale                    m_Scale_AbientLight[4];
