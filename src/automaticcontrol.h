@@ -90,20 +90,22 @@ private:
     Glib::RefPtr<Gtk::ListStore> m_refListModel_CurModelDay;
     Glib::RefPtr<Gtk::ListStore> m_refListModel_Multiplicator;
 
-    Gtk::Label     m_Label_Spacer;
+    Gtk::Label        m_Label_Spacer;
 
-    Gtk::ComboBox  m_Combo_CurModelDay;
-    Gtk::Label     m_Label_CurModelDay{"Tag:"};
+    Gtk::ComboBox     m_Combo_CurModelDay;
+    Gtk::Label        m_Label_CurModelDay{"Tag:"};
 
-    Gtk::Entry     m_Entry_CurModelTime;
-    Gtk::Label     m_Label_CurModelTime{"Uhrzeit (hh:mm):"};
+    Gtk::Entry        m_Entry_CurModelTime;
+    Gtk::Label        m_Label_CurModelTime{"Uhrzeit (hh:mm):"};
 
-    Gtk::ComboBox  m_Combo_Multiplicator;
-    Gtk::Label     m_Label_Multiplicator{"Multiplikator"};
+    Gtk::ComboBox     m_Combo_Multiplicator;
+    Gtk::Label        m_Label_Multiplicator{"Multiplikator"};
 
-    Gtk::ButtonBox m_ButtonBox_AutomaticControl;
-    Gtk::Button    m_Button_AutomaticControl_Set{"Werte setzen"};
-    Gtk::Button    m_Button_AutomaticControl_Enable{"Automatik"};
+    Gtk::ButtonBox    m_ButtonBox_AutomaticControl;
+    Gtk::Button       m_Button_AutomaticControl_Set{"Werte setzen"};
+    Gtk::ToggleButton m_Button_AutomaticControl_Enable{"Automatik"};
+
+    sigc::connection  m_click_connection;
 
     EndpointPtr msgEndpoint;
 };

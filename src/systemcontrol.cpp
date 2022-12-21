@@ -49,7 +49,7 @@ SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::ORIENTATION
 
     m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_shutdown_clicked));
     m_Button_SystemReset.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_reset_clicked));
-    m_Button_SystemStandby.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_standby_clicked));
+    m_click_connection = m_Button_SystemStandby.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_standby_clicked));
     m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_ping_clicked));
 }
 
@@ -65,7 +65,7 @@ void SystemControl::on_button_shutdown_clicked() {
 }
 
 void SystemControl::on_button_standby_clicked() {
-    if(m_Button_SystemStandby.get_label() == "Standby (aus)") {
+    if(m_Button_SystemStandby.get_active()) {
         msgEndpoint->sendMsg(SystemSetStandbyMode{true});
     } else {
         msgEndpoint->sendMsg(SystemSetStandbyMode{false});
@@ -122,8 +122,10 @@ void SystemControl::setHardwareState(SystemHardwareStateChanged::HardwareState s
             break;
 
         case SystemHardwareStateChanged::HardwareState::STANDBY:
+            m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
-            m_Button_SystemStandby.set_label("Standby (an)");
+            m_Button_SystemStandby.set_active(true);
+            m_click_connection.unblock();
             setHardwareStateLabel("standby");
             break;
 
@@ -133,14 +135,18 @@ void SystemControl::setHardwareState(SystemHardwareStateChanged::HardwareState s
             break;
 
         case SystemHardwareStateChanged::HardwareState::MANUEL:
+            m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
-            m_Button_SystemStandby.set_label("Standby (aus)");
+            m_Button_SystemStandby.set_active(false);
+            m_click_connection.unblock();
             setHardwareStateLabel("manuell");
             break;
 
         case SystemHardwareStateChanged::HardwareState::AUTOMATIC:
+            m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
-            m_Button_SystemStandby.set_label("Standby (aus)");
+            m_Button_SystemStandby.set_active(false);
+            m_click_connection.unblock();
             setHardwareStateLabel("automatisch");
             break;
     }

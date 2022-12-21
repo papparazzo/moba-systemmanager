@@ -51,16 +51,18 @@ private:
     void on_button_standby_clicked();
     void on_button_ping_clicked();
 
-    Gtk::ButtonBox m_ButtonBox_System;
-    Gtk::Button    m_Button_SystemStandby{"Standby"};
-    Gtk::Button    m_Button_SystemShutdown{"Shutdown"};
-    Gtk::Button    m_Button_SystemReset{"Reset"};
-    Gtk::Button    m_Button_SystemPing{"Ping"};
-    Gtk::Label     m_Label_HardwareState;
-    Gtk::Label     m_Label_PingResult[4];
+    Gtk::ButtonBox    m_ButtonBox_System;
+    Gtk::ToggleButton m_Button_SystemStandby{"Standby"};
+    Gtk::Button       m_Button_SystemShutdown{"Shutdown"};
+    Gtk::Button       m_Button_SystemReset{"Reset"};
+    Gtk::Button       m_Button_SystemPing{"Ping"};
+    Gtk::Label        m_Label_HardwareState;
+    Gtk::Label        m_Label_PingResult[4];
 
     std::chrono::time_point<std::chrono::system_clock> start;
     int pingctr;
+
+    sigc::connection  m_click_connection;
 
     EndpointPtr msgEndpoint;
 };

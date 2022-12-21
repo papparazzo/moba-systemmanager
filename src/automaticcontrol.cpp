@@ -99,7 +99,7 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     m_ButtonBox_AutomaticControl.set_sensitive(false);
 
     m_Button_AutomaticControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_time_control_set_clicked));
-    m_Button_AutomaticControl_Enable.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_automatic_clicked));
+    m_click_connection = m_Button_AutomaticControl_Enable.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_automatic_clicked));
 }
 
 AutomaticControl::~AutomaticControl() {
@@ -134,14 +134,18 @@ void AutomaticControl::setHardwareState(SystemHardwareStateChanged::HardwareStat
 
         case SystemHardwareStateChanged::HardwareState::MANUEL:
             m_Clock.stop();
+            m_click_connection.block();
             m_Button_AutomaticControl_Enable.set_sensitive(true);
-            m_Button_AutomaticControl_Enable.set_label("Automatik (aus)");
+            m_Button_AutomaticControl_Enable.set_active(false);
+            m_click_connection.unblock();
             break;
 
         case SystemHardwareStateChanged::HardwareState::AUTOMATIC:
             m_Clock.run();
+            m_click_connection.block();
             m_Button_AutomaticControl_Enable.set_sensitive(true);
-            m_Button_AutomaticControl_Enable.set_label("Automatik (an)");
+            m_Button_AutomaticControl_Enable.set_active(true);
+            m_click_connection.unblock();
             break;
     }
 }
@@ -236,7 +240,7 @@ void AutomaticControl::on_button_time_control_set_clicked() {
 }
 
 void AutomaticControl::on_button_automatic_clicked() {
-    if(m_Button_AutomaticControl_Enable.get_label() == "Automatik (aus)") {
+    if(m_Button_AutomaticControl_Enable.get_active()) {
         msgEndpoint->sendMsg(SystemSetAutomaticMode{true});
     } else {
         msgEndpoint->sendMsg(SystemSetAutomaticMode{false});
