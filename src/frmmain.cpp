@@ -64,7 +64,7 @@ m_Environment_Control{mhp}, msgEndpoint{mhp}
     set_title(PACKAGE_NAME);
 
     set_border_width(10);
-    set_size_request(600, 400);
+    set_size_request(675, 450);
     set_resizable(false);
     set_position(Gtk::WIN_POS_CENTER);
 
