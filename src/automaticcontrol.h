@@ -21,7 +21,6 @@
 #pragma once
 
 #include <gtkmm.h>
-#include <giomm/settings.h>
 
 #include "clock.h"
 
@@ -46,8 +45,7 @@ public:
     void setTimerSetGlobalTimer(const TimerSetGlobalTimer &data);
 
 private:
-    void setClock(Day day, unsigned int hours);
-    void setNightLight(bool activate);
+    void setClock(Day day, Time time);
 
     void on_button_time_control_set_clicked();
     void on_button_automatic_clicked();
@@ -60,8 +58,9 @@ private:
     Gtk::Box     m_VBox_Settings{Gtk::ORIENTATION_VERTICAL, 6};
 
     Gtk::Box     m_HBox_CurModelDay{Gtk::ORIENTATION_HORIZONTAL, 6};
-    Gtk::Box     m_HBox_CurModelTime{Gtk::ORIENTATION_HORIZONTAL, 6};
     Gtk::Box     m_HBox_Multiplicator{Gtk::ORIENTATION_HORIZONTAL, 6};
+
+    Gtk::HBox     m_HBox[5];
 
     struct ModelColumns_CurModelDay: public Gtk::TreeModel::ColumnRecord {
         ModelColumns_CurModelDay() {
@@ -95,11 +94,11 @@ private:
     Gtk::ComboBox     m_Combo_CurModelDay;
     Gtk::Label        m_Label_CurModelDay{"Tag:"};
 
-    Gtk::Entry        m_Entry_CurModelTime;
-    Gtk::Label        m_Label_CurModelTime{"Uhrzeit (hh:mm):"};
-
     Gtk::ComboBox     m_Combo_Multiplicator;
     Gtk::Label        m_Label_Multiplicator{"Multiplikator"};
+
+    Gtk::Entry        m_Entry_Time[5];
+    Gtk::Label        m_Label_Time[5];
 
     Gtk::ButtonBox    m_ButtonBox_AutomaticControl;
     Gtk::Button       m_Button_AutomaticControl_Set{"Werte setzen"};
@@ -108,5 +107,10 @@ private:
     sigc::connection  m_click_connection;
 
     EndpointPtr msgEndpoint;
+
+    Time nightStartTime;
+    Time sunriseStartTime;
+    Time dayStartTime;
+    Time sunsetStartTime;
 };
 

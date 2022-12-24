@@ -58,10 +58,10 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     m_refListModel_Multiplicator = Gtk::ListStore::create(m_Columns_Multiplicator);
     m_Combo_Multiplicator.set_model(m_refListModel_Multiplicator);
 
-    for(unsigned int i = 60; i <= 240; i += 30) {
+    for(unsigned int i = 1; i <= 4; ++i) {
         std::stringstream ss;
 
-        ss << "1min -> " << static_cast<float>(i) / 60.0 << "h";
+        ss << "1min -> " << i << "h";
 
         auto row1 = *(m_refListModel_Multiplicator->append());
         row1[m_Columns_Multiplicator.m_col_factor] = i;
@@ -78,9 +78,23 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     m_VBox_Clock.pack_start(m_Label_Date, Gtk::PACK_SHRINK, 10);
 
     m_VBox_Settings.pack_start(m_Label_Spacer, Gtk::PACK_SHRINK, 5);
-    m_VBox_Settings.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
-    m_VBox_Settings.pack_start(m_HBox_CurModelTime, Gtk::PACK_SHRINK);
     m_VBox_Settings.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
+    m_VBox_Settings.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
+
+    for(int i = 0; i < 5; ++i) {
+        m_HBox[i].set_spacing(6);
+        m_VBox_Settings.pack_start(m_HBox[i], Gtk::PACK_SHRINK);
+        m_HBox[i].pack_start(m_Label_Time[i], Gtk::PACK_SHRINK, 5);
+        m_HBox[i].pack_end(m_Entry_Time[i], Gtk::PACK_SHRINK, 5);
+        m_Entry_Time[i].set_width_chars(5);
+    }
+
+    m_Label_Time[0].set_text("Uhrzeit (hh:mm):");
+    m_Label_Time[1].set_text("Sonnenaufgang (hh:mm):");
+    m_Label_Time[2].set_text("Tag (hh:mm):");
+    m_Label_Time[3].set_text("Sonnenuntergang (hh:mm):");
+    m_Label_Time[4].set_text("Nacht (hh:mm):");
+
     m_VBox_Settings.pack_end(m_ButtonBox_AutomaticControl, Gtk::PACK_SHRINK, 15);
 
     m_ButtonBox_AutomaticControl.pack_start(m_Button_AutomaticControl_Enable);
@@ -89,9 +103,6 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
 
     m_HBox_CurModelDay.pack_start(m_Label_CurModelDay, Gtk::PACK_SHRINK, 5);
     m_HBox_CurModelDay.pack_end(m_Combo_CurModelDay, Gtk::PACK_SHRINK, 5);
-
-    m_HBox_CurModelTime.pack_start(m_Label_CurModelTime, Gtk::PACK_SHRINK, 5);
-    m_HBox_CurModelTime.pack_end(m_Entry_CurModelTime, Gtk::PACK_SHRINK, 5);
 
     m_HBox_Multiplicator.pack_start(m_Label_Multiplicator, Gtk::PACK_SHRINK, 5);
     m_HBox_Multiplicator.pack_end(m_Combo_Multiplicator, Gtk::PACK_SHRINK, 5);
@@ -150,10 +161,9 @@ void AutomaticControl::setHardwareState(SystemHardwareStateChanged::HardwareStat
     }
 }
 
-void AutomaticControl::setClock(Day day, unsigned int hours) {
+void AutomaticControl::setClock(Day day, Time time) {
 
     std::stringstream ss;
-    ss << "<b>";
 
     switch(day) {
         case Day::MONDAY:
@@ -203,26 +213,33 @@ void AutomaticControl::setClock(Day day, unsigned int hours) {
      * ab 22:30 Uht Nacht
      */
 
-    ss << "</b> (";
+    auto hours = time.getHours();
+    if(hours >= 5 && hours < 10) {
+        ss << " morgens";
+    } else if(hours >= 10 && hours < 12) {
+        ss << " vormittags";
+    } else if(hours >= 12 && hours < 15) {
+        ss << " mittags";
+    } else if(hours >= 15 && hours < 18) {
+        ss << " nachmittags";
+    } else if(hours >= 18 && hours < 22) {
+        ss << " abends";
+    } else if(hours >= 22 || hours < 5) {
+        ss << " nachts";
+    }
 
-    /*
-    if(data.hours >= 7 || data.hours < 11) {
-        ss << "morgens";
-    } else if(data.hours >= 11 || data.hours < 13) {
-        ss << "vormittags";
-    } else if(data.hours < 11 || data.hours > 9) {
-        ss << "mittags";
-    } else if(data.hours < 13 || data.hours > 11) {
-        ss << "nachmittags";
-    } else if(data.hours < 17 || data.hours > 13) {
-        ss << "abends";
-    } else if(data.hours < 21 || data.hours > 17) {
-        ss << "nachts";
-    }*/
-    ss << ")";
-
+    /* Geht so nicht, da "AutomaticControl::setClock" 'stündlich' aufgerufen wird
+     * aber Sonnenauf und untergänge zu jeder Zeit stattfinden können
+     * 
+    ss << "<b>";
+    if(time >= sunriseStartTime && time < dayStartTime) {
+        ss << " (Sonnenaufgang)";
+    } else if(time >= sunsetStartTime && time < nightStartTime) {
+        ss << " (Sonnenuntergang)";
+    }
+    ss << "</b>";
+    */
     m_Label_Date.set_markup(ss.str());
-    //m_Label_Date.set_tooltip_markup("<b>Faktor:</b> unbekannt");
 }
 
 void AutomaticControl::on_button_time_control_set_clicked() {
@@ -234,8 +251,12 @@ void AutomaticControl::on_button_time_control_set_clicked() {
 
     msgEndpoint->sendMsg(TimerSetGlobalTimer{
         (*iter)[m_Columns_CurModelDay.m_col_id],
-        m_Entry_CurModelTime.get_text(),
-        (*iter1)[m_Columns_Multiplicator.m_col_factor]
+        Time{m_Entry_Time[0].get_text()},
+        (*iter1)[m_Columns_Multiplicator.m_col_factor],
+        Time{m_Entry_Time[1].get_text()},
+        Time{m_Entry_Time[2].get_text()},
+        Time{m_Entry_Time[3].get_text()},
+        Time{m_Entry_Time[4].get_text()}
     });
 }
 
@@ -248,15 +269,32 @@ void AutomaticControl::on_button_automatic_clicked() {
 }
 
 void AutomaticControl::setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data) {
-    m_Clock.setMultiplier(data.multiplicator);
-    m_Clock.setTime(data.hours, data.minutes, false);
-
-    setClock(data.curModelDay, data.hours);
+    m_Clock.setTime(data.time.getHours(), data.time.getMinutes(), false);
+    setClock(data.curModelDay, data.time);
 }
 
 void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     m_Combo_CurModelDay.set_active(static_cast<int>(data.curModelDay));
-    m_Entry_CurModelTime.set_text(data.curModelTime);
+
+    nightStartTime   = Time{22, 30};
+    sunriseStartTime = Time{4, 0};
+    dayStartTime     = Time{5, 0};
+    sunsetStartTime  = Time{21, 30};
+
+    /*
+    sunriseStartTime = data.sunriseStartTime;
+    dayStartTime = data.dayStartTime;
+    sunsetStartTime = data.sunsetStartTime;
+    nightStartTime = data.nightStartTime;
+     */
+
+    m_Clock.setNightLight(sunsetStartTime, dayStartTime);
+
+    m_Entry_Time[0].set_text(data.curModelTime.getTimeAsString());
+    m_Entry_Time[1].set_text(sunriseStartTime.getTimeAsString());
+    m_Entry_Time[2].set_text(dayStartTime.getTimeAsString());
+    m_Entry_Time[3].set_text(sunsetStartTime.getTimeAsString());
+    m_Entry_Time[4].set_text(nightStartTime.getTimeAsString());
 
     auto children = m_refListModel_Multiplicator->children();
 
@@ -268,16 +306,12 @@ void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     }
 
     m_Clock.setMultiplier(data.multiplicator);
-    m_Clock.setTime(data.hours, data.minutes, true);
+    m_Clock.setTime(data.curModelTime.getHours(), data.curModelTime.getMinutes(), true);
+    setClock(data.curModelDay, data.curModelTime);
 
-    setClock(data.curModelDay, data.hours);
-}
+    std::stringstream ss;
+    ss <<
+        "<b>Faktor:</b> 1min -> " << data.multiplicator << "h (" << data.multiplicator << ")";
 
-void AutomaticControl::setNightLight(bool activate) {
-    Glib::RefPtr<Gio::Settings> s = Gio::Settings::create("org.gnome.settings-daemon.plugins.color");
-
-    if(activate) {
-        s->set_uint("night-light-temperature", 1000);
-    }
-    s->set_boolean("night-light-enabled", activate);
+    m_Label_Date.set_tooltip_markup(ss.str());
 }
