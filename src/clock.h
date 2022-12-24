@@ -22,33 +22,19 @@
 
 #include <gtkmm/drawingarea.h>
 #include <atomic>
+#include "moba/timestruct.h"
 
-class Clock : public Gtk::DrawingArea
-{
+class Clock: public Gtk::DrawingArea {
 public:
     Clock();
     virtual ~Clock();
 
-    void setTime(unsigned int hours, unsigned int minutes, bool draw) {
-        m_hours = hours;
-        m_minutes = minutes;
-        if(draw) {
-            invalidateRect();
-        }
-    }
+    void setTime(unsigned int hours, unsigned int minutes, bool draw);
+    void setMultiplier(unsigned int multiplier);
+    void setNightLight(Time on_at, Time off_at);
 
-    void setMultiplier(unsigned int multiplier) {
-        m_multiplier = multiplier;
-    }
-
-    void run() {
-        m_run = true;
-    }
-
-    void stop() {
-        m_run = false;
-        m_seconds = 0;
-    }
+    void run();
+    void stop();
 
 protected:
 
@@ -57,10 +43,15 @@ protected:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
     bool on_timeout();
 
+    void setNightLight(bool activate);
+
     std::atomic<unsigned int> m_seconds{0};
     std::atomic<unsigned int> m_minutes{0};
     std::atomic<unsigned int> m_hours{0};
-    std::atomic<unsigned int> m_multiplier{180}; // factor 60 bedeutet: 1 Sek Echtzeit = 60 Sek Modellbahnzeit
+    std::atomic<unsigned int> m_multiplier{4}; // factor 1 bedeutet: 1 Min. Echtzeit = 1 Std. Modellbahnzeit
+
+    std::atomic<Time> m_nightlight_on_at;
+    std::atomic<Time> m_nightlight_off_at;
 
     std::atomic<bool> m_run{false};
 
@@ -68,4 +59,6 @@ protected:
 
     const double m_factor = 1;
     const double m_radius = 0.42 * m_factor;
+
+    bool nightlightActive{false};
 };

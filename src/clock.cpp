@@ -21,6 +21,8 @@
 #include <cmath>
 #include <cairomm/context.h>
 #include <glibmm/main.h>
+#include <giomm/settings.h>
+
 #include "clock.h"
 
 Clock::Clock() {
@@ -28,6 +30,33 @@ Clock::Clock() {
 }
 
 Clock::~Clock() {
+}
+
+void Clock::setTime(unsigned int hours, unsigned int minutes, bool draw) {
+    m_hours = hours;
+    m_minutes = minutes;
+    if(draw) {
+        invalidateRect();
+    }
+}
+
+void Clock::setMultiplier(unsigned int multiplier) {
+    m_multiplier = multiplier;
+}
+
+void Clock::setNightLight(Time on_at, Time off_at) {
+    m_nightlight_on_at = on_at;
+    m_nightlight_off_at = off_at;
+}
+
+void Clock::run() {
+    m_run = true;
+}
+
+void Clock::stop() {
+    m_run = false;
+    m_seconds = 0;
+    setNightLight(false);
 }
 
 bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
@@ -70,13 +99,13 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
         }
 
         cr->move_to(
-            (radius - inset) * cos (i * M_PI / 30),
-            (radius - inset) * sin (i * M_PI / 30)
+            (radius - inset) * cos(i * M_PI / 30),
+            (radius - inset) * sin(i * M_PI / 30)
         );
 
         cr->line_to (
-            radius * cos (i * M_PI / 30),
-            radius * sin (i * M_PI / 30)
+            radius * cos(i * M_PI / 30),
+            radius * sin(i * M_PI / 30)
         );
 
         cr->stroke();
@@ -140,9 +169,7 @@ bool Clock::on_timeout() {
         return true;
     }
 
-    if(++m_seconds % 60 == 0) {
-        m_seconds = 0;
-    }
+    m_seconds = (m_seconds + m_multiplier) % 60;
 
     m_ticks = (++m_ticks % 8);
 
@@ -155,7 +182,7 @@ bool Clock::on_timeout() {
         case 1:
         case 3:
         case 5:
-            if(m_multiplier > 150) {
+            if(m_multiplier > 2) {
                 m_minutes++;
             } else {
                 invalidateRect();
@@ -164,7 +191,7 @@ bool Clock::on_timeout() {
             break;
 
         case 2:
-            if(m_multiplier == 150 || m_multiplier == 120 || m_multiplier == 210 || m_multiplier == 240) {
+            if(m_multiplier == 2 || m_multiplier == 4) {
                 m_minutes++;
             } else {
                 invalidateRect();
@@ -173,7 +200,7 @@ bool Clock::on_timeout() {
             break;
 
         case 6:
-            if(m_multiplier != 60 && m_multiplier != 180) {
+            if(m_multiplier != 1 && m_multiplier != 3) {
                 m_minutes++;
             } else {
                 invalidateRect();
@@ -182,7 +209,7 @@ bool Clock::on_timeout() {
             break;
 
         case 7:
-            if(m_multiplier == 150 || m_multiplier == 180 || m_multiplier == 240) {
+            if(m_multiplier == 3 || m_multiplier == 4) {
                 m_minutes++;
             } else {
                 invalidateRect();
@@ -192,20 +219,27 @@ bool Clock::on_timeout() {
     }
 
     /*
-    60	1 Sek	1 Min	0,      4
-    90	1 Sek	1,5 Min	0,      4   6
-    120	1 Sek	2 Min	0,  2,  4,  6
-    150	1 Sek	2,5 Min	0,  2,  4,  6,7
-    180	1 Sek	3 Min	0,1,  3,4,5,  7
-    210	1 Sek	3,5 Min	0,1,2,3,4,5,6
-    240	1 Sek	4 Min	0,1,2,3,4,5,6,7
+    1 Sek => 1 Min 0,      4
+    1 Sek => 2 Min 0,  2,  4,  6
+    1 Sek => 3 Min 0,1,  3,4,5,  7
+    1 Sek => 4 Min 0,1,2,3,4,5,6,7
      */
 
     if(m_minutes % 60 == 0) {
         m_minutes = 0;
-        if(++m_hours % 12 == 0) {
+        if(++m_hours % 24 == 0) {
             m_hours = 0;
         }
+    }
+
+    Time t{m_hours, m_minutes};
+
+    if((t >= m_nightlight_on_at || t <= m_nightlight_off_at) && !nightlightActive) {
+        setNightLight(true);
+    }
+
+    if((t < m_nightlight_on_at && t > m_nightlight_off_at) && nightlightActive) {
+        setNightLight(false);
     }
 
     invalidateRect();
@@ -219,4 +253,22 @@ void Clock::invalidateRect() {
     }
     Gdk::Rectangle r{0, 0, get_allocation().get_width(), get_allocation().get_height()};
     win->invalidate_rect(r, false);
+}
+
+void Clock::setNightLight(bool activate) {
+    Glib::RefPtr<Gio::Settings> s1 = Gio::Settings::create("org.gnome.settings-daemon.plugins.color");
+    Glib::RefPtr<Gio::Settings> s2 = Gio::Settings::create("org.gnome.desktop.interface");
+
+    if(activate) {
+        s2->set_string("gtk-theme", "Yaru-dark");
+        s1->set_uint("night-light-temperature", 1700);
+        s1->set_boolean("night-light-enabled", true);
+    } else {
+        s2->set_string("gtk-theme", "Yaru");
+        s1->set_boolean("night-light-enabled", false);
+    }
+
+    nightlightActive = activate;
+
+    //FIXME ACHTUNG: Wenn Applikation beendet wird, dann setNightLight(false) aufrufen!!!
 }
