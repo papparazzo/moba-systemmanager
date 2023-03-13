@@ -34,7 +34,7 @@
 
 namespace {
     const char license[] =
-        "Project:    moba-systemmanager\n"
+        "Project:    " PACKAGE_NAME "\n"
         "\n"
         "Copyright (C) 2018 Stefan Paproth <pappi-@gmx.de>\n"
         "\n"
