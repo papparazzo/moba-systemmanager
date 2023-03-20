@@ -20,9 +20,13 @@
 #pragma once
 
 #include <gtkmm.h>
+#include <gtkmm/window.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/liststore.h>
+
+#include <atomic>
 
 #include "moba/endpoint.h"
-
 #include "moba/registry.h"
 #include "moba/servermessages.h"
 #include "moba/guimessages.h"
@@ -30,71 +34,55 @@
 #include "moba/systemmessages.h"
 #include "moba/timermessages.h"
 
-#include <gtkmm/window.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/liststore.h>
-
 #include "activeapps.h"
 #include "noticelogger.h"
 #include "systemcontrol.h"
 #include "automaticcontrol.h"
 #include "environmentcontrol.h"
 #include "serverdata.h"
+#include "frmbase.h"
 
-class FrmMain : public Gtk::Window {
-    public:
-        FrmMain(EndpointPtr mhp);
-        virtual ~FrmMain() {
-        }
+class FrmMain: public FrmBase {
+public:
+    FrmMain(EndpointPtr mhp);
+    virtual ~FrmMain() {
+    }
 
-    protected:
-        Gtk::Notebook  m_Notebook;
-        Gtk::ButtonBox m_ButtonBox;
-        Gtk::Button    m_Button_Emergency{"Nothalt"};
-        Gtk::Box       m_VBox{Gtk::ORIENTATION_VERTICAL, 6};
-        Gtk::Box       m_HBox{Gtk::ORIENTATION_HORIZONTAL, 6};
-        Gtk::Label     m_Label_Connectivity_HW{" \xe2\x96\x84"};
-        Gtk::Label     m_Label_Connectivity_SW{" \xe2\x96\x84"};
+protected:
+    enum class SystemState {
+        NO_CONNECT,
+        ERROR,
+        STANDBY,
+        EMERGENCY_STOP,
+        MANUEL,
+        AUTOMATIC
+    };
 
-        // about
-        Gtk::Button      m_Button_About{"About..."};
-        Gtk::AboutDialog m_Dialog;
+    std::atomic<SystemState> systemState;
 
-        // info-bar
-        Gtk::InfoBar m_InfoBar;
-        Gtk::Label   m_Label_InfoBarMessage;
+    Gtk::Notebook  m_Notebook;
 
-        // active-apps
-        Gtk::ScrolledWindow m_ScrolledWindow;
-        ActiveApps          m_ActiveApps;
+    // active-apps
+    Gtk::ScrolledWindow m_ScrolledWindow;
+    ActiveApps          m_ActiveApps;
 
-        NoticeLogger       m_Notice_Logger;
-        SystemControl      m_System_Control;
-        AutomaticControl   m_Automatic_Control;
-        ServerData         m_Server_Data;
-        EnvironmentControl m_Environment_Control;
+    NoticeLogger       m_Notice_Logger;
+    SystemControl      m_System_Control;
+    AutomaticControl   m_Automatic_Control;
+    ServerData         m_Server_Data;
+    EnvironmentControl m_Environment_Control;
 
-        void initAboutDialog();
-        void initActiveApps();
+    void initActiveApps();
 
-        EndpointPtr msgEndpoint;
-        Registry    registry;
+    void setSensitive(bool);
+    void initialSend();
 
-        void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
+    // Signal handlers:
+    bool on_timeout_status(int);
 
-        // Signal handlers:
-        bool on_timeout(int timer_number);
-        void on_button_about_clicked();
-        void on_button_emergency_clicked();
-        void on_about_dialog_response(int response_id);
-        void on_infobar_response(int response);
-
-        // msg-response
-        void setServerInfoRes(const ServerInfoRes &data);
-        void setConClientsRes(const ServerConClientsRes &data);
-        void setSystemNotice(const GuiSystemNotice &data);
-        void setErrorNotice(const ClientError &data);
-        void setHardwareState(const SystemHardwareStateChanged &data);
-        void setNewClient(const ServerNewClientStarted &data);
-        void setRemoveClient(const ServerClientClosed &data);
+    // msg-response
+    void setServerInfoRes(const ServerInfoRes &data);
+    void setConClientsRes(const ServerConClientsRes &data);
+    void setNewClient(const ServerNewClientStarted &data);
+    void setRemoveClient(const ServerClientClosed &data);
 };
