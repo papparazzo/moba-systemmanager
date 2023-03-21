@@ -28,6 +28,7 @@
 #include "moba/systemmessages.h"
 
 #include <gtkmm.h>
+#include <atomic>
 
 class FrmBase: public Gtk::Window {
 public:
@@ -35,6 +36,17 @@ public:
     virtual ~FrmBase();
 
 protected:
+    enum class SystemState {
+        NO_CONNECT,
+        ERROR,
+        STANDBY,
+        EMERGENCY_STOP,
+        MANUEL,
+        AUTOMATIC
+    };
+
+    std::atomic<SystemState> systemState;
+
     EndpointPtr msgEndpoint;
 
     Registry registry;

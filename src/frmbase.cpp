@@ -42,7 +42,35 @@ namespace {
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
 }
 
-FrmBase::FrmBase(EndpointPtr mhp): msgEndpoint(mhp) {
+FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndpoint{mhp} {
+    set_title(PACKAGE_NAME);
+
+    // Add the message label to the InfoBar:
+    auto infoBarContainer = dynamic_cast<Gtk::Container*>(m_InfoBar.get_content_area());
+    if(infoBarContainer) {
+        infoBarContainer->add(m_Label_InfoBarMessage);
+    }
+
+    m_InfoBar.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_infobar_response));
+    m_InfoBar.add_button("_OK", 0);
+
+    m_VBox.pack_start(m_InfoBar, Gtk::PACK_SHRINK);
+
+    // about-dialog
+    m_ButtonBox.pack_start(m_Button_About, Gtk::PACK_EXPAND_WIDGET, 5);
+    m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
+    m_Button_About.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_about_clicked));
+
+    m_ButtonBox.pack_start(m_Button_Emergency, Gtk::PACK_EXPAND_WIDGET, 5);
+    m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_emergency_clicked));
+
+    m_Button_Emergency.set_sensitive(false);
+    initAboutDialog();
+
+    registry.registerHandler<GuiSystemNotice>(std::bind(&FrmBase::setSystemNotice, this, std::placeholders::_1));
+    registry.registerHandler<ClientError>(std::bind(&FrmBase::setErrorNotice, this, std::placeholders::_1));
+    registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmBase::setHardwareState, this, std::placeholders::_1));
+    m_InfoBar.hide();
 }
 
 FrmBase::~FrmBase() {
@@ -83,7 +111,7 @@ std::string FrmBase::getDisplayMessage(std::string caption, std::string text) {
 }
 
 void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    m_Notice_Logger.setNotice(noticeType, caption, text);
+    //m_Notice_Logger.setNotice(noticeType, caption, text);
 
     m_Label_InfoBarMessage.set_markup(getDisplayMessage(caption, text));
     m_InfoBar.set_message_type(noticeType);
@@ -169,3 +197,33 @@ void FrmBase::on_infobar_response(int) {
     m_InfoBar.hide();
 }
 
+void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
+    //m_System_Control.setHardwareState(data.hardwareState);
+    //m_Automatic_Control.setHardwareState(data.hardwareState);
+
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
+        systemState = SystemState::ERROR;
+        m_Button_Emergency.set_sensitive(false);
+        return;
+    }
+    m_Button_Emergency.set_sensitive(true);
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
+        systemState = SystemState::EMERGENCY_STOP;
+        m_Button_Emergency.set_label("Freigabe");
+        return;
+    }
+    m_Button_Emergency.set_label("Nothalt");
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
+        systemState = SystemState::STANDBY;
+        m_Button_Emergency.set_sensitive(false);
+        return;
+    }
+
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
+        systemState = SystemState::MANUEL;
+        return;
+    }
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
+        systemState = SystemState::AUTOMATIC;
+    }
+}
