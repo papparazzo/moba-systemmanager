@@ -24,8 +24,6 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/liststore.h>
 
-#include <atomic>
-
 #include "moba/endpoint.h"
 #include "moba/registry.h"
 #include "moba/servermessages.h"
@@ -49,17 +47,6 @@ public:
     }
 
 protected:
-    enum class SystemState {
-        NO_CONNECT,
-        ERROR,
-        STANDBY,
-        EMERGENCY_STOP,
-        MANUEL,
-        AUTOMATIC
-    };
-
-    std::atomic<SystemState> systemState;
-
     Gtk::Notebook  m_Notebook;
 
     // active-apps

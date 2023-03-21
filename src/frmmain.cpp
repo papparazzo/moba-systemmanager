@@ -33,8 +33,8 @@
 #include "moba/environmentmessages.h"
 
 FrmMain::FrmMain(EndpointPtr mhp):
-systemState{SystemState::NO_CONNECT}, m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
-m_Environment_Control{mhp}, msgEndpoint{mhp}
+m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
+m_Environment_Control{mhp}
 {
     sigc::slot<bool> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
     sigc::connection conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
@@ -42,25 +42,12 @@ m_Environment_Control{mhp}, msgEndpoint{mhp}
     sigc::slot<bool> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout_status), 1);
     sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 25 ms
 
-    set_title(PACKAGE_NAME);
-
     set_border_width(10);
     set_size_request(675, 450);
     set_resizable(false);
     set_position(Gtk::WIN_POS_CENTER);
 
     add(m_VBox);
-
-    // Add the message label to the InfoBar:
-    auto infoBarContainer = dynamic_cast<Gtk::Container*>(m_InfoBar.get_content_area());
-    if(infoBarContainer) {
-        infoBarContainer->add(m_Label_InfoBarMessage);
-    }
-
-    m_InfoBar.signal_response().connect(sigc::mem_fun(*this, &FrmMain::on_infobar_response));
-    m_InfoBar.add_button("_OK", 0);
-
-    m_VBox.pack_start(m_InfoBar, Gtk::PACK_SHRINK);
 
     m_Notebook.set_border_width(10);
     m_VBox.pack_start(m_Notebook);
@@ -75,15 +62,6 @@ m_Environment_Control{mhp}, msgEndpoint{mhp}
     m_Label_Connectivity_HW.set_justify(Gtk::JUSTIFY_LEFT);
     m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
 
-    // about-dialog
-    m_ButtonBox.pack_start(m_Button_About, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
-    m_Button_About.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_about_clicked));
-
-    m_ButtonBox.pack_start(m_Button_Emergency, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmMain::on_button_emergency_clicked));
-
-    initAboutDialog();
     initActiveApps();
     m_Notebook.append_page(m_Server_Data, "Server Info");
     m_Notebook.append_page(m_System_Control, "Systemsteuerung");
@@ -91,21 +69,15 @@ m_Environment_Control{mhp}, msgEndpoint{mhp}
     m_Notebook.append_page(m_Environment_Control, "Umgebung");
     m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
 
-    m_Button_Emergency.set_sensitive(false);
-
     registry.registerHandler<ServerInfoRes>(std::bind(&ServerData::setServerInfoRes, &m_Server_Data, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
-    registry.registerHandler<GuiSystemNotice>(std::bind(&FrmMain::setSystemNotice, this, std::placeholders::_1));
-    registry.registerHandler<ClientError>(std::bind(&FrmMain::setErrorNotice, this, std::placeholders::_1));
     registry.registerHandler<ClientEchoRes>([this]{m_System_Control.setPingResult();});
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
-    registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmMain::setHardwareState, this, std::placeholders::_1));
     registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
     registry.registerHandler<TimerGlobalTimerEvent>(std::bind(&AutomaticControl::setTimerGlobalTimerEvent, &m_Automatic_Control, std::placeholders::_1));
     registry.registerHandler<TimerSetGlobalTimer>(std::bind(&AutomaticControl::setTimerSetGlobalTimer, &m_Automatic_Control, std::placeholders::_1));
 
     show_all_children();
-    m_InfoBar.hide();
 }
 
 void FrmMain::initActiveApps() {
@@ -220,37 +192,6 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
         m_ActiveApps.addActiveApp(
             iter.appId, iter.appInfo.appName, iter.appInfo.version.getString(), iter.addr, iter.port, iter.startTime
         );
-    }
-}
-
-void FrmMain::setHardwareState(const SystemHardwareStateChanged &data) {
-    m_System_Control.setHardwareState(data.hardwareState);
-    m_Automatic_Control.setHardwareState(data.hardwareState);
-
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
-        systemState = SystemState::ERROR;
-        m_Button_Emergency.set_sensitive(false);
-        return;
-    }
-    m_Button_Emergency.set_sensitive(true);
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
-        systemState = SystemState::EMERGENCY_STOP;
-        m_Button_Emergency.set_label("Freigabe");
-        return;
-    }
-    m_Button_Emergency.set_label("Nothalt");
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
-        systemState = SystemState::STANDBY;
-        m_Button_Emergency.set_sensitive(false);
-        return;
-    }
-
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
-        systemState = SystemState::MANUEL;
-        return;
-    }
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
-        systemState = SystemState::AUTOMATIC;
     }
 }
 
