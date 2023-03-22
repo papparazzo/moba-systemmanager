@@ -114,14 +114,14 @@ void SystemControl::disable() {
     m_ButtonBox_System.set_sensitive(false);
 }
 
-void SystemControl::setHardwareState(SystemHardwareStateChanged::HardwareState state) {
-    switch(state) {
-        case SystemHardwareStateChanged::HardwareState::ERROR:
+void SystemControl::setHardwareState(SystemState systemState) {
+    switch(systemState) {
+        case SystemState::ERROR:
             m_Button_SystemStandby.set_sensitive(false);
             setHardwareStateLabel("Hardwarefehler");
             break;
 
-        case SystemHardwareStateChanged::HardwareState::STANDBY:
+        case SystemState::STANDBY:
             m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
             m_Button_SystemStandby.set_active(true);
@@ -129,12 +129,12 @@ void SystemControl::setHardwareState(SystemHardwareStateChanged::HardwareState s
             setHardwareStateLabel("standby");
             break;
 
-        case SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP:
+        case SystemState::EMERGENCY_STOP:
             m_Button_SystemStandby.set_sensitive(false);
             setHardwareStateLabel("Nothalt");
             break;
 
-        case SystemHardwareStateChanged::HardwareState::MANUEL:
+        case SystemState::MANUEL:
             m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
             m_Button_SystemStandby.set_active(false);
@@ -142,12 +142,17 @@ void SystemControl::setHardwareState(SystemHardwareStateChanged::HardwareState s
             setHardwareStateLabel("manuell");
             break;
 
-        case SystemHardwareStateChanged::HardwareState::AUTOMATIC:
+        case SystemState::AUTOMATIC:
             m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
             m_Button_SystemStandby.set_active(false);
             m_click_connection.unblock();
             setHardwareStateLabel("automatisch");
+            break;
+
+        case SystemState::NO_CONNECT:
+            m_Button_SystemStandby.set_sensitive(false);
+            setHardwareStateLabel("Keine Verbindung");
             break;
     }
 }

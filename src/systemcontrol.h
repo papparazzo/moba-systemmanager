@@ -25,7 +25,7 @@
 #include <string>
 
 #include "moba/endpoint.h"
-#include "moba/systemmessages.h"
+#include "frmbase.h"
 
 class SystemControl: public Gtk::Box {
 public:
@@ -40,7 +40,7 @@ public:
 
     void setPingResult();
 
-    void setHardwareState(SystemHardwareStateChanged::HardwareState state);
+    void setHardwareState(SystemState systemState);
 
 private:
     void setHardwareStateLabel(const std::string &status);
