@@ -126,24 +126,24 @@ void AutomaticControl::disable() {
     m_ButtonBox_AutomaticControl.set_sensitive(false);
 }
 
-void AutomaticControl::setHardwareState(SystemHardwareStateChanged::HardwareState state) {
-    switch(state) {
-        case SystemHardwareStateChanged::HardwareState::ERROR:
+void AutomaticControl::setHardwareState(SystemState systemState) {
+    switch(systemState) {
+        case SystemState::ERROR:
             m_Clock.stop();
             m_Button_AutomaticControl_Enable.set_sensitive(false);
             break;
 
-        case SystemHardwareStateChanged::HardwareState::STANDBY:
+        case SystemState::STANDBY:
             m_Clock.stop();
             m_Button_AutomaticControl_Enable.set_sensitive(false);
             break;
 
-        case SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP:
+        case SystemState::EMERGENCY_STOP:
             m_Clock.stop();
             m_Button_AutomaticControl_Enable.set_sensitive(false);
             break;
 
-        case SystemHardwareStateChanged::HardwareState::MANUEL:
+        case SystemState::MANUEL:
             m_Clock.stop();
             m_click_connection.block();
             m_Button_AutomaticControl_Enable.set_sensitive(true);
@@ -151,12 +151,17 @@ void AutomaticControl::setHardwareState(SystemHardwareStateChanged::HardwareStat
             m_click_connection.unblock();
             break;
 
-        case SystemHardwareStateChanged::HardwareState::AUTOMATIC:
+        case SystemState::AUTOMATIC:
             m_Clock.run();
             m_click_connection.block();
             m_Button_AutomaticControl_Enable.set_sensitive(true);
             m_Button_AutomaticControl_Enable.set_active(true);
             m_click_connection.unblock();
+            break;
+
+        case SystemState::NO_CONNECT:
+            m_Button_AutomaticControl_Enable.set_sensitive(false);
+            m_Clock.stop();
             break;
     }
 }
@@ -230,7 +235,7 @@ void AutomaticControl::setClock(Day day, Time time) {
 
     /* Geht so nicht, da "AutomaticControl::setClock" 'stündlich' aufgerufen wird
      * aber Sonnenauf und untergänge zu jeder Zeit stattfinden können
-     * 
+     *
     ss << "<b>";
     if(time >= sunriseStartTime && time < dayStartTime) {
         ss << " (Sonnenaufgang)";

@@ -23,9 +23,9 @@
 #include <gtkmm.h>
 
 #include "clock.h"
+#include "frmbase.h"
 
 #include "moba/endpoint.h"
-#include "moba/systemmessages.h"
 #include "moba/timermessages.h"
 #include "moba/day.h"
 
@@ -40,7 +40,7 @@ public:
     void enable();
     void disable();
 
-    void setHardwareState(SystemHardwareStateChanged::HardwareState state);
+    void setHardwareState(SystemState systemState);
     void setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &data);
     void setTimerSetGlobalTimer(const TimerSetGlobalTimer &data);
 
