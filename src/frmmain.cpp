@@ -32,7 +32,7 @@
 
 #include "moba/environmentmessages.h"
 
-FrmMain::FrmMain(EndpointPtr mhp):
+FrmMain::FrmMain(EndpointPtr mhp): FrmBase{mhp},
 m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
 m_Environment_Control{mhp}
 {
@@ -51,16 +51,6 @@ m_Environment_Control{mhp}
 
     m_Notebook.set_border_width(10);
     m_VBox.pack_start(m_Notebook);
-    m_VBox.pack_start(m_HBox, Gtk::PACK_SHRINK);
-    m_HBox.pack_end(m_ButtonBox, Gtk::PACK_SHRINK);
-
-    m_HBox.pack_start(m_Label_Connectivity_SW, Gtk::PACK_SHRINK);
-    m_Label_Connectivity_SW.set_justify(Gtk::JUSTIFY_LEFT);
-    m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-
-    m_HBox.pack_start(m_Label_Connectivity_HW, Gtk::PACK_SHRINK);
-    m_Label_Connectivity_HW.set_justify(Gtk::JUSTIFY_LEFT);
-    m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
 
     initActiveApps();
     m_Notebook.append_page(m_Server_Data, "Server Info");
@@ -99,6 +89,10 @@ void FrmMain::setSensitive(bool sensitive) {
         m_ActiveApps.clearList();
         m_Server_Data.clear();
     }
+}
+
+void FrmMain::listNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
+    m_Notice_Logger.setNotice(noticeType, caption, text);
 }
 
 void FrmMain::initialSend() {
@@ -204,6 +198,11 @@ void FrmMain::setNewClient(const ServerNewClientStarted &data) {
 
 void FrmMain::setRemoveClient(const ServerClientClosed &data) {
     m_ActiveApps.removeActiveApp(data.clientId);
+}
+
+void FrmMain::setSystemState(SystemState systemState) {
+    m_System_Control.setHardwareState(systemState);
+    m_Automatic_Control.setHardwareState(systemState);
 }
 
 // </editor-fold>

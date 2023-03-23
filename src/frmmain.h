@@ -63,6 +63,7 @@ protected:
 
     void setSensitive(bool);
     void initialSend();
+    void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
 
     // Signal handlers:
     bool on_timeout_status(int);
@@ -72,4 +73,5 @@ protected:
     void setConClientsRes(const ServerConClientsRes &data);
     void setNewClient(const ServerNewClientStarted &data);
     void setRemoveClient(const ServerClientClosed &data);
+    void setSystemState(SystemState systemState);
 };
