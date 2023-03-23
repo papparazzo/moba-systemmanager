@@ -51,10 +51,20 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
         infoBarContainer->add(m_Label_InfoBarMessage);
     }
 
+    m_VBox.pack_start(m_InfoBar, Gtk::PACK_SHRINK);
+    m_VBox.pack_end(m_HBox, Gtk::PACK_SHRINK);
+    m_HBox.pack_end(m_ButtonBox, Gtk::PACK_SHRINK);
+
+    m_HBox.pack_start(m_Label_Connectivity_SW, Gtk::PACK_SHRINK);
+    m_Label_Connectivity_SW.set_justify(Gtk::JUSTIFY_LEFT);
+    m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+
+    m_HBox.pack_start(m_Label_Connectivity_HW, Gtk::PACK_SHRINK);
+    m_Label_Connectivity_HW.set_justify(Gtk::JUSTIFY_LEFT);
+    m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+
     m_InfoBar.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_infobar_response));
     m_InfoBar.add_button("_OK", 0);
-
-    m_VBox.pack_start(m_InfoBar, Gtk::PACK_SHRINK);
 
     // about-dialog
     m_ButtonBox.pack_start(m_Button_About, Gtk::PACK_EXPAND_WIDGET, 5);
@@ -111,7 +121,7 @@ std::string FrmBase::getDisplayMessage(std::string caption, std::string text) {
 }
 
 void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    //m_Notice_Logger.setNotice(noticeType, caption, text);
+    listNotice(noticeType, caption, text);
 
     m_Label_InfoBarMessage.set_markup(getDisplayMessage(caption, text));
     m_InfoBar.set_message_type(noticeType);
@@ -198,9 +208,6 @@ void FrmBase::on_infobar_response(int) {
 }
 
 void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
-    //m_System_Control.setHardwareState(data.hardwareState);
-    //m_Automatic_Control.setHardwareState(data.hardwareState);
-
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
         systemState = SystemState::ERROR;
         m_Button_Emergency.set_sensitive(false);
@@ -226,4 +233,5 @@ void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
         systemState = SystemState::AUTOMATIC;
     }
+    setSystemState(systemState);
 }

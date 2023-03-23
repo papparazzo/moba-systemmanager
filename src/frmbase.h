@@ -30,21 +30,21 @@
 #include <gtkmm.h>
 #include <atomic>
 
+enum class SystemState {
+    NO_CONNECT,
+    ERROR,
+    STANDBY,
+    EMERGENCY_STOP,
+    MANUEL,
+    AUTOMATIC
+};
+
 class FrmBase: public Gtk::Window {
 public:
     FrmBase(EndpointPtr mhp);
     virtual ~FrmBase();
 
 protected:
-    enum class SystemState {
-        NO_CONNECT,
-        ERROR,
-        STANDBY,
-        EMERGENCY_STOP,
-        MANUEL,
-        AUTOMATIC
-    };
-
     std::atomic<SystemState> systemState;
 
     EndpointPtr msgEndpoint;
@@ -79,6 +79,8 @@ protected:
 
     virtual void setSensitive(bool) {}
     virtual void initialSend() {}
+    virtual void setSystemState(SystemState systemState) {}
+    virtual void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {}
 
     void setHardwareState(const SystemHardwareStateChanged &data);
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
