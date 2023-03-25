@@ -47,8 +47,6 @@ m_Environment_Control{mhp}
     set_resizable(false);
     set_position(Gtk::WIN_POS_CENTER);
 
-    add(m_VBox);
-
     m_Notebook.set_border_width(10);
     m_VBox.pack_start(m_Notebook);
 
