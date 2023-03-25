@@ -74,16 +74,15 @@ protected:
     void initAboutDialog();
 
     // msg-response
+    void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
     void setSystemNotice(const GuiSystemNotice &data);
     void setErrorNotice(const ClientError &data);
+    void setHardwareState(const SystemHardwareStateChanged &data);
 
     virtual void setSensitive(bool) {}
     virtual void initialSend() {}
     virtual void setSystemState(SystemState systemState) {}
     virtual void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {}
-
-    void setHardwareState(const SystemHardwareStateChanged &data);
-    void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
 
     // Signal handlers:
     void on_about_dialog_response(int response_id);
