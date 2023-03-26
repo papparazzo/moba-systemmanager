@@ -32,30 +32,14 @@
 
 #include "moba/environmentmessages.h"
 
-FrmMain::FrmMain(EndpointPtr mhp): FrmBase{mhp},
-m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
-m_Environment_Control{mhp}
-{
-    sigc::slot<bool> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout), 1);
-    sigc::connection conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
-
-    sigc::slot<bool> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmMain::on_timeout_status), 1);
-    sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 25 ms
-
-    set_border_width(10);
+FrmMain::FrmMain(EndpointPtr mhp): FrmBase{mhp}, m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
+m_Environment_Control{mhp} {
+    
     set_size_request(675, 450);
     set_resizable(false);
-    set_position(Gtk::WIN_POS_CENTER);
-
-    m_Notebook.set_border_width(10);
-    m_VBox.pack_start(m_Notebook);
 
     initActiveApps();
-    m_Notebook.append_page(m_Server_Data, "Server Info");
-    m_Notebook.append_page(m_System_Control, "Systemsteuerung");
-    m_Notebook.append_page(m_Automatic_Control, "Automatic Control");
-    m_Notebook.append_page(m_Environment_Control, "Umgebung");
-    m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
+    finishForm();
 
     registry.registerHandler<ServerInfoRes>(std::bind(&ServerData::setServerInfoRes, &m_Server_Data, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
@@ -64,12 +48,19 @@ m_Environment_Control{mhp}
     registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
     registry.registerHandler<TimerGlobalTimerEvent>(std::bind(&AutomaticControl::setTimerGlobalTimerEvent, &m_Automatic_Control, std::placeholders::_1));
     registry.registerHandler<TimerSetGlobalTimer>(std::bind(&AutomaticControl::setTimerSetGlobalTimer, &m_Automatic_Control, std::placeholders::_1));
-
-    show_all_children();
 }
 
 void FrmMain::initActiveApps() {
+    m_VBox.pack_start(m_Notebook);
+
+    m_Notebook.set_border_width(10);
+
     m_Notebook.append_page(m_ScrolledWindow, "Active Apps");
+    m_Notebook.append_page(m_Server_Data, "Server Info");
+    m_Notebook.append_page(m_System_Control, "Systemsteuerung");
+    m_Notebook.append_page(m_Automatic_Control, "Automatic Control");
+    m_Notebook.append_page(m_Environment_Control, "Umgebung");
+    m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
 
     m_ScrolledWindow.add(m_ActiveApps);
     m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
@@ -99,81 +90,6 @@ void FrmMain::initialSend() {
     msgEndpoint->sendMsg(SystemGetHardwareState{});
     msgEndpoint->sendMsg(TimerGetGlobalTimer{});
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// <editor-fold defaultstate="collapsed" desc="call-back-methodes">
-bool FrmMain::on_timeout_status(int) {
-    static bool on = false;
-
-    on = !on;
-
-    switch(systemState) {
-        case SystemState::NO_CONNECT:
-            if(on) {
-                m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
-            } else {
-                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-            }
-            m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-            break;
-
-        case SystemState::ERROR:
-            m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
-            if(on) {
-                m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
-            } else {
-                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-            }
-            break;
-
-        case SystemState::STANDBY:
-            m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
-            if(on) {
-                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
-            } else {
-                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-            }
-            break;
-
-        case SystemState::EMERGENCY_STOP:
-            if(on) {
-                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
-                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
-            } else {
-                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-            }
-            break;
-
-        case SystemState::MANUEL:
-            m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
-            if(on) {
-                m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
-            } else {
-                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
-            }
-            break;
-
-        case SystemState::AUTOMATIC:
-            m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
-            m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
-            break;
-    }
-    return true;
-
-    /*
-                SW              HW
-    -           rot / blink     grau
-    ERROR       grün            rot / blink
-    STANDBY     grün            gelb / blink
-    EMERGENCY   gelb / blink    gelb / blink
-    MANUELL     grün / blink    grün
-    AUTOMATIC   grün            grün
-
-     */
-}
-
-// </editor-fold>
 
 ////////////////////////////////////////////////////////////////////////////////
 // <editor-fold defaultstate="collapsed" desc="msg-response">

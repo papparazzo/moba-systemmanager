@@ -60,13 +60,11 @@ protected:
     EnvironmentControl m_Environment_Control;
 
     void initActiveApps();
-
     void setSensitive(bool);
     void initialSend();
     void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
-
-    // Signal handlers:
-    bool on_timeout_status(int);
+    void registerAdditionalHandler();
+    void setUpForm();
 
     // msg-response
     void setServerInfoRes(const ServerInfoRes &data);
