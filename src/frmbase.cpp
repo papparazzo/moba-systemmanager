@@ -43,8 +43,18 @@ namespace {
 }
 
 FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndpoint{mhp} {
-    set_title(PACKAGE_NAME);
 
+    set_icon_name(PACKAGE_NAME);
+    set_title(PACKAGE_NAME);
+    set_border_width(10);
+    set_position(Gtk::WIN_POS_CENTER);
+
+    sigc::slot<bool> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout), 1);
+    sigc::connection conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
+
+    sigc::slot<bool> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout_status), 1);
+    sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 25 ms
+    
     // Add the message label to the InfoBar:
     auto infoBarContainer = dynamic_cast<Gtk::Container*>(m_InfoBar.get_content_area());
     if(infoBarContainer) {
@@ -76,18 +86,23 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     m_ButtonBox.pack_start(m_Button_Emergency, Gtk::PACK_EXPAND_WIDGET, 5);
     m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_emergency_clicked));
 
+    setSensitive(false);
     m_Button_Emergency.set_sensitive(false);
     initAboutDialog();
 
     registry.registerHandler<GuiSystemNotice>(std::bind(&FrmBase::setSystemNotice, this, std::placeholders::_1));
     registry.registerHandler<ClientError>(std::bind(&FrmBase::setErrorNotice, this, std::placeholders::_1));
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmBase::setHardwareState, this, std::placeholders::_1));
-    m_InfoBar.hide();
 }
 
 FrmBase::~FrmBase() {
 }
 
+void FrmBase::finishForm() {
+    show_all_children();
+    m_InfoBar.hide();
+}
+ 
 void FrmBase::initAboutDialog() {
     m_Dialog.set_transient_for(*this);
 
@@ -100,7 +115,7 @@ void FrmBase::initAboutDialog() {
     m_Dialog.set_website("<pappi-@gmx.de>");
     m_Dialog.set_website_label("pappi-@gmx.de");
 
-    m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/moba-systemmanager.svg"));
+    m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/" PACKAGE_NAME ".svg"));
 
     std::vector<Glib::ustring> list_authors;
     list_authors.push_back("Stefan Paproth");
@@ -153,6 +168,37 @@ void FrmBase::setSystemNotice(const GuiSystemNotice &data) {
     setNotice(mt, data.caption, data.text);
 }
 
+void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
+        systemState = SystemState::ERROR;
+        m_Button_Emergency.set_sensitive(false);
+        return;
+    }
+    m_Button_Emergency.set_sensitive(true);
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
+        systemState = SystemState::EMERGENCY_STOP;
+        m_Button_Emergency.set_label("Freigabe");
+        return;
+    }
+    m_Button_Emergency.set_label("Nothalt");
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
+        systemState = SystemState::STANDBY;
+        m_Button_Emergency.set_sensitive(false);
+        return;
+    }
+
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
+        systemState = SystemState::MANUEL;
+        return;
+    }
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
+        systemState = SystemState::AUTOMATIC;
+    }
+    setSystemState(systemState);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// <editor-fold defaultstate="collapsed" desc="call-back-methodes">
 void FrmBase::on_about_dialog_response(int) {
     m_Dialog.hide();
 }
@@ -191,6 +237,77 @@ bool FrmBase::on_timeout(int) {
     return true;
 }
 
+bool FrmBase::on_timeout_status(int) {
+    static bool on = false;
+
+    on = !on;
+
+    switch(systemState) {
+        case SystemState::NO_CONNECT:
+            if(on) {
+                m_Label_Connectivity_SW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+            } else {
+                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            }
+            m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            break;
+
+        case SystemState::ERROR:
+            m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            if(on) {
+                m_Label_Connectivity_HW.override_color(Gdk::RGBA("red"), Gtk::STATE_FLAG_NORMAL);
+            } else {
+                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            }
+            break;
+
+        case SystemState::STANDBY:
+            m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            if(on) {
+                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
+            } else {
+                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            }
+            break;
+
+        case SystemState::EMERGENCY_STOP:
+            if(on) {
+                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
+                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gold"), Gtk::STATE_FLAG_NORMAL);
+            } else {
+                m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            }
+            break;
+
+        case SystemState::MANUEL:
+            m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            if(on) {
+                m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            } else {
+                m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+            }
+            break;
+
+        case SystemState::AUTOMATIC:
+            m_Label_Connectivity_HW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
+            break;
+    }
+    return true;
+
+    /*
+                SW              HW
+    -           rot / blink     grau
+    ERROR       grün            rot / blink
+    STANDBY     grün            gelb / blink
+    EMERGENCY   gelb / blink    gelb / blink
+    MANUELL     grün / blink    grün
+    AUTOMATIC   grün            grün
+
+     */
+}
+
 void FrmBase::on_button_about_clicked() {
     m_Dialog.show();
     m_Dialog.present();
@@ -208,32 +325,4 @@ void FrmBase::on_infobar_response(int) {
     m_Label_InfoBarMessage.set_text("");
     m_InfoBar.hide();
 }
-
-void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
-        systemState = SystemState::ERROR;
-        m_Button_Emergency.set_sensitive(false);
-        return;
-    }
-    m_Button_Emergency.set_sensitive(true);
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
-        systemState = SystemState::EMERGENCY_STOP;
-        m_Button_Emergency.set_label("Freigabe");
-        return;
-    }
-    m_Button_Emergency.set_label("Nothalt");
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
-        systemState = SystemState::STANDBY;
-        m_Button_Emergency.set_sensitive(false);
-        return;
-    }
-
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
-        systemState = SystemState::MANUEL;
-        return;
-    }
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
-        systemState = SystemState::AUTOMATIC;
-    }
-    setSystemState(systemState);
-}
+// </editor-fold>

@@ -72,6 +72,7 @@ protected:
     std::string getDisplayMessage(std::string caption, std::string text);
 
     void initAboutDialog();
+    void finishForm();
 
     // msg-response
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
@@ -83,12 +84,13 @@ protected:
     virtual void initialSend() {}
     virtual void setSystemState(SystemState systemState) {}
     virtual void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {}
-
+    
     // Signal handlers:
     void on_about_dialog_response(int response_id);
     void on_button_about_clicked();
     void on_button_emergency_clicked();
     void on_infobar_response(int response);
     bool on_timeout(int timer_number);
+    bool on_timeout_status(int);
 };
 
