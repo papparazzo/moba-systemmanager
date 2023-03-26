@@ -47,10 +47,7 @@ int main(int argc, char *argv[]) {
     auto app = Gtk::Application::create(argc, argv, "org.moba.systemmanager");
 
     FrmMain frmMain{endpoint};
-    frmMain.set_title(appData.appName);
-    frmMain.set_border_width(10);
     frmMain.set_default_size(400, 200);
-    frmMain.set_icon_name("moba-systemmanager");
 
     return app->run(frmMain);
 }
