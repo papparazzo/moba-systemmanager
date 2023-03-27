@@ -21,7 +21,6 @@
 #include <iostream>
 
 #include <gtkmm/application.h>
-
 #include <moba-common/helper.h>
 
 #include "frmmain.h"
@@ -41,7 +40,6 @@ namespace {
 }
 
 int main(int argc, char *argv[]) {
-
     auto socket = std::make_shared<Socket>(appData.host, appData.port);
     auto endpoint = EndpointPtr{new Endpoint{socket, appData.appName, appData.version, {Message::SERVER, Message::SYSTEM, Message::GUI, Message::TIMER}}};
     auto app = Gtk::Application::create(argc, argv, "org.moba.systemmanager");

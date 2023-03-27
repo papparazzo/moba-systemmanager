@@ -64,7 +64,6 @@ protected:
     void initialSend();
     void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
     void registerAdditionalHandler();
-    void setUpForm();
 
     // msg-response
     void setServerInfoRes(const ServerInfoRes &data);
