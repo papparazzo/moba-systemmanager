@@ -170,28 +170,38 @@ void FrmBase::setSystemNotice(const GuiSystemNotice &data) {
 
 void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
         systemState = SystemState::ERROR;
         m_Button_Emergency.set_sensitive(false);
+        setSystemState(systemState);
         return;
     }
     m_Button_Emergency.set_sensitive(true);
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
         systemState = SystemState::EMERGENCY_STOP;
         m_Button_Emergency.set_label("Freigabe");
+        setSystemState(systemState);
         return;
     }
     m_Button_Emergency.set_label("Nothalt");
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
         systemState = SystemState::STANDBY;
         m_Button_Emergency.set_sensitive(false);
-        return;
     }
 
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> manuell");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> manuell");
         systemState = SystemState::MANUEL;
-        return;
     }
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> automatisch");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> automatisch");
         systemState = SystemState::AUTOMATIC;
     }
     setSystemState(systemState);
@@ -210,6 +220,8 @@ bool FrmBase::on_timeout(int) {
         if(!connected) {
             msgEndpoint->connect();
             systemState = SystemState::ERROR;
+            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
+            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
             initialSend();
             setSensitive(true);
 
@@ -221,10 +233,10 @@ bool FrmBase::on_timeout(int) {
     } catch(std::exception &e) {
         if(connected) {
             m_Button_Emergency.set_sensitive(false);
-
-            //m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
-
             systemState = SystemState::NO_CONNECT;
+            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
+            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
+
             m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
             std::stringstream ss;
             ss << "<b>msg-handler exception:</b>\n" << e.what();
