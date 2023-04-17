@@ -146,7 +146,11 @@ void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::s
 }
 
 void FrmBase::setErrorNotice(const ClientError &data) {
-    setNotice(Gtk::MESSAGE_ERROR, data.errorId, data.additionalMsg);
+    setNotice(
+        Gtk::MESSAGE_ERROR, 
+        errorIdEnumToString(data.errorId),    
+        data.additionalMsg
+    );
 }
 
 void FrmBase::setSystemNotice(const GuiSystemNotice &data) {

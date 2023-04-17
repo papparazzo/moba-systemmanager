@@ -74,7 +74,7 @@ protected:
     void initAboutDialog();
     void finishForm();
 
-    // msg-response
+    // message-response
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
     void setSystemNotice(const GuiSystemNotice &data);
     void setErrorNotice(const ClientError &data);
