@@ -29,7 +29,7 @@
 #include "moba/timermessages.h"
 #include "moba/day.h"
 
-class AutomaticControl: public Gtk::HBox {
+class AutomaticControl: public Gtk::Box {
 public:
     AutomaticControl(EndpointPtr msgEndpoint);
     AutomaticControl(const AutomaticControl&) = delete;
@@ -50,17 +50,17 @@ private:
     void on_button_time_control_set_clicked();
     void on_button_automatic_clicked();
 
-    Gtk::VBox    m_VBox_Clock;
+    Gtk::Box     m_VBox_Clock{Gtk::Orientation::VERTICAL}; 
     Gtk::Label   m_Label_Date;
 
     Clock        m_Clock;
 
-    Gtk::Box     m_VBox_Settings{Gtk::ORIENTATION_VERTICAL, 6};
+    Gtk::Box     m_VBox_Settings{Gtk::Orientation::VERTICAL, 6};
 
-    Gtk::Box     m_HBox_CurModelDay{Gtk::ORIENTATION_HORIZONTAL, 6};
-    Gtk::Box     m_HBox_Multiplicator{Gtk::ORIENTATION_HORIZONTAL, 6};
+    Gtk::Box     m_HBox_CurModelDay{Gtk::Orientation::HORIZONTAL, 6};
+    Gtk::Box     m_HBox_Multiplicator{Gtk::Orientation::HORIZONTAL, 6};
 
-    Gtk::HBox     m_HBox[5];
+    Gtk::Box     m_HBox[5];
 
     struct ModelColumns_CurModelDay: public Gtk::TreeModel::ColumnRecord {
         ModelColumns_CurModelDay() {
@@ -100,7 +100,7 @@ private:
     Gtk::Entry        m_Entry_Time[5];
     Gtk::Label        m_Label_Time[5];
 
-    Gtk::ButtonBox    m_ButtonBox_AutomaticControl;
+    Gtk::Box          m_ButtonBox_AutomaticControl;
     Gtk::Button       m_Button_AutomaticControl_Set{"Werte setzen"};
     Gtk::ToggleButton m_Button_AutomaticControl_Enable{"Automatik"};
 
