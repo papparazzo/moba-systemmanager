@@ -23,7 +23,7 @@
 #include <gtkmm.h>
 #include "moba/servermessages.h"
 
-class ServerData: public Gtk::HBox {
+class ServerData: public Gtk::Box {
 public:
     ServerData();
     ServerData(const ServerData&) = delete;
@@ -38,7 +38,7 @@ public:
 private:
     // server-data
     Gtk::Label lblName[2][11];
-    Gtk::VBox  m_VBox_ServerDataKey{Gtk::ORIENTATION_VERTICAL, 6};
-    Gtk::VBox  m_VBox_ServerDataValue{Gtk::ORIENTATION_VERTICAL, 6};
+    Gtk::Box  m_VBox_ServerDataKey{Gtk::Orientation::VERTICAL, 6};
+    Gtk::Box  m_VBox_ServerDataValue{Gtk::Orientation::VERTICAL, 6};
 };
 

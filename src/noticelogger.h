@@ -58,7 +58,7 @@ private:
     Gtk::TreeView                m_TreeView_Notices;
     Glib::RefPtr<Gtk::ListStore> m_refTreeModel_Notices;
 
-    Gtk::ButtonBox               m_ButtonBox_NoticeLogger;
+    Gtk::Box                     m_ButtonBox_NoticeLogger{Gtk::Orientation::HORIZONTAL, 6};
     Gtk::Button                  m_Button_NoticesClear{"Liste leeren"};
 };
 
