@@ -53,9 +53,6 @@ SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::ORIENTATION
     m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_ping_clicked));
 }
 
-SystemControl::~SystemControl() {
-}
-
 void SystemControl::on_button_reset_clicked() {
     msgEndpoint->sendMsg(SystemHardwareReset{});
 }

@@ -33,7 +33,7 @@ public:
     SystemControl(const SystemControl&) = delete;
     SystemControl& operator=(const SystemControl&) = delete;
 
-    virtual ~SystemControl();
+    virtual ~SystemControl() noexcept = default;
 
     void enable();
     void disable();
