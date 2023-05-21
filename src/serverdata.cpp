@@ -21,16 +21,16 @@
 #include "serverdata.h"
 
 ServerData::ServerData() {
-    set_border_width(2);
+   // set_border_width(2);
 
-    add(m_VBox_ServerDataKey);
-    add(m_VBox_ServerDataValue);
+    append(m_VBox_ServerDataKey);
+    append(m_VBox_ServerDataValue);
 
     for(int i = 0; i < 11; ++i) {
-        m_VBox_ServerDataKey.pack_start(lblName[0][i]);
-        m_VBox_ServerDataValue.pack_start(lblName[1][i]);
-        lblName[0][i].set_justify(Gtk::JUSTIFY_RIGHT);
-        lblName[0][i].set_justify(Gtk::JUSTIFY_LEFT);
+        m_VBox_ServerDataKey.append(lblName[0][i]);
+        m_VBox_ServerDataValue.append(lblName[1][i]);
+        lblName[0][i].set_justify(Gtk::Justification::RIGHT);
+        lblName[0][i].set_justify(Gtk::Justification::LEFT);
     }
 
     lblName[0][0].set_markup("<b>AppName:</b>");

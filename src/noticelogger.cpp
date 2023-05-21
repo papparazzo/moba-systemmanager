@@ -24,14 +24,15 @@
 #include <sstream>
 #include <iomanip>
 
-NoticeLogger::NoticeLogger(): Gtk::Box{Gtk::ORIENTATION_VERTICAL, 2} {
+NoticeLogger::NoticeLogger(): Gtk::Box{Gtk::Orientation::VERTICAL} {
 
-    pack_start(m_ScrolledWindow_NoticeLogger);
-    pack_end(m_ButtonBox_NoticeLogger, Gtk::PACK_SHRINK);
+    append(m_ScrolledWindow_NoticeLogger);
+    append(m_ButtonBox_NoticeLogger);
 
     // TreeView
-    m_ScrolledWindow_NoticeLogger.add(m_TreeView_Notices);
-    m_ScrolledWindow_NoticeLogger.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_ScrolledWindow_NoticeLogger.set_child(m_TreeView_Notices);
+    m_ScrolledWindow_NoticeLogger.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
+    m_ScrolledWindow_NoticeLogger.set_expand();
 
     m_refTreeModel_Notices = Gtk::ListStore::create(m_Columns_Notices);
     m_TreeView_Notices.set_model(m_refTreeModel_Notices);
@@ -42,8 +43,9 @@ NoticeLogger::NoticeLogger(): Gtk::Box{Gtk::ORIENTATION_VERTICAL, 2} {
     m_TreeView_Notices.append_column("Text",      m_Columns_Notices.m_col_text);
 
     // HBox
-    m_ButtonBox_NoticeLogger.pack_start(m_Button_NoticesClear, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_ButtonBox_NoticeLogger.set_layout(Gtk::BUTTONBOX_END);
+    m_ButtonBox_NoticeLogger.append(m_Button_NoticesClear);
+    m_ButtonBox_NoticeLogger.set_halign(Gtk::Align::END);
+    //m_ButtonBox_NoticeLogger.set_layout(Gtk::BUTTONBOX_END);
     m_ButtonBox_NoticeLogger.set_sensitive(false);
 
     m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &NoticeLogger::on_button_notices_clear_clicked));
@@ -66,11 +68,11 @@ void NoticeLogger::setNotice(Gtk::MessageType noticeType, std::string caption, s
     row[m_Columns_Notices.m_col_text     ] = text;
 
     switch(noticeType) {
-        case Gtk::MESSAGE_ERROR:
+        case Gtk::MessageType::ERROR:
             row[m_Columns_Notices.m_col_type] = "ERROR";
             break;
 
-        case Gtk::MESSAGE_WARNING:
+        case Gtk::MessageType::WARNING:
             row[m_Columns_Notices.m_col_type] = "WARNING";
             break;
 

@@ -22,20 +22,20 @@
 
 EnvironmentControl::EnvironmentControl(EndpointPtr msgEndpoint): m_adjustment(Gtk::Adjustment::create(0.0, 0.0, 4095.0)), msgEndpoint(msgEndpoint) {
 
-    add(m_VBox_Left);
-    add(m_VBox_Right);
+    append(m_VBox_Left);
+    append(m_VBox_Right);
 
-    m_VBox_Left.pack_start(m_Label_Spacer, Gtk::PACK_SHRINK, 5);
-    m_VBox_Left.pack_start(m_HBox_Curtain, Gtk::PACK_SHRINK);
-    m_VBox_Left.pack_start(m_HBox_MainLight, Gtk::PACK_SHRINK);
+    m_VBox_Left.append(m_Label_Spacer);
+    m_VBox_Left.append(m_HBox_Curtain);
+    m_VBox_Left.append(m_HBox_MainLight);
 
-    m_HBox_Curtain.pack_start(m_Label_Curtain, Gtk::PACK_SHRINK, 5);
-    m_HBox_Curtain.pack_end(m_Button_Curtain_Up, Gtk::PACK_SHRINK, 5);
-    m_HBox_Curtain.pack_end(m_Button_Curtain_Down, Gtk::PACK_SHRINK, 5);
+    m_HBox_Curtain.append(m_Label_Curtain);
+    m_HBox_Curtain.append(m_Button_Curtain_Up);
+    m_HBox_Curtain.append(m_Button_Curtain_Down);
 
-    m_HBox_MainLight.pack_start(m_Label_MainLight, Gtk::PACK_SHRINK, 5);
-    m_HBox_MainLight.pack_end(m_Button_MainLight_On, Gtk::PACK_SHRINK, 5);
-    m_HBox_MainLight.pack_end(m_Button_MainLight_Off, Gtk::PACK_SHRINK, 5);
+    m_HBox_MainLight.append(m_Label_MainLight);
+    m_HBox_MainLight.append(m_Button_MainLight_On);
+    m_HBox_MainLight.append(m_Button_MainLight_Off);
 
 
     m_Button_Curtain_Up.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_curtain_up_clicked));
