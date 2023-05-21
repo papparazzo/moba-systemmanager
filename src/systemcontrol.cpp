@@ -25,14 +25,14 @@
 
 #include "moba/clientmessages.h"
 
-SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::ORIENTATION_VERTICAL, 6}, msgEndpoint{msgEndpoint} {
+SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::Orientation::VERTICAL, 6}, msgEndpoint{msgEndpoint} {
 
-    pack_start(m_Label_HardwareState, Gtk::PACK_SHRINK, 50);
-    pack_start(m_Label_PingResult[0], Gtk::PACK_SHRINK);
-    pack_start(m_Label_PingResult[1], Gtk::PACK_SHRINK);
-    pack_start(m_Label_PingResult[2], Gtk::PACK_SHRINK);
-    pack_start(m_Label_PingResult[3], Gtk::PACK_SHRINK);
-    pack_end(m_ButtonBox_System, Gtk::PACK_SHRINK);
+    append(m_Label_HardwareState);
+    append(m_Label_PingResult[0]);
+    append(m_Label_PingResult[1]);
+    append(m_Label_PingResult[2]);
+    append(m_Label_PingResult[3]);
+    append(m_ButtonBox_System);
 
     m_Label_HardwareState.set_markup("<b>Hardwarestatus:</b> [unbekannt]");
     m_Label_PingResult[0].set_markup("<b>Ping 1:</b> [unbekannt]");
@@ -40,11 +40,12 @@ SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::ORIENTATION
     m_Label_PingResult[2].set_markup("<b>Ping 3:</b> [unbekannt]");
     m_Label_PingResult[3].set_markup("<b>Ping 4:</b> [unbekannt]");
 
-    m_ButtonBox_System.pack_start(m_Button_SystemShutdown);
-    m_ButtonBox_System.pack_start(m_Button_SystemReset);
-    m_ButtonBox_System.pack_start(m_Button_SystemStandby);
-    m_ButtonBox_System.pack_start(m_Button_SystemPing);
-    m_ButtonBox_System.set_layout(Gtk::BUTTONBOX_CENTER);
+    m_ButtonBox_System.append(m_Button_SystemShutdown);
+    m_ButtonBox_System.append(m_Button_SystemReset);
+    m_ButtonBox_System.append(m_Button_SystemStandby);
+    m_ButtonBox_System.append(m_Button_SystemPing);
+    m_ButtonBox_System.set_valign(Gtk::Align::END);
+    m_ButtonBox_System.set_halign(Gtk::Align::CENTER);
     m_ButtonBox_System.set_sensitive(false);
 
     m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_shutdown_clicked));
