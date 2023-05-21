@@ -51,7 +51,7 @@ private:
     void on_button_standby_clicked();
     void on_button_ping_clicked();
 
-    Gtk::ButtonBox    m_ButtonBox_System;
+    Gtk::Box          m_ButtonBox_System{Gtk::Orientation::HORIZONTAL, 6};
     Gtk::ToggleButton m_Button_SystemStandby{"Standby"};
     Gtk::Button       m_Button_SystemShutdown{"Shutdown"};
     Gtk::Button       m_Button_SystemReset{"Reset"};
