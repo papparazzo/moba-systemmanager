@@ -14,7 +14,7 @@ AM_INIT_AUTOMAKE([-Wall foreign])
 # Checks for programs.
 AC_PROG_CXX
 
-PKG_CHECK_MODULES([GTKMM], [gtkmm-3.0])
+PKG_CHECK_MODULES([GTKMM], [gtkmm-4.0])
 
 AX_CXX_COMPILE_STDCXX_17()
 

@@ -42,10 +42,7 @@ namespace {
 int main(int argc, char *argv[]) {
     auto socket = std::make_shared<Socket>(appData.host, appData.port);
     auto endpoint = EndpointPtr{new Endpoint{socket, appData.appName, appData.version, {Message::SERVER, Message::SYSTEM, Message::GUI, Message::TIMER}}};
-    auto app = Gtk::Application::create(argc, argv, "org.moba.systemmanager");
+    auto app = Gtk::Application::create("org.moba.systemmanager");
 
-    FrmMain frmMain{endpoint};
-    frmMain.set_default_size(400, 200);
-
-    return app->run(frmMain);
+    return app->make_window_and_run<FrmMain>(argc, argv, endpoint);
 }
