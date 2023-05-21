@@ -26,7 +26,7 @@
 #include "moba/systemmessages.h"
 #include "moba/environmentmessages.h"
 
-class EnvironmentControl: public Gtk::HBox {
+class EnvironmentControl: public Gtk::Box {
 public:
     EnvironmentControl(EndpointPtr msgEndpoint);
     virtual ~EnvironmentControl();
@@ -47,12 +47,12 @@ private:
 
     Gtk::Label     m_Label_Spacer;
 
-    Gtk::VBox      m_VBox_Left;
-    Gtk::VBox      m_VBox_Right;
+    Gtk::Box      m_VBox_Left{Gtk::Orientation::VERTICAL};
+    Gtk::Box      m_VBox_Right{Gtk::Orientation::VERTICAL};
 
-    Gtk::Box       m_HBox_Curtain{Gtk::ORIENTATION_HORIZONTAL, 6};
-    Gtk::Box       m_HBox_MainLight{Gtk::ORIENTATION_HORIZONTAL, 6};
-    //Gtk::Box     m_HBox_AmbientLight{Gtk::ORIENTATION_HORIZONTAL, 6};
+    Gtk::Box       m_HBox_Curtain{Gtk::Orientation::HORIZONTAL, 6};
+    Gtk::Box       m_HBox_MainLight{Gtk::Orientation::HORIZONTAL, 6};
+    //Gtk::Box     m_HBox_AmbientLight{Gtk::Orientation::HORIZONTAL, 6};
 
     Gtk::Label                    m_Label_Curtain{"Rolladen:"};
     Gtk::Button                   m_Button_Curtain_Up{"hoch"};
