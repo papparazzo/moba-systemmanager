@@ -51,9 +51,7 @@ m_Environment_Control{mhp} {
 }
 
 void FrmMain::initActiveApps() {
-    m_VBox.pack_start(m_Notebook);
-
-    m_Notebook.set_border_width(10);
+    m_VBox.append(m_Notebook);
 
     m_Notebook.append_page(m_ScrolledWindow, "Active Apps");
     m_Notebook.append_page(m_Server_Data, "Server Info");
@@ -62,8 +60,8 @@ void FrmMain::initActiveApps() {
     m_Notebook.append_page(m_Environment_Control, "Umgebung");
     m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
 
-    m_ScrolledWindow.add(m_ActiveApps);
-    m_ScrolledWindow.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
+    m_ScrolledWindow.set_child(m_ActiveApps);
+    m_ScrolledWindow.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
 }
 
 void FrmMain::setSensitive(bool sensitive) {
