@@ -58,7 +58,8 @@ Makefile
 # Executables
 *.out
 *.app
-
+/.libs/libMoBaCommon.so.0.0.0
+/.libs/libMoBaCommon.so.0
 /libtool
 /config.status
 /configure.scan
