@@ -53,7 +53,7 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     row[m_Columns_CurModelDay.m_col_id] = Day::SUNDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Sonntag";
 
-    m_Combo_CurModelDay.pack_start(m_Columns_CurModelDay.m_col_name);
+   // m_Combo_CurModelDay.append(m_Columns_CurModelDay.m_col_name);
 
     m_refListModel_Multiplicator = Gtk::ListStore::create(m_Columns_Multiplicator);
     m_Combo_Multiplicator.set_model(m_refListModel_Multiplicator);
@@ -68,24 +68,24 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
         row1[m_Columns_Multiplicator.m_col_label] = ss.str();
     }
 
-    m_Combo_Multiplicator.pack_start(m_Columns_Multiplicator.m_col_label);
+   // m_Combo_Multiplicator.append(m_Columns_Multiplicator.m_col_label);
 
     set_homogeneous(true);
-    add(m_VBox_Settings);
-    add(m_VBox_Clock);
+   // add(m_VBox_Settings);
+  //  add(m_VBox_Clock);
 
-    m_VBox_Clock.pack_start(m_Clock);
-    m_VBox_Clock.pack_start(m_Label_Date, Gtk::PACK_SHRINK, 10);
+    m_VBox_Clock.append(m_Clock);
+    m_VBox_Clock.append(m_Label_Date);
 
-    m_VBox_Settings.pack_start(m_Label_Spacer, Gtk::PACK_SHRINK, 5);
-    m_VBox_Settings.pack_start(m_HBox_Multiplicator, Gtk::PACK_SHRINK);
-    m_VBox_Settings.pack_start(m_HBox_CurModelDay, Gtk::PACK_SHRINK);
+    m_VBox_Settings.append(m_Label_Spacer);
+    m_VBox_Settings.append(m_HBox_Multiplicator);
+    m_VBox_Settings.append(m_HBox_CurModelDay);
 
     for(int i = 0; i < 5; ++i) {
         m_HBox[i].set_spacing(6);
-        m_VBox_Settings.pack_start(m_HBox[i], Gtk::PACK_SHRINK);
-        m_HBox[i].pack_start(m_Label_Time[i], Gtk::PACK_SHRINK, 5);
-        m_HBox[i].pack_end(m_Entry_Time[i], Gtk::PACK_SHRINK, 5);
+        m_VBox_Settings.append(m_HBox[i]);
+        m_HBox[i].append(m_Label_Time[i]);
+        m_HBox[i].append(m_Entry_Time[i]);
         m_Entry_Time[i].set_width_chars(5);
     }
 
@@ -95,17 +95,17 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     m_Label_Time[3].set_text("Sonnenuntergang (hh:mm):");
     m_Label_Time[4].set_text("Nacht (hh:mm):");
 
-    m_VBox_Settings.pack_end(m_ButtonBox_AutomaticControl, Gtk::PACK_SHRINK, 15);
+    m_VBox_Settings.append(m_ButtonBox_AutomaticControl);
 
-    m_ButtonBox_AutomaticControl.pack_start(m_Button_AutomaticControl_Enable);
-    m_ButtonBox_AutomaticControl.pack_start(m_Button_AutomaticControl_Set, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_ButtonBox_AutomaticControl.set_layout(Gtk::BUTTONBOX_END);
+    m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Enable);
+    m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Set);
+   // m_ButtonBox_AutomaticControl.set_layout(Gtk::BUTTONBOX_END);
 
-    m_HBox_CurModelDay.pack_start(m_Label_CurModelDay, Gtk::PACK_SHRINK, 5);
-    m_HBox_CurModelDay.pack_end(m_Combo_CurModelDay, Gtk::PACK_SHRINK, 5);
+    m_HBox_CurModelDay.append(m_Label_CurModelDay);
+    m_HBox_CurModelDay.append(m_Combo_CurModelDay);
 
-    m_HBox_Multiplicator.pack_start(m_Label_Multiplicator, Gtk::PACK_SHRINK, 5);
-    m_HBox_Multiplicator.pack_end(m_Combo_Multiplicator, Gtk::PACK_SHRINK, 5);
+    m_HBox_Multiplicator.append(m_Label_Multiplicator);
+    m_HBox_Multiplicator.append(m_Combo_Multiplicator);
 
     m_ButtonBox_AutomaticControl.set_sensitive(false);
 
@@ -302,14 +302,14 @@ void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     m_Entry_Time[4].set_text(nightStartTime.getTimeAsString());
 
     auto children = m_refListModel_Multiplicator->children();
-
+/*
     for(auto iter : children) {
         if(data.multiplicator == (*iter)[m_Columns_Multiplicator.m_col_factor]) {
             m_Combo_Multiplicator.set_active(iter);
             break;
         }
     }
-
+*/
     m_Clock.setMultiplier(data.multiplicator);
     m_Clock.setTime(data.curModelTime.getHours(), data.curModelTime.getMinutes(), true);
     setClock(data.curModelDay, data.curModelTime);
