@@ -247,12 +247,14 @@ bool Clock::on_timeout() {
 }
 
 void Clock::invalidateRect() {
+ /*
     auto win = get_window();
     if(!win) {
         return;
     }
     Gdk::Rectangle r{0, 0, get_allocation().get_width(), get_allocation().get_height()};
     win->invalidate_rect(r, false);
+ */
 }
 
 void Clock::setNightLight(bool activate) {
