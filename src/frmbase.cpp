@@ -46,9 +46,9 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
 
     set_icon_name(PACKAGE_NAME);
     set_title(PACKAGE_NAME);
-    set_border_width(10);
-    set_position(Gtk::WIN_POS_CENTER);
-
+    //set_border_width(10);
+    //set_position(Gtk::WIN_POS_CENTER);
+/*
     sigc::slot<bool> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout), 1);
     sigc::connection conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
 
@@ -60,30 +60,30 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     if(infoBarContainer) {
         infoBarContainer->add(m_Label_InfoBarMessage);
     }
-
-    add(m_VBox);
+*/
+    set_child(m_VBox);
     
-    m_VBox.pack_start(m_InfoBar, Gtk::PACK_SHRINK);
-    m_VBox.pack_end(m_HBox, Gtk::PACK_SHRINK);
-    m_HBox.pack_end(m_ButtonBox, Gtk::PACK_SHRINK);
+    m_VBox.append(m_InfoBar);
+    m_VBox.append(m_HBox);
+    m_HBox.append(m_ButtonBox);
 
-    m_HBox.pack_start(m_Label_Connectivity_SW, Gtk::PACK_SHRINK);
-    m_Label_Connectivity_SW.set_justify(Gtk::JUSTIFY_LEFT);
-    m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+    m_HBox.append(m_Label_Connectivity_SW);
+  //  m_Label_Connectivity_SW.set_justify(Gtk::JUSTIFY_LEFT);
+   // m_Label_Connectivity_SW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
 
-    m_HBox.pack_start(m_Label_Connectivity_HW, Gtk::PACK_SHRINK);
-    m_Label_Connectivity_HW.set_justify(Gtk::JUSTIFY_LEFT);
-    m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
+    m_HBox.append(m_Label_Connectivity_HW);
+    //m_Label_Connectivity_HW.set_justify(Gtk::JUSTIFY_LEFT);
+    //m_Label_Connectivity_HW.override_color(Gdk::RGBA("gray"), Gtk::STATE_FLAG_NORMAL);
 
     m_InfoBar.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_infobar_response));
     m_InfoBar.add_button("_OK", 0);
 
     // about-dialog
-    m_ButtonBox.pack_start(m_Button_About, Gtk::PACK_EXPAND_WIDGET, 5);
-    m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
+    m_ButtonBox.append(m_Button_About);
+   // m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
     m_Button_About.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_about_clicked));
 
-    m_ButtonBox.pack_start(m_Button_Emergency, Gtk::PACK_EXPAND_WIDGET, 5);
+    m_ButtonBox.append(m_Button_Emergency);
     m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_emergency_clicked));
 
     setSensitive(false);
@@ -99,7 +99,7 @@ FrmBase::~FrmBase() {
 }
 
 void FrmBase::finishForm() {
-    show_all_children();
+   // show_all_children();
     m_InfoBar.hide();
 }
  
@@ -115,13 +115,13 @@ void FrmBase::initAboutDialog() {
     m_Dialog.set_website("<pappi-@gmx.de>");
     m_Dialog.set_website_label("pappi-@gmx.de");
 
-    m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/" PACKAGE_NAME ".svg"));
+   // m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/" PACKAGE_NAME ".svg"));
 
     std::vector<Glib::ustring> list_authors;
     list_authors.push_back("Stefan Paproth");
     m_Dialog.set_authors(list_authors);
 
-    m_Dialog.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_about_dialog_response));
+   // m_Dialog.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_about_dialog_response));
 
     m_Button_About.grab_focus();
 }
@@ -146,14 +146,17 @@ void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::s
 }
 
 void FrmBase::setErrorNotice(const ClientError &data) {
+    /*
     setNotice(
         Gtk::MESSAGE_ERROR, 
         errorIdEnumToString(data.errorId),    
         data.additionalMsg
     );
+    */
 }
 
 void FrmBase::setSystemNotice(const GuiSystemNotice &data) {
+    /*
     Gtk::MessageType mt;
     switch(data.noticeType) {
         case GuiSystemNotice::NoticeType::ERROR:
@@ -170,6 +173,7 @@ void FrmBase::setSystemNotice(const GuiSystemNotice &data) {
             break;
     }
     setNotice(mt, data.caption, data.text);
+    */
 }
 
 void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
@@ -241,7 +245,7 @@ bool FrmBase::on_timeout(int) {
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
 
-            m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
+            //m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
             std::stringstream ss;
             ss << "<b>msg-handler exception:</b>\n" << e.what();
             m_Label_InfoBarMessage.set_markup(ss.str());
@@ -257,7 +261,7 @@ bool FrmBase::on_timeout_status(int) {
     static bool on = false;
 
     on = !on;
-
+/*
     switch(systemState) {
         case SystemState::NO_CONNECT:
             if(on) {
@@ -310,6 +314,7 @@ bool FrmBase::on_timeout_status(int) {
             m_Label_Connectivity_SW.override_color(Gdk::RGBA("green"), Gtk::STATE_FLAG_NORMAL);
             break;
     }
+    */
     return true;
 
     /*
