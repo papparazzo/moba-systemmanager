@@ -60,13 +60,13 @@ protected:
 
     Glib::RefPtr<Gtk::ListStore> m_refTreeModel_ActiveApps;
 
-    Gtk::Menu m_Menu_Popup;
+    //Gtk::Menu m_Menu_Popup;
 
     EndpointPtr msgEndpoint;
 
     void on_menu_popup_reset();
     void on_menu_popup_selftest();
-    bool on_button_press_event(GdkEventButton* button_event) override;
+   // bool on_button_press_event(GdkEventButton* button_event) override;
     void on_menu_file_popup_generic();
 
 };

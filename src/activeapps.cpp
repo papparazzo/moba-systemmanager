@@ -31,7 +31,7 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     append_column("IP-Adresse", m_Columns_ActiveApps.m_col_ipAddr);
     append_column("Port",       m_Columns_ActiveApps.m_col_port);
     append_column("Start-Time", m_Columns_ActiveApps.m_col_startTime);
-
+/*
     auto item = Gtk::manage(new Gtk::MenuItem("_Selftest", true));
 
     item->signal_activate().connect(sigc::mem_fun(*this, &ActiveApps::on_menu_popup_selftest));
@@ -39,10 +39,12 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
 
     item = Gtk::manage(new Gtk::MenuItem("_Reset", true));
     item->signal_activate().connect(sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
+  
     m_Menu_Popup.append(*item);
 
     m_Menu_Popup.accelerate(*this);
     m_Menu_Popup.show_all();
+  */
 }
 
 ActiveApps::~ActiveApps() {
@@ -77,7 +79,7 @@ void ActiveApps::addActiveApp(
     row[m_Columns_ActiveApps.m_col_port     ] = port;
     row[m_Columns_ActiveApps.m_col_startTime] = startTime;
 }
-
+/*
 bool ActiveApps::on_button_press_event(GdkEventButton *button_event) {
     bool return_value = Gtk::TreeView::on_button_press_event(button_event);
 
@@ -86,7 +88,7 @@ bool ActiveApps::on_button_press_event(GdkEventButton *button_event) {
     }
 
     return return_value;
-}
+}*/
 
 void ActiveApps::on_menu_popup_reset() {
     auto refSelection = get_selection();
