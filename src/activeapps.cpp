@@ -79,8 +79,9 @@ void ActiveApps::addActiveApp(
     row[m_Columns_ActiveApps.m_col_port     ] = port;
     row[m_Columns_ActiveApps.m_col_startTime] = startTime;
 }
-/*
+
 bool ActiveApps::on_button_press_event(GdkEventButton *button_event) {
+  /*
     bool return_value = Gtk::TreeView::on_button_press_event(button_event);
 
     if((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3)) {
@@ -88,7 +89,8 @@ bool ActiveApps::on_button_press_event(GdkEventButton *button_event) {
     }
 
     return return_value;
-}*/
+  */
+}
 
 void ActiveApps::on_menu_popup_reset() {
     auto refSelection = get_selection();

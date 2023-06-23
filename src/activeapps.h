@@ -66,7 +66,7 @@ protected:
 
     void on_menu_popup_reset();
     void on_menu_popup_selftest();
-   // bool on_button_press_event(GdkEventButton* button_event) override;
+    bool on_button_press_event(GdkEventButton* button_event) override;
     void on_menu_file_popup_generic();
 
 };
