@@ -31,20 +31,6 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     append_column("IP-Adresse", m_Columns_ActiveApps.m_col_ipAddr);
     append_column("Port",       m_Columns_ActiveApps.m_col_port);
     append_column("Start-Time", m_Columns_ActiveApps.m_col_startTime);
-/*
-    auto item = Gtk::manage(new Gtk::MenuItem("_Selftest", true));
-
-    item->signal_activate().connect(sigc::mem_fun(*this, &ActiveApps::on_menu_popup_selftest));
-    m_Menu_Popup.append(*item);
-
-    item = Gtk::manage(new Gtk::MenuItem("_Reset", true));
-    item->signal_activate().connect(sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
-  
-    m_Menu_Popup.append(*item);
-
-    m_Menu_Popup.accelerate(*this);
-    m_Menu_Popup.show_all();
-  */
 
     auto refGesture = Gtk::GestureClick::create();
     refGesture->set_button(GDK_BUTTON_SECONDARY);
@@ -109,16 +95,6 @@ void ActiveApps::on_popup_button_pressed(int n_press, double x, double y) {
     const Gdk::Rectangle rect(x, y, 1, 1);
     m_Menu_Popup.set_pointing_to(rect);
     m_Menu_Popup.popup();
-  
-  /*
-    bool return_value = Gtk::TreeView::on_button_press_event(button_event);
-
-    if((button_event->type == GDK_BUTTON_PRESS) && (button_event->button == 3)) {
-        m_Menu_Popup.popup(button_event->button, button_event->time);
-    }
-
-    return return_value;
-  */
 }
 
 void ActiveApps::on_menu_popup_reset() {
