@@ -68,12 +68,12 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     m_HBox.append(m_ButtonBox);
 
     m_HBox.append(m_Label_Connectivity_SW);
-  //  m_Label_Connectivity_SW.set_justify(Gtk::JUSTIFY_LEFT);
-   // m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+    m_Label_Connectivity_SW.set_justify(Gtk::Justification::LEFT);
+    m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
 
     m_HBox.append(m_Label_Connectivity_HW);
-    //m_Label_Connectivity_HW.set_justify(Gtk::JUSTIFY_LEFT);
-    //m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+    m_Label_Connectivity_HW.set_justify(Gtk::Justification::LEFT);
+    m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
 
     m_InfoBar.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_infobar_response));
     m_InfoBar.add_button("_OK", 0);
