@@ -45,6 +45,29 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     m_Menu_Popup.accelerate(*this);
     m_Menu_Popup.show_all();
   */
+
+    auto refGesture = Gtk::GestureClick::create();
+    refGesture->set_button(GDK_BUTTON_SECONDARY);
+    refGesture->signal_pressed().connect(sigc::mem_fun(*this, &ActiveApps::on_popup_button_pressed));
+    add_controller(refGesture);
+
+
+    // Fill popup menu:
+    auto gmenu = Gio::Menu::create();
+    gmenu->append("_Selftest", "popup.selftest");
+    gmenu->append("_Reset", "popup.reset");
+
+    m_Menu_Popup.set_parent(*this);
+    m_Menu_Popup.set_menu_model(gmenu);
+    m_Menu_Popup.set_has_arrow(false);
+
+    // Create actions:
+    auto refActionGroup = Gio::SimpleActionGroup::create();
+
+    refActionGroup->add_action("selftest", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_selftest));
+    refActionGroup->add_action("reset", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
+
+    insert_action_group("popup", refActionGroup);
 }
 
 ActiveApps::~ActiveApps() {
@@ -80,7 +103,13 @@ void ActiveApps::addActiveApp(
     row[m_Columns_ActiveApps.m_col_startTime] = startTime;
 }
 
-bool ActiveApps::on_button_press_event(GdkEventButton *button_event) {
+void ActiveApps::on_popup_button_pressed(int n_press, double x, double y) {
+    std::cout << n_press << std::endl;
+    
+    const Gdk::Rectangle rect(x, y, 1, 1);
+    m_Menu_Popup.set_pointing_to(rect);
+    m_Menu_Popup.popup();
+  
   /*
     bool return_value = Gtk::TreeView::on_button_press_event(button_event);
 
@@ -97,7 +126,7 @@ void ActiveApps::on_menu_popup_reset() {
     if(!refSelection) {
         return;
     }
-    Gtk::TreeModel::iterator iter = refSelection->get_selected();
+    auto iter = refSelection->get_selected();
     if(!iter) {
         return;
     }
@@ -110,7 +139,7 @@ void ActiveApps::on_menu_popup_selftest() {
     if(!refSelection) {
         return;
     }
-    Gtk::TreeModel::iterator iter = refSelection->get_selected();
+    auto iter = refSelection->get_selected();
     if(!iter) {
         return;
     }
