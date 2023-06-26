@@ -95,9 +95,6 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmBase::setHardwareState, this, std::placeholders::_1));
 }
 
-FrmBase::~FrmBase() {
-}
-
 void FrmBase::finishForm() {
    // show_all_children();
     m_InfoBar.hide();
