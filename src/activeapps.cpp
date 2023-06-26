@@ -78,7 +78,8 @@ void ActiveApps::addActiveApp(
     int id, const std::string &name, const std::string &version,
     const std::string &addr, int port, const std::string startTime
 ) {
-    auto row = *(m_refTreeModel_ActiveApps->append());
+    Gtk::TreeModel::Row row;
+    row = *(m_refTreeModel_ActiveApps->append());
     row[m_Columns_ActiveApps.m_col_id       ] = id;
     row[m_Columns_ActiveApps.m_col_name     ] = name;
     row[m_Columns_ActiveApps.m_col_version  ] = version;
