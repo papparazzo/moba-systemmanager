@@ -37,7 +37,6 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     refGesture->signal_pressed().connect(sigc::mem_fun(*this, &ActiveApps::on_popup_button_pressed));
     add_controller(refGesture);
 
-
     // Fill popup menu:
     auto gmenu = Gio::Menu::create();
     gmenu->append("_Selftest", "popup.selftest");
@@ -79,8 +78,7 @@ void ActiveApps::addActiveApp(
     int id, const std::string &name, const std::string &version,
     const std::string &addr, int port, const std::string startTime
 ) {
-    Gtk::TreeModel::Row row;
-    row = *(m_refTreeModel_ActiveApps->append());
+    auto row = *(m_refTreeModel_ActiveApps->append());
     row[m_Columns_ActiveApps.m_col_id       ] = id;
     row[m_Columns_ActiveApps.m_col_name     ] = name;
     row[m_Columns_ActiveApps.m_col_version  ] = version;

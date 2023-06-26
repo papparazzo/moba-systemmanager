@@ -17,13 +17,14 @@
  *  along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.
  *
  */
+
 #pragma once
 
 #include <gtkmm.h>
 
 #include "moba/endpoint.h"
 
-class ActiveApps : public Gtk::TreeView {
+class ActiveApps: public Gtk::TreeView {
 public:
     ActiveApps(EndpointPtr msgEndpoint);
     virtual ~ActiveApps();
@@ -67,5 +68,4 @@ protected:
     void on_menu_popup_reset();
     void on_menu_popup_selftest();
     void on_popup_button_pressed(int n_press, double x, double y);
-    void on_menu_file_popup_generic();
 };
