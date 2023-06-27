@@ -65,7 +65,9 @@ protected:
     Gtk::Label       m_Label_Connectivity_HW{" \xe2\x96\x84"};
     Gtk::Label       m_Label_Connectivity_SW{" \xe2\x96\x84"};
 
-    Gtk::Box         m_ButtonBox;
+    Gtk::Box         m_HBox_Expander{Gtk::Orientation::HORIZONTAL, 6};
+
+    Gtk::Box         m_HButtonBox{Gtk::Orientation::HORIZONTAL, 6};
     Gtk::Box         m_VBox{Gtk::Orientation::VERTICAL, 6};
     Gtk::Box         m_HBox{Gtk::Orientation::HORIZONTAL, 6};
 

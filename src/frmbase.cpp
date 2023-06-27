@@ -74,17 +74,20 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     m_Label_Connectivity_HW.set_justify(Gtk::Justification::LEFT);
     m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
 
-    m_HBox.append(m_ButtonBox);
+    m_HBox.append(m_HButtonBox);
 
     m_InfoBar.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_infobar_response));
     m_InfoBar.add_button("_OK", 0);
 
+    m_HBox_Expander.set_hexpand();
+    m_HButtonBox.append(m_HBox_Expander);
+
     // about-dialog
-    m_ButtonBox.append(m_Button_About);
-   // m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
+    m_HButtonBox.append(m_Button_About);
+    // m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
     m_Button_About.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_about_clicked));
 
-    m_ButtonBox.append(m_Button_Emergency);
+    m_HButtonBox.append(m_Button_Emergency);
     m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_emergency_clicked));
 
     setSensitive(false);
