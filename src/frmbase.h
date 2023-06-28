@@ -69,7 +69,7 @@ protected:
 
     Gtk::Box         m_HButtonBox{Gtk::Orientation::HORIZONTAL, 6};
     Gtk::Box         m_VBox{Gtk::Orientation::VERTICAL, 6};
-    Gtk::Box         m_HBox{Gtk::Orientation::HORIZONTAL, 6};
+    Gtk::Box         m_HBox_Status{Gtk::Orientation::HORIZONTAL, 6};
 
     std::string getDisplayMessage(std::string caption, std::string text);
 
