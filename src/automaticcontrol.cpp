@@ -302,14 +302,16 @@ void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     m_Entry_Time[4].set_text(nightStartTime.getTimeAsString());
 
     auto children = m_refListModel_Multiplicator->children();
-/*
+
     for(auto iter : children) {
+/*
         if(data.multiplicator == (*iter)[m_Columns_Multiplicator.m_col_factor]) {
             m_Combo_Multiplicator.set_active(iter);
             break;
         }
-    }
 */
+    }
+
     m_Clock.setMultiplier(data.multiplicator);
     m_Clock.setTime(data.curModelTime.getHours(), data.curModelTime.getMinutes(), true);
     setClock(data.curModelDay, data.curModelTime);
