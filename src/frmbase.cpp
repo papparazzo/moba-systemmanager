@@ -84,7 +84,6 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
 
     // about-dialog
     m_HButtonBox.append(m_Button_About);
-    // m_ButtonBox.set_layout(Gtk::BUTTONBOX_END);
     m_Button_About.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_about_clicked));
 
     m_HButtonBox.append(m_Button_Emergency);
@@ -147,34 +146,31 @@ void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::s
 }
 
 void FrmBase::setErrorNotice(const ClientError &data) {
-    /*
     setNotice(
-        Gtk::MESSAGE_ERROR, 
+        Gtk::MessageType::ERROR, 
         errorIdEnumToString(data.errorId),    
         data.additionalMsg
     );
-    */
 }
 
 void FrmBase::setSystemNotice(const GuiSystemNotice &data) {
-    /*
+    
     Gtk::MessageType mt;
     switch(data.noticeType) {
         case GuiSystemNotice::NoticeType::ERROR:
-            mt = Gtk::MESSAGE_ERROR;
+            mt = Gtk::MessageType::ERROR;
             break;
 
         case GuiSystemNotice::NoticeType::WARNING:
-            mt = Gtk::MESSAGE_WARNING;
+            mt = Gtk::MessageType::WARNING;
             break;
 
         case GuiSystemNotice::NoticeType::INFO:
         default:
-            mt = Gtk::MESSAGE_INFO;
+            mt = Gtk::MessageType::INFO;
             break;
     }
     setNotice(mt, data.caption, data.text);
-    */
 }
 
 void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
