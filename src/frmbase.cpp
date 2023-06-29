@@ -242,7 +242,7 @@ bool FrmBase::on_timeout(int) {
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
 
-            //m_InfoBar.set_message_type(Gtk::MESSAGE_ERROR);
+            m_InfoBar.set_message_type(Gtk::MessageType::ERROR);
             std::stringstream ss;
             ss << "<b>msg-handler exception:</b>\n" << e.what();
             m_Label_InfoBarMessage.set_markup(ss.str());
