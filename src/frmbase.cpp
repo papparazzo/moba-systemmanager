@@ -64,7 +64,6 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     set_child(m_VBox);
     
     m_VBox.append(m_InfoBar);
-    m_VBox.append(m_HBox_Status);
 
     m_HBox_Status.append(m_Label_Connectivity_SW);
     m_Label_Connectivity_SW.set_justify(Gtk::Justification::LEFT);
@@ -100,6 +99,7 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
 
 void FrmBase::finishForm() {
    // show_all_children();
+    m_VBox.append(m_HBox_Status);
     m_InfoBar.hide();
 }
  
