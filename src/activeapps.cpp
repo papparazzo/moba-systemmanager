@@ -89,8 +89,6 @@ void ActiveApps::addActiveApp(
 }
 
 void ActiveApps::on_popup_button_pressed(int n_press, double x, double y) {
-    std::cout << n_press << std::endl;
-    
     const Gdk::Rectangle rect(x, y, 1, 1);
     m_Menu_Popup.set_pointing_to(rect);
     m_Menu_Popup.popup();
