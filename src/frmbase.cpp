@@ -65,6 +65,7 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     
     m_VBox.append(m_InfoBar);
 
+    m_HBox_Status.set_margin(6);
     m_HBox_Status.append(m_Label_Connectivity_SW);
     m_Label_Connectivity_SW.set_justify(Gtk::Justification::LEFT);
     m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
