@@ -27,12 +27,15 @@
 
 SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::Orientation::VERTICAL, 6}, msgEndpoint{msgEndpoint} {
 
+    append(m_HBox_Expander);
     append(m_Label_HardwareState);
     append(m_Label_PingResult[0]);
     append(m_Label_PingResult[1]);
     append(m_Label_PingResult[2]);
     append(m_Label_PingResult[3]);
     append(m_ButtonBox_System);
+
+    m_HBox_Expander.set_hexpand();
 
     m_Label_HardwareState.set_markup("<b>Hardwarestatus:</b> [unbekannt]");
     m_Label_PingResult[0].set_markup("<b>Ping 1:</b> [unbekannt]");
@@ -47,6 +50,7 @@ SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::Orientation
     m_ButtonBox_System.set_valign(Gtk::Align::END);
     m_ButtonBox_System.set_halign(Gtk::Align::CENTER);
     m_ButtonBox_System.set_sensitive(false);
+    m_ButtonBox_System.set_margin(6);
 
     m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_shutdown_clicked));
     m_Button_SystemReset.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_reset_clicked));
