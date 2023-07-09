@@ -44,6 +44,21 @@ ServerData::ServerData() {
     lblName[0][8].set_markup("<b>osVersion:</b>");
     lblName[0][9].set_markup("<b>fwType:</b>");
     lblName[0][10].set_markup("<b>fwVersion:</b>");
+
+
+
+    lblName[1][0].set_label("data.appName");
+    lblName[1][1].set_label("data.version.getString()");
+    lblName[1][2].set_label("data.buildDate");
+    lblName[1][3].set_label("data.startTime");
+    lblName[1][4].set_label("std::to_string(data.maxClients)");
+    lblName[1][5].set_label("std::to_string(data.connectedClients)");
+    lblName[1][6].set_label("data.osArch");
+    lblName[1][7].set_label("data.osName");
+    lblName[1][8].set_label("data.osVersion");
+    lblName[1][9].set_label("data.fwType");
+    lblName[1][10].set_label("data.fwVersion");
+
 }
 
 ServerData::~ServerData() {
