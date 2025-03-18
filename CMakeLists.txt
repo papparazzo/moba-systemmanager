@@ -12,32 +12,24 @@ pkg_check_modules(GTKMM gtkmm-4.0)
 configure_file(config.h.in config.h)
 
 add_executable(
-    moba-systemmanger
+    moba-systemmanager
 
-    src/ctrlambience.cpp     
-    src/ctrlambientlight.cpp  
-    src/ctrlblocklock.cpp     
-    src/ctrlbool.cpp          
-    src/ctrlcolortheme.cpp    
-    src/ctrlconnectivity.cpp  
-    src/ctrlcontact.cpp       
-    src/ctrlenvironment.cpp     
-    src/ctrlglobaltimer.cpp     
-    src/ctrlsetbrakevector.cpp  
-    src/ctrlstring.cpp
-    src/ctrltracklayout.cpp
+    src/activeapps.cpp
+    src/automaticcontrol.cpp
+    src/clock.cpp
+    src/environmentcontrol.cpp
+    src/frmbase.cpp
     src/frmmain.cpp
     src/main.cpp
-    src/msgsender.cpp
 )
 
 install(TARGETS moba-systemmanager)
 
-target_include_directories(moba-tester PUBLIC "${PROJECT_BINARY_DIR}")
+target_include_directories(moba-systemmanager PUBLIC "${PROJECT_BINARY_DIR}")
 
-target_link_libraries(moba-tester mobacommon)
-target_link_libraries(moba-tester ${CMAKE_SOURCE_DIR}/modules/lib-msghandling/libmoba-lib-msghandling.a)
-target_link_libraries(moba-tester ${GTKMM_LIBRARIES})
+target_link_libraries(moba-systemmanager mobacommon)
+target_link_libraries(moba-systemmanager ${CMAKE_SOURCE_DIR}/modules/lib-msghandling/libmoba-lib-msghandling.a)
+target_link_libraries(moba-systemmanager ${GTKMM_LIBRARIES})
 
 link_directories(${GTKMM_LIBRARY_DIRS})
 
