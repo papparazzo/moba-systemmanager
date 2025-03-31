@@ -31,6 +31,9 @@
 #include "config.h"
 
 #include "moba/environmentmessages.h"
+#include "moba/servermessages.h"
+#include "moba/timermessages.h"
+#include "noticelogger.h"
 
 FrmMain::FrmMain(EndpointPtr mhp): FrmBase{mhp}, m_ActiveApps{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
 m_Environment_Control{mhp} {

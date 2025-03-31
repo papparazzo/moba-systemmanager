@@ -234,8 +234,7 @@ bool FrmBase::on_timeout(int) {
             connected = true;
             return true;
         }
-        registry.handleMsg(msgEndpoint->recieveMsg());
-
+        registry.handleMsg(msgEndpoint->receiveMsg());
     } catch(std::exception &e) {
         if(connected) {
             m_Button_Emergency.set_sensitive(false);

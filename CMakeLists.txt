@@ -21,6 +21,9 @@ add_executable(
     src/frmbase.cpp
     src/frmmain.cpp
     src/main.cpp
+    src/noticelogger.cpp
+    src/serverdata.cpp
+    src/systemcontrol.cpp
 )
 
 install(TARGETS moba-systemmanager)
