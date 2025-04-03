@@ -48,19 +48,19 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     set_title(PACKAGE_NAME);
     //set_border_width(10);
     //set_position(Gtk::WIN_POS_CENTER);
-/*
-    sigc::slot<bool> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout), 1);
-    sigc::connection conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
 
-    sigc::slot<bool> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout_status), 1);
+    sigc::slot<bool()> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout), 1);
+    auto conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
+
+    sigc::slot<bool()> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout_status), 1);
     sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 25 ms
     
     // Add the message label to the InfoBar:
-    auto infoBarContainer = dynamic_cast<Gtk::Container*>(m_InfoBar.get_content_area());
-    if(infoBarContainer) {
-        infoBarContainer->add(m_Label_InfoBarMessage);
-    }
-*/
+    //auto infoBarContainer = dynamic_cast<Gtk::Container*>(m_InfoBar.get_content_area());
+    //if(infoBarContainer) {
+    //    infoBarContainer->add(m_Label_InfoBarMessage);
+    //}
+
     set_child(m_VBox);
     
     m_VBox.append(m_InfoBar);
