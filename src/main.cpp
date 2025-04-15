@@ -40,9 +40,13 @@ namespace {
 }
 
 int main(int argc, char *argv[]) {
+    if(argc == 2) {
+        appData.host = std::string(argv[1]);
+    }
+
     auto socket = std::make_shared<Socket>(appData.host, appData.port);
     auto endpoint = EndpointPtr{new Endpoint{socket, appData.appName, appData.version, {Message::SERVER, Message::SYSTEM, Message::GUI, Message::TIMER}}};
     auto app = Gtk::Application::create("org.moba.systemmanager");
 
-    return app->make_window_and_run<FrmMain>(argc, argv, endpoint);
+    return app->make_window_and_run<FrmMain>(--argc, argv, endpoint);
 }
