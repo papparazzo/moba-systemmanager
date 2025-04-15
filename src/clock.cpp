@@ -26,10 +26,8 @@
 #include "clock.h"
 
 Clock::Clock() {
-    Glib::signal_timeout().connect(sigc::mem_fun(*this, &Clock::on_timeout), 250);
-}
-
-Clock::~Clock() {
+    //Glib::signal_timeout().connect(sigc::mem_fun(*this, &Clock::on_timeout), 250);
+    set_draw_func(sigc::mem_fun(*this, &Clock::on_draw));
 }
 
 void Clock::setTime(unsigned int hours, unsigned int minutes, bool draw) {
@@ -59,10 +57,11 @@ void Clock::stop() {
     setNightLight(false);
 }
 
-bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
-    Gtk::Allocation allocation = get_allocation();
-    const int width = allocation.get_width();
-    const int height = allocation.get_height();
+void Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
+
+  //    Gtk::Allocation allocation = get_allocation();
+//    const int width = allocation.get_width();
+//    const int height = allocation.get_height();
 
     const double radius = 0.42 * m_factor;
 
@@ -160,8 +159,6 @@ bool Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
         -cos(seconds) * (radius * 0.9)
     );
     cr->stroke();
-
-    return true;
 }
 
 bool Clock::on_timeout() {

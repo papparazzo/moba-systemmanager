@@ -27,7 +27,7 @@
 class Clock: public Gtk::DrawingArea {
 public:
     Clock();
-    virtual ~Clock();
+    virtual ~Clock() = default;
 
     void setTime(unsigned int hours, unsigned int minutes, bool draw);
     void setMultiplier(unsigned int multiplier);
@@ -40,7 +40,7 @@ protected:
 
     void invalidateRect();
 
-    bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) ; //override;
+    void on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height);
     bool on_timeout();
 
     void setNightLight(bool activate);
