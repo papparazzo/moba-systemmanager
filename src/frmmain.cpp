@@ -19,13 +19,8 @@
  */
 
 #include <iostream>
-#include <exception>
-#include <algorithm>
 #include <functional>
 #include <string>
-
-#include <cassert>
-#include <ctime>
 
 #include "frmmain.h"
 #include "config.h"
