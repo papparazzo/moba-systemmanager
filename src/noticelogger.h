@@ -33,6 +33,7 @@ public:
     virtual ~NoticeLogger();
 
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
+    void setNotice(std::string timestamp, std::string type, std::string caption, std::string text);
 
 private:
     struct ModelColumnsNotices : public Gtk::TreeModel::ColumnRecord {

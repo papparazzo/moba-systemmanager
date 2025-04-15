@@ -45,7 +45,6 @@ NoticeLogger::NoticeLogger(): Gtk::Box{Gtk::Orientation::VERTICAL} {
     // HBox
     m_ButtonBox_NoticeLogger.append(m_Button_NoticesClear);
     m_ButtonBox_NoticeLogger.set_halign(Gtk::Align::END);
-    //m_ButtonBox_NoticeLogger.set_layout(Gtk::BUTTONBOX_END);
     m_ButtonBox_NoticeLogger.set_sensitive(false);
 
     m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &NoticeLogger::on_button_notices_clear_clicked));
@@ -62,24 +61,30 @@ void NoticeLogger::setNotice(Gtk::MessageType noticeType, std::string caption, s
 
     oss << std::put_time(&tm, "%d.%m.%Y %H:%M:%S");
 
-    Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
-    row[m_Columns_Notices.m_col_timestamp] = oss.str();
-    row[m_Columns_Notices.m_col_caption  ] = caption;
-    row[m_Columns_Notices.m_col_text     ] = text;
+    std::string type;
 
     switch(noticeType) {
         case Gtk::MessageType::ERROR:
-            row[m_Columns_Notices.m_col_type] = "ERROR";
+            type = "ERROR";
             break;
 
         case Gtk::MessageType::WARNING:
-            row[m_Columns_Notices.m_col_type] = "WARNING";
+            type = "WARNING";
             break;
 
         default:
-            row[m_Columns_Notices.m_col_type] = "INFO";
+            type = "INFO";
             break;
     }
+    setNotice(oss.str(), type, caption, text);
+}
+
+void NoticeLogger::setNotice(std::string timestamp, std::string type, std::string caption, std::string text) {
+    Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
+    row[m_Columns_Notices.m_col_timestamp] = timestamp;
+    row[m_Columns_Notices.m_col_caption  ] = caption;
+    row[m_Columns_Notices.m_col_text     ] = text;
+    row[m_Columns_Notices.m_col_type     ] = type;
     m_ButtonBox_NoticeLogger.set_sensitive(true);
 }
 
