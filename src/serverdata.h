@@ -29,16 +29,14 @@ public:
     ServerData(const ServerData&) = delete;
     ServerData& operator=(const ServerData&) = delete;
 
-    virtual ~ServerData();
+    virtual ~ServerData() noexcept = default;
 
     void setServerInfoRes(const ServerInfoRes &data);
 
     void clear();
 
 private:
-    // server-data
+    Gtk::Grid  m_grid;
     Gtk::Label lblName[2][11];
-    Gtk::Box  m_VBox_ServerDataKey{Gtk::Orientation::VERTICAL, 6};
-    Gtk::Box  m_VBox_ServerDataValue{Gtk::Orientation::VERTICAL, 6};
 };
 

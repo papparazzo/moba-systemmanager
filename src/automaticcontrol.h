@@ -35,7 +35,7 @@ public:
     AutomaticControl(const AutomaticControl&) = delete;
     AutomaticControl& operator=(const AutomaticControl&) = delete;
 
-    virtual ~AutomaticControl();
+    virtual ~AutomaticControl() noexcept = default;
 
     void enable();
     void disable();
@@ -49,18 +49,6 @@ private:
 
     void on_button_time_control_set_clicked();
     void on_button_automatic_clicked();
-
-    Gtk::Box     m_VBox_Clock{Gtk::Orientation::VERTICAL}; 
-    Gtk::Label   m_Label_Date;
-
-    Clock        m_Clock;
-
-    Gtk::Box     m_VBox_Settings{Gtk::Orientation::VERTICAL, 6};
-
-    Gtk::Box     m_HBox_CurModelDay{Gtk::Orientation::HORIZONTAL, 6};
-    Gtk::Box     m_HBox_Multiplicator{Gtk::Orientation::HORIZONTAL, 6};
-
-    Gtk::Box     m_HBox[5];
 
     struct ModelColumns_CurModelDay: public Gtk::TreeModel::ColumnRecord {
         ModelColumns_CurModelDay() {
@@ -89,7 +77,7 @@ private:
     Glib::RefPtr<Gtk::ListStore> m_refListModel_CurModelDay;
     Glib::RefPtr<Gtk::ListStore> m_refListModel_Multiplicator;
 
-    Gtk::Label        m_Label_Spacer;
+    Gtk::Grid m_grid_control_panel;
 
     Gtk::ComboBox     m_Combo_CurModelDay;
     Gtk::Label        m_Label_CurModelDay{"Tag:"};
@@ -99,6 +87,11 @@ private:
 
     Gtk::Entry        m_Entry_Time[5];
     Gtk::Label        m_Label_Time[5];
+
+    Gtk::Box          m_VBox_Clock{Gtk::Orientation::VERTICAL};
+    Gtk::Label        m_Label_Date;
+
+    Clock             m_Clock;
 
     Gtk::Box          m_ButtonBox_AutomaticControl;
     Gtk::Button       m_Button_AutomaticControl_Set{"Werte setzen"};

@@ -20,48 +20,30 @@
 
 #include "serverdata.h"
 
-ServerData::ServerData() {
-   // set_border_width(2);
-
-    append(m_VBox_ServerDataKey);
-    append(m_VBox_ServerDataValue);
+ServerData::ServerData() : Gtk::Box{Gtk::Orientation::VERTICAL, 6} {
+    set_expand(true);
+    append(m_grid);
+    m_grid.set_margin(50);
+    m_grid.set_halign(Gtk::Align::CENTER);
 
     for(int i = 0; i < 11; ++i) {
-        m_VBox_ServerDataKey.append(lblName[0][i]);
-        m_VBox_ServerDataValue.append(lblName[1][i]);
-        lblName[0][i].set_justify(Gtk::Justification::RIGHT);
-        lblName[0][i].set_justify(Gtk::Justification::LEFT);
+        m_grid.attach(lblName[0][i], 0, i);
+        m_grid.attach(lblName[1][i], 1, i);
+        lblName[0][i].set_halign(Gtk::Align::START);
+        lblName[1][i].set_halign(Gtk::Align::START);
     }
 
-    lblName[0][0].set_markup("<b>AppName:</b>");
-    lblName[0][1].set_markup("<b>Version:</b>");
-    lblName[0][2].set_markup("<b>Build-Date:</b>");
-    lblName[0][3].set_markup("<b>Start-Time:</b>");
-    lblName[0][4].set_markup("<b>max. Clients:</b>");
-    lblName[0][5].set_markup("<b>connected Clients:</b>");
-    lblName[0][6].set_markup("<b>osArch:</b>");
-    lblName[0][7].set_markup("<b>osName:</b>");
-    lblName[0][8].set_markup("<b>osVersion:</b>");
-    lblName[0][9].set_markup("<b>fwType:</b>");
-    lblName[0][10].set_markup("<b>fwVersion:</b>");
-
-
-
-    lblName[1][0].set_label("data.appName");
-    lblName[1][1].set_label("data.version.getString()");
-    lblName[1][2].set_label("data.buildDate");
-    lblName[1][3].set_label("data.startTime");
-    lblName[1][4].set_label("std::to_string(data.maxClients)");
-    lblName[1][5].set_label("std::to_string(data.connectedClients)");
-    lblName[1][6].set_label("data.osArch");
-    lblName[1][7].set_label("data.osName");
-    lblName[1][8].set_label("data.osVersion");
-    lblName[1][9].set_label("data.fwType");
-    lblName[1][10].set_label("data.fwVersion");
-
-}
-
-ServerData::~ServerData() {
+    lblName[0][0].set_markup("<b>AppName:   </b>");
+    lblName[0][1].set_markup("<b>Version:   </b>");
+    lblName[0][2].set_markup("<b>Build-Date:   </b>");
+    lblName[0][3].set_markup("<b>Start-Time:   </b>");
+    lblName[0][4].set_markup("<b>max. Clients:   </b>");
+    lblName[0][5].set_markup("<b>connected Clients:    </b>");
+    lblName[0][6].set_markup("<b>osArch:               </b>");
+    lblName[0][7].set_markup("<b>osName:               </b>");
+    lblName[0][8].set_markup("<b>osVersion:    </b>");
+    lblName[0][9].set_markup("<b>fwType:       </b>");
+    lblName[0][10].set_markup("<b>fwVersion:   </b>");
 }
 
 void ServerData::setServerInfoRes(const ServerInfoRes &data) {

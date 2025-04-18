@@ -50,9 +50,6 @@ NoticeLogger::NoticeLogger(): Gtk::Box{Gtk::Orientation::VERTICAL} {
     m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &NoticeLogger::on_button_notices_clear_clicked));
 }
 
-NoticeLogger::~NoticeLogger() {
-}
-
 void NoticeLogger::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);

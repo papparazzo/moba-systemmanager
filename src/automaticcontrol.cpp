@@ -19,8 +19,67 @@
  */
 
 #include "automaticcontrol.h"
+#include <iostream>
 
 AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndpoint} {
+    set_expand(true);
+
+    append(m_grid_control_panel);
+    append(m_VBox_Clock);
+
+    m_Label_Date.set_margin(5);
+
+    m_Clock.set_content_width(400);
+    m_Clock.set_content_height(400);
+    m_VBox_Clock.set_expand(true);
+
+    m_VBox_Clock.append(m_Clock);
+    m_VBox_Clock.append(m_Label_Date);
+
+    m_grid_control_panel.set_margin(25);
+    m_grid_control_panel.set_halign(Gtk::Align::CENTER);
+
+    m_grid_control_panel.attach(m_Label_Multiplicator, 0, 0);
+    m_grid_control_panel.attach(m_Combo_Multiplicator, 1, 0);
+
+    m_grid_control_panel.attach(m_Label_CurModelDay, 0, 1);
+    m_grid_control_panel.attach(m_Combo_CurModelDay, 1, 1);
+
+    m_Label_Multiplicator.set_halign(Gtk::Align::START);
+    m_Combo_Multiplicator.set_margin(4);
+    m_Label_CurModelDay.set_halign(Gtk::Align::START);
+    m_Combo_CurModelDay.set_margin(4);
+
+    m_Label_Time[0].set_text("Startuhrzeit (hh:mm):");
+    m_Label_Time[1].set_text("Sonnenaufgang (hh:mm):");
+    m_Label_Time[2].set_text("Tag (hh:mm):");
+    m_Label_Time[3].set_text("Sonnenuntergang (hh:mm):");
+    m_Label_Time[4].set_text("Nacht (hh:mm):");
+
+    for(int i = 0; i < 5; ++i) {
+        m_grid_control_panel.attach(m_Label_Time[i], 0, 2 + i);
+        m_grid_control_panel.attach(m_Entry_Time[i], 1, 2 + i);
+        m_Entry_Time[i].set_width_chars(5);
+        m_Label_Time[i].set_halign(Gtk::Align::START);
+        m_Entry_Time[i].set_halign(Gtk::Align::START);
+        m_Entry_Time[i].set_margin(4);
+    }
+
+    m_Combo_Multiplicator.pack_start(m_Columns_Multiplicator.m_col_label);
+
+    m_grid_control_panel.attach_next_to(m_ButtonBox_AutomaticControl, m_Label_Time[4], Gtk::PositionType::BOTTOM, 2, 1);
+
+    m_Button_AutomaticControl_Enable.set_margin(10);
+    m_Button_AutomaticControl_Set.set_margin(10);
+
+    m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Enable);
+    m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Set);
+    m_ButtonBox_AutomaticControl.set_margin(10);
+
+    m_ButtonBox_AutomaticControl.set_sensitive(false);
+
+    m_Button_AutomaticControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_time_control_set_clicked));
+    m_click_connection = m_Button_AutomaticControl_Enable.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_automatic_clicked));
 
     m_refListModel_CurModelDay = Gtk::ListStore::create(m_Columns_CurModelDay);
     m_Combo_CurModelDay.set_model(m_refListModel_CurModelDay);
@@ -53,7 +112,7 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     row[m_Columns_CurModelDay.m_col_id] = Day::SUNDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Sonntag";
 
-   // m_Combo_CurModelDay.append(m_Columns_CurModelDay.m_col_name);
+    m_Combo_CurModelDay.pack_start(m_Columns_CurModelDay.m_col_name);
 
     m_refListModel_Multiplicator = Gtk::ListStore::create(m_Columns_Multiplicator);
     m_Combo_Multiplicator.set_model(m_refListModel_Multiplicator);
@@ -67,53 +126,6 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
         row1[m_Columns_Multiplicator.m_col_factor] = i;
         row1[m_Columns_Multiplicator.m_col_label] = ss.str();
     }
-
-   // m_Combo_Multiplicator.append(m_Columns_Multiplicator.m_col_label);
-
-    set_homogeneous(true);
-   // add(m_VBox_Settings);
-  //  add(m_VBox_Clock);
-
-    m_VBox_Clock.append(m_Clock);
-    m_VBox_Clock.append(m_Label_Date);
-
-    m_VBox_Settings.append(m_Label_Spacer);
-    m_VBox_Settings.append(m_HBox_Multiplicator);
-    m_VBox_Settings.append(m_HBox_CurModelDay);
-
-    for(int i = 0; i < 5; ++i) {
-        m_HBox[i].set_spacing(6);
-        m_VBox_Settings.append(m_HBox[i]);
-        m_HBox[i].append(m_Label_Time[i]);
-        m_HBox[i].append(m_Entry_Time[i]);
-        m_Entry_Time[i].set_width_chars(5);
-    }
-
-    m_Label_Time[0].set_text("Uhrzeit (hh:mm):");
-    m_Label_Time[1].set_text("Sonnenaufgang (hh:mm):");
-    m_Label_Time[2].set_text("Tag (hh:mm):");
-    m_Label_Time[3].set_text("Sonnenuntergang (hh:mm):");
-    m_Label_Time[4].set_text("Nacht (hh:mm):");
-
-    m_VBox_Settings.append(m_ButtonBox_AutomaticControl);
-
-    m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Enable);
-    m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Set);
-   // m_ButtonBox_AutomaticControl.set_layout(Gtk::BUTTONBOX_END);
-
-    m_HBox_CurModelDay.append(m_Label_CurModelDay);
-    m_HBox_CurModelDay.append(m_Combo_CurModelDay);
-
-    m_HBox_Multiplicator.append(m_Label_Multiplicator);
-    m_HBox_Multiplicator.append(m_Combo_Multiplicator);
-
-    m_ButtonBox_AutomaticControl.set_sensitive(false);
-
-    m_Button_AutomaticControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_time_control_set_clicked));
-    m_click_connection = m_Button_AutomaticControl_Enable.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_automatic_clicked));
-}
-
-AutomaticControl::~AutomaticControl() {
 }
 
 void AutomaticControl::enable() {
@@ -167,7 +179,6 @@ void AutomaticControl::setHardwareState(SystemState systemState) {
 }
 
 void AutomaticControl::setClock(Day day, Time time) {
-
     std::stringstream ss;
 
     switch(day) {
@@ -281,17 +292,10 @@ void AutomaticControl::setTimerGlobalTimerEvent(const TimerGlobalTimerEvent &dat
 void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     m_Combo_CurModelDay.set_active(static_cast<int>(data.curModelDay));
 
-    nightStartTime   = Time{22, 30};
-    sunriseStartTime = Time{4, 0};
-    dayStartTime     = Time{5, 0};
-    sunsetStartTime  = Time{21, 30};
-
-    /*
     sunriseStartTime = data.sunriseStartTime;
     dayStartTime = data.dayStartTime;
     sunsetStartTime = data.sunsetStartTime;
     nightStartTime = data.nightStartTime;
-     */
 
     m_Clock.setNightLight(sunsetStartTime, dayStartTime);
 
@@ -301,16 +305,7 @@ void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     m_Entry_Time[3].set_text(sunsetStartTime.getTimeAsString());
     m_Entry_Time[4].set_text(nightStartTime.getTimeAsString());
 
-    auto children = m_refListModel_Multiplicator->children();
-
-    for(auto iter : children) {
-/*
-        if(data.multiplicator == (*iter)[m_Columns_Multiplicator.m_col_factor]) {
-            m_Combo_Multiplicator.set_active(iter);
-            break;
-        }
-*/
-    }
+    m_Combo_Multiplicator.set_active(data.multiplicator - 1);
 
     m_Clock.setMultiplier(data.multiplicator);
     m_Clock.setTime(data.curModelTime.getHours(), data.curModelTime.getMinutes(), true);

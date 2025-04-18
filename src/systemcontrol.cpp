@@ -28,14 +28,16 @@
 SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::Orientation::VERTICAL, 6}, msgEndpoint{msgEndpoint} {
 
     append(m_HBox_Expander);
+
+    m_Label_HardwareState.set_margin(50);
     m_HBox_Expander.append(m_Label_HardwareState);
+
     m_HBox_Expander.append(m_Label_PingResult[0]);
     m_HBox_Expander.append(m_Label_PingResult[1]);
     m_HBox_Expander.append(m_Label_PingResult[2]);
     m_HBox_Expander.append(m_Label_PingResult[3]);
     m_HBox_Expander.append(m_ButtonBox_System);
 
-    m_Label_HardwareState.set_margin(25);
 	m_ButtonBox_System.set_margin(25);
 
     m_Label_HardwareState.set_markup("<b>Hardwarestatus:</b> [unbekannt]");
@@ -48,10 +50,10 @@ SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::Orientation
     m_ButtonBox_System.append(m_Button_SystemReset);
     m_ButtonBox_System.append(m_Button_SystemStandby);
     m_ButtonBox_System.append(m_Button_SystemPing);
-    m_ButtonBox_System.set_valign(Gtk::Align::END);
+
     m_ButtonBox_System.set_halign(Gtk::Align::CENTER);
     m_ButtonBox_System.set_sensitive(false);
-    m_ButtonBox_System.set_margin(6);
+    m_ButtonBox_System.set_margin(60);
 
     m_Button_SystemShutdown.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_shutdown_clicked));
     m_Button_SystemReset.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_reset_clicked));

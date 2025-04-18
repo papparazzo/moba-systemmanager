@@ -30,7 +30,7 @@ public:
     NoticeLogger(const NoticeLogger&) = delete;
     NoticeLogger& operator=(const NoticeLogger&) = delete;
 
-    virtual ~NoticeLogger();
+    virtual ~NoticeLogger() noexcept = default;
 
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
     void setNotice(std::string timestamp, std::string type, std::string caption, std::string text);
