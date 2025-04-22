@@ -77,7 +77,7 @@ private:
     Glib::RefPtr<Gtk::ListStore> m_refListModel_CurModelDay;
     Glib::RefPtr<Gtk::ListStore> m_refListModel_Multiplicator;
 
-    Gtk::Grid m_grid_control_panel;
+    Gtk::Grid         m_grid_control_panel;
 
     Gtk::ComboBox     m_Combo_CurModelDay;
     Gtk::Label        m_Label_CurModelDay{"Tag:"};

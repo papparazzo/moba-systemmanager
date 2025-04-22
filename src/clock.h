@@ -27,7 +27,7 @@
 class Clock: public Gtk::DrawingArea {
 public:
     Clock();
-    virtual ~Clock() = default;
+    ~Clock() noexcept override = default;;
 
     void setTime(unsigned int hours, unsigned int minutes, bool draw);
     void setMultiplier(unsigned int multiplier);

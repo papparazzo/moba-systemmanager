@@ -55,9 +55,6 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     insert_action_group("popup", refActionGroup);
 }
 
-ActiveApps::~ActiveApps() {
-}
-
 void ActiveApps::removeActiveApp(long id) {
     Gtk::TreeModel::Children children = m_refTreeModel_ActiveApps->children();
 

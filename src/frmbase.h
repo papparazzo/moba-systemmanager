@@ -41,8 +41,8 @@ enum class SystemState {
 
 class FrmBase: public Gtk::Window {
 public:
-    FrmBase(EndpointPtr mhp);
-    virtual ~FrmBase() = default;
+    explicit FrmBase(EndpointPtr mhp);
+    ~FrmBase() noexcept override = default;
 
 protected:
     std::atomic<SystemState> systemState;

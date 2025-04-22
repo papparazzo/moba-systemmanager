@@ -23,14 +23,14 @@
 #include <gtkmm.h>
 #include <string>
 
-class NoticeLogger: public Gtk::Box {
+class NoticeLogger final : public Gtk::Box {
 public:
 
     NoticeLogger();
     NoticeLogger(const NoticeLogger&) = delete;
     NoticeLogger& operator=(const NoticeLogger&) = delete;
 
-    virtual ~NoticeLogger() noexcept = default;
+    ~NoticeLogger() noexcept override = default;
 
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
     void setNotice(std::string timestamp, std::string type, std::string caption, std::string text);

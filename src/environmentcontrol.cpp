@@ -21,22 +21,32 @@
 #include "environmentcontrol.h"
 
 EnvironmentControl::EnvironmentControl(EndpointPtr msgEndpoint): m_adjustment(Gtk::Adjustment::create(0.0, 0.0, 4095.0)), msgEndpoint(msgEndpoint) {
+    set_expand(true);
+    append(m_grid);
+    m_grid.set_margin(50);
+    m_grid.set_halign(Gtk::Align::CENTER);
 
-    append(m_VBox_Left);
-    append(m_VBox_Right);
+    m_grid.attach(m_Label_Curtain, 0, 0);
+    m_grid.attach(m_HBox_Curtain, 1, 0);
 
-    m_VBox_Left.append(m_Label_Spacer);
-    m_VBox_Left.append(m_HBox_Curtain);
-    m_VBox_Left.append(m_HBox_MainLight);
-
-    m_HBox_Curtain.append(m_Label_Curtain);
     m_HBox_Curtain.append(m_Button_Curtain_Up);
     m_HBox_Curtain.append(m_Button_Curtain_Down);
 
-    m_HBox_MainLight.append(m_Label_MainLight);
+    m_Button_Curtain_Up.set_margin(4);
+    m_Button_Curtain_Down.set_margin(4);
+
+    m_Label_Curtain.set_halign(Gtk::Align::START);
+
+    m_grid.attach(m_Label_MainLight, 0, 1);
+    m_grid.attach(m_HBox_MainLight, 1, 1);
+
     m_HBox_MainLight.append(m_Button_MainLight_On);
     m_HBox_MainLight.append(m_Button_MainLight_Off);
 
+    m_Button_MainLight_On.set_margin(4);
+    m_Button_MainLight_Off.set_margin(4);
+
+    m_Label_MainLight.set_halign(Gtk::Align::START);
 
     m_Button_Curtain_Up.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_curtain_up_clicked));
     m_Button_Curtain_Down.signal_clicked().connect(sigc::mem_fun(*this, &EnvironmentControl::on_button_curtain_down_clicked));
@@ -51,9 +61,6 @@ EnvironmentControl::EnvironmentControl(EndpointPtr msgEndpoint): m_adjustment(Gt
 	Integer	green		1	1	grüner Anteil (0-4095)
 	Integer	white		1	1	weißer Anteil (0-4095)
  */
-}
-
-EnvironmentControl::~EnvironmentControl() {
 }
 
 void EnvironmentControl::on_button_curtain_up_clicked() {

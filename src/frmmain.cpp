@@ -68,10 +68,10 @@ void FrmMain::setSensitive(bool sensitive) {
         m_System_Control.enable();
         m_Environment_Control.enable();
     } else {
+        m_ActiveApps.clearList();
         m_Automatic_Control.disable();
         m_System_Control.disable();
         m_Environment_Control.disable();
-        m_ActiveApps.clearList();
         m_Server_Data.clear();
     }
 }

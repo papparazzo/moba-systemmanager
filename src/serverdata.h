@@ -23,13 +23,13 @@
 #include <gtkmm.h>
 #include "moba/servermessages.h"
 
-class ServerData: public Gtk::Box {
+class ServerData final : public Gtk::Box {
 public:
     ServerData();
     ServerData(const ServerData&) = delete;
     ServerData& operator=(const ServerData&) = delete;
 
-    virtual ~ServerData() noexcept = default;
+    ~ServerData() noexcept override = default;
 
     void setServerInfoRes(const ServerInfoRes &data);
 

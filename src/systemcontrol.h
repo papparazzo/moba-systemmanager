@@ -29,11 +29,11 @@
 
 class SystemControl: public Gtk::Box {
 public:
-    SystemControl(EndpointPtr msgEndpoint);
+    explicit SystemControl(EndpointPtr msgEndpoint);
     SystemControl(const SystemControl&) = delete;
     SystemControl& operator=(const SystemControl&) = delete;
 
-    virtual ~SystemControl() noexcept = default;
+    ~SystemControl() noexcept override = default;
 
     void enable();
     void disable();
@@ -45,10 +45,9 @@ public:
 private:
     void setHardwareStateLabel(const std::string &status);
 
-    void on_button_shutdown_clicked();
-    void on_button_reset_clicked();
-    void on_button_automatic_clicked();
-    void on_button_standby_clicked();
+    void on_button_shutdown_clicked() const;
+    void on_button_reset_clicked() const;
+    void on_button_standby_clicked() const;
     void on_button_ping_clicked();
 
     Gtk::Box          m_HBox_Expander{Gtk::Orientation::VERTICAL, 6};
@@ -62,7 +61,7 @@ private:
     Gtk::Label        m_Label_PingResult[4];
 
     std::chrono::time_point<std::chrono::system_clock> start;
-    int pingctr;
+    int pingctr{0};
 
     sigc::connection  m_click_connection;
 

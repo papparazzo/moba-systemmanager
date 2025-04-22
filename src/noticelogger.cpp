@@ -24,7 +24,7 @@
 #include <sstream>
 #include <iomanip>
 
-NoticeLogger::NoticeLogger(): Gtk::Box{Gtk::Orientation::VERTICAL} {
+NoticeLogger::NoticeLogger(): Box{Gtk::Orientation::VERTICAL} {
 
     append(m_ScrolledWindow_NoticeLogger);
     append(m_ButtonBox_NoticeLogger);

@@ -61,15 +61,15 @@ SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::Orientation
     m_Button_SystemPing.signal_clicked().connect(sigc::mem_fun(*this, &SystemControl::on_button_ping_clicked));
 }
 
-void SystemControl::on_button_reset_clicked() {
+void SystemControl::on_button_reset_clicked() const {
     msgEndpoint->sendMsg(SystemHardwareReset{});
 }
 
-void SystemControl::on_button_shutdown_clicked() {
+void SystemControl::on_button_shutdown_clicked() const {
     msgEndpoint->sendMsg(SystemHardwareShutdown{});
 }
 
-void SystemControl::on_button_standby_clicked() {
+void SystemControl::on_button_standby_clicked() const {
     if(m_Button_SystemStandby.get_active()) {
         msgEndpoint->sendMsg(SystemSetStandbyMode{true});
     } else {
@@ -119,7 +119,7 @@ void SystemControl::disable() {
     m_ButtonBox_System.set_sensitive(false);
 }
 
-void SystemControl::setHardwareState(SystemState systemState) {
+void SystemControl::setHardwareState(const SystemState systemState) {
     switch(systemState) {
         case SystemState::ERROR:
             m_Button_SystemStandby.set_sensitive(false);

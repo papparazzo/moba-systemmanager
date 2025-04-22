@@ -29,7 +29,7 @@
 class EnvironmentControl: public Gtk::Box {
 public:
     EnvironmentControl(EndpointPtr msgEndpoint);
-    virtual ~EnvironmentControl();
+    virtual ~EnvironmentControl() noexcept = default;
 
     EnvironmentControl(const EnvironmentControl&) = delete;
     EnvironmentControl& operator=(const EnvironmentControl&) = delete;
@@ -45,14 +45,10 @@ private:
     void on_button_main_light_on_clicked();
     void on_button_main_light_off_clicked();
 
-    Gtk::Label     m_Label_Spacer;
+    Gtk::Grid                     m_grid;
 
-    Gtk::Box      m_VBox_Left{Gtk::Orientation::VERTICAL};
-    Gtk::Box      m_VBox_Right{Gtk::Orientation::VERTICAL};
-
-    Gtk::Box       m_HBox_Curtain{Gtk::Orientation::HORIZONTAL, 6};
-    Gtk::Box       m_HBox_MainLight{Gtk::Orientation::HORIZONTAL, 6};
-    //Gtk::Box     m_HBox_AmbientLight{Gtk::Orientation::HORIZONTAL, 6};
+    Gtk::Box                      m_HBox_Curtain{Gtk::Orientation::HORIZONTAL, 6};
+    Gtk::Box                      m_HBox_MainLight{Gtk::Orientation::HORIZONTAL, 6};
 
     Gtk::Label                    m_Label_Curtain{"Rolladen:"};
     Gtk::Button                   m_Button_Curtain_Up{"hoch"};

@@ -26,8 +26,8 @@
 
 class ActiveApps: public Gtk::TreeView {
 public:
-    ActiveApps(EndpointPtr msgEndpoint);
-    virtual ~ActiveApps();
+    explicit ActiveApps(EndpointPtr msgEndpoint);
+    ~ActiveApps() noexcept override = default;
 
     void clearList();
 
@@ -59,11 +59,11 @@ protected:
 
     ModelColumnsActiveApps m_Columns_ActiveApps;
 
+    EndpointPtr msgEndpoint;
+
     Glib::RefPtr<Gtk::ListStore> m_refTreeModel_ActiveApps;
 
     Gtk::PopoverMenu m_Menu_Popup;
-
-    EndpointPtr msgEndpoint;
 
     void on_menu_popup_reset();
     void on_menu_popup_selftest();

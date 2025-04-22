@@ -40,11 +40,10 @@
 #include "serverdata.h"
 #include "frmbase.h"
 
-class FrmMain: public FrmBase {
+class FrmMain final : public FrmBase {
 public:
-    FrmMain(EndpointPtr mhp);
-    virtual ~FrmMain() {
-    }
+    explicit FrmMain(EndpointPtr mhp);
+    ~FrmMain() noexcept override = default;
 
 protected:
     Gtk::Notebook  m_Notebook;
@@ -70,5 +69,5 @@ protected:
     void setConClientsRes(const ServerConClientsRes &data);
     void setNewClient(const ServerNewClientStarted &data);
     void setRemoveClient(const ServerClientClosed &data);
-    void setSystemState(SystemState systemState);
+    void setSystemState(SystemState systemState) override;
 };
