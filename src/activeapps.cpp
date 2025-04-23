@@ -22,15 +22,21 @@
 #include "moba/servermessages.h"
 
 ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
-    m_refTreeModel_ActiveApps = Gtk::ListStore::create(m_Columns_ActiveApps);
-    set_model(m_refTreeModel_ActiveApps);
+    append(m_ScrolledWindow);
 
-    append_column("ID",         m_Columns_ActiveApps.m_col_id);
-    append_column("Name",       m_Columns_ActiveApps.m_col_name);
-    append_column("Version",    m_Columns_ActiveApps.m_col_version);
-    append_column("IP-Adresse", m_Columns_ActiveApps.m_col_ipAddr);
-    append_column("Port",       m_Columns_ActiveApps.m_col_port);
-    append_column("Start-Time", m_Columns_ActiveApps.m_col_startTime);
+    m_ScrolledWindow.set_child(m_TreeView_ActiveApps);
+    m_ScrolledWindow.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
+    m_ScrolledWindow.set_expand();
+
+    m_refTreeModel_ActiveApps = Gtk::ListStore::create(m_Columns_ActiveApps);
+    m_TreeView_ActiveApps.set_model(m_refTreeModel_ActiveApps);
+
+    m_TreeView_ActiveApps.append_column("ID",         m_Columns_ActiveApps.m_col_id);
+    m_TreeView_ActiveApps.append_column("Name",       m_Columns_ActiveApps.m_col_name);
+    m_TreeView_ActiveApps.append_column("Version",    m_Columns_ActiveApps.m_col_version);
+    m_TreeView_ActiveApps.append_column("IP-Adresse", m_Columns_ActiveApps.m_col_ipAddr);
+    m_TreeView_ActiveApps.append_column("Port",       m_Columns_ActiveApps.m_col_port);
+    m_TreeView_ActiveApps.append_column("Start-Time", m_Columns_ActiveApps.m_col_startTime);
 
     auto refGesture = Gtk::GestureClick::create();
     refGesture->set_button(GDK_BUTTON_SECONDARY);
@@ -72,8 +78,8 @@ void ActiveApps::clearList() {
 }
 
 void ActiveApps::addActiveApp(
-    int id, const std::string &name, const std::string &version,
-    const std::string &addr, int port, const std::string startTime
+    long id, const std::string &name, const std::string &version,
+    const std::string &addr, long port, const std::string &startTime
 ) {
     Gtk::TreeModel::Row row;
     row = *(m_refTreeModel_ActiveApps->append());
@@ -92,7 +98,8 @@ void ActiveApps::on_popup_button_pressed(int n_press, double x, double y) {
 }
 
 void ActiveApps::on_menu_popup_reset() {
-    auto refSelection = get_selection();
+
+    auto refSelection = m_TreeView_ActiveApps.get_selection();
     if(!refSelection) {
         return;
     }
@@ -105,7 +112,7 @@ void ActiveApps::on_menu_popup_reset() {
 }
 
 void ActiveApps::on_menu_popup_selftest() {
-    auto refSelection = get_selection();
+    auto refSelection = m_TreeView_ActiveApps.get_selection();
     if(!refSelection) {
         return;
     }

@@ -24,7 +24,7 @@
 
 #include "moba/endpoint.h"
 
-class ActiveApps: public Gtk::TreeView {
+class ActiveApps: public Gtk::Box {
 public:
     explicit ActiveApps(EndpointPtr msgEndpoint);
     ~ActiveApps() noexcept override = default;
@@ -32,14 +32,17 @@ public:
     void clearList();
 
     void addActiveApp(
-        int id, const std::string &name, const std::string &version,
-        const std::string &addr, int port, const std::string startTime
+        long id,
+        const std::string &name,
+        const std::string &version,
+        const std::string &addr,
+        long port,
+        const std::string &startTime
     );
     void removeActiveApp(long id);
 
-protected:
-
-    struct ModelColumnsActiveApps: public Gtk::TreeModel::ColumnRecord {
+private:
+    struct ModelColumnsActiveApps final : Gtk::TreeModel::ColumnRecord {
         ModelColumnsActiveApps() {
             add(m_col_id);
             add(m_col_name);
@@ -62,6 +65,9 @@ protected:
     EndpointPtr msgEndpoint;
 
     Glib::RefPtr<Gtk::ListStore> m_refTreeModel_ActiveApps;
+
+    Gtk::ScrolledWindow          m_ScrolledWindow;
+    Gtk::TreeView                m_TreeView_ActiveApps;
 
     Gtk::PopoverMenu m_Menu_Popup;
 
