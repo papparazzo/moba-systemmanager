@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     }
 
     auto socket = std::make_shared<Socket>(appData.host, appData.port);
-    auto endpoint = EndpointPtr{new Endpoint{socket, appData.appName, appData.version, {Message::SERVER, Message::SYSTEM, Message::GUI, Message::TIMER}}};
+    auto endpoint = EndpointPtr{new Endpoint{socket, appData.appName, appData.version, {Message::SERVER, Message::SYSTEM, Message::MESSAGING, Message::TIMER}}};
     auto app = Gtk::Application::create("org.moba.systemmanager");
 
     return app->make_window_and_run<FrmMain>(--argc, argv, endpoint);

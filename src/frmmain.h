@@ -20,19 +20,11 @@
 #pragma once
 
 #include <gtkmm.h>
-#include <gtkmm/window.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/liststore.h>
-
-#include "moba/endpoint.h"
-#include "moba/registry.h"
-#include "moba/servermessages.h"
-#include "moba/guimessages.h"
-#include "moba/clientmessages.h"
-#include "moba/systemmessages.h"
-#include "moba/timermessages.h"
 
 #include "activeapps.h"
+#include "moba/endpoint.h"
+#include "moba/servermessages.h"
+
 #include "noticelogger.h"
 #include "systemcontrol.h"
 #include "automaticcontrol.h"
@@ -49,23 +41,27 @@ protected:
     Gtk::Notebook  m_Notebook;
 
     // active-apps
-    Gtk::ScrolledWindow m_ScrolledWindow;
-    ActiveApps          m_ActiveApps;
-
-    NoticeLogger       m_Notice_Logger;
+    ActiveApps         m_ActiveApps;
+    NoticeLogger       m_Incident_Logger;
     SystemControl      m_System_Control;
     AutomaticControl   m_Automatic_Control;
     ServerData         m_Server_Data;
     EnvironmentControl m_Environment_Control;
 
     void initActiveApps();
-    void setSensitive(bool);
-    void initialSend();
-    void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
-    void registerAdditionalHandler();
+    void setSensitive(bool) override;
+    void initialSend() override;
+    void listNotice(
+        const std::string &timestamp,
+        const std::string &level,
+        const std::string &type,
+        const std::string &caption,
+        const std::string &text,
+        const std::string &origin,
+        const std::string &source
+    ) override;
 
     // msg-response
-    void setServerInfoRes(const ServerInfoRes &data);
     void setConClientsRes(const ServerConClientsRes &data);
     void setNewClient(const ServerNewClientStarted &data);
     void setRemoveClient(const ServerClientClosed &data);

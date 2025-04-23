@@ -23,7 +23,7 @@
 #include "moba/endpoint.h"
 #include "moba/registry.h"
 
-#include "moba/guimessages.h"
+#include "moba/messagingmessages.h"
 #include "moba/clientmessages.h"
 #include "moba/systemmessages.h"
 
@@ -56,7 +56,8 @@ protected:
     Gtk::AboutDialog m_Dialog;
 
     // info-bar
-    Gtk::InfoBar     m_InfoBar;
+    Gtk::Box         m_InfoBar{Gtk::Orientation::HORIZONTAL, 6};
+    Gtk::Button      m_Button_OK{"OK", true};
     Gtk::Label       m_Label_InfoBarMessage;
 
     Gtk::Button      m_Button_Emergency{"Nothalt"};
@@ -78,20 +79,29 @@ protected:
 
     // message-response
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
-    void setSystemNotice(const GuiSystemNotice &data);
-    void setErrorNotice(const ClientError &data);
-    void setHardwareState(const SystemHardwareStateChanged &data);
+    void handleNotifyIncident(const MessagingNotifyIncident &data);
+    void handleSetIncidentList(const MessagingSetIncidentList &data) ;
+    void handleError(const ClientError &data);
+    void handleHardwareState(const SystemHardwareStateChanged &data);
 
     virtual void setSensitive(bool) {}
     virtual void initialSend() {}
     virtual void setSystemState(SystemState systemState) {}
-    virtual void listNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {}
-    
+    virtual void listNotice(
+        const std::string &timestamp,
+        const std::string &level,
+        const std::string &type,
+        const std::string &caption,
+        const std::string &text,
+        const std::string &origin,
+        const std::string &source
+    ) {};
+
     // Signal handlers:
     void on_about_dialog_response(int response_id);
     void on_button_about_clicked();
     void on_button_emergency_clicked();
-    void on_infobar_response(int response);
+    void on_infobar_response();
     bool on_timeout(int timer_number);
     bool on_timeout_status(int);
 };

@@ -32,22 +32,35 @@ public:
 
     ~NoticeLogger() noexcept override = default;
 
-    void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
-    void setNotice(std::string timestamp, std::string type, std::string caption, std::string text);
+    void setNotice(
+        const std::string &timestamp,
+        const std::string &level,
+        const std::string &type,
+        const std::string &caption,
+        const std::string &text,
+        const std::string &origin,
+        const std::string &source
+    );
 
 private:
-    struct ModelColumnsNotices : public Gtk::TreeModel::ColumnRecord {
+    struct ModelColumnsNotices final : Gtk::TreeModel::ColumnRecord {
         ModelColumnsNotices() {
             add(m_col_timestamp);
+            add(m_col_level);
             add(m_col_type);
             add(m_col_caption);
             add(m_col_text);
+            add(m_col_origin);
+            add(m_col_source);
         }
 
         Gtk::TreeModelColumn<Glib::ustring> m_col_timestamp;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_level;
         Gtk::TreeModelColumn<Glib::ustring> m_col_type;
         Gtk::TreeModelColumn<Glib::ustring> m_col_caption;
         Gtk::TreeModelColumn<Glib::ustring> m_col_text;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_origin;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_source;
     };
 
     ModelColumnsNotices m_Columns_Notices;

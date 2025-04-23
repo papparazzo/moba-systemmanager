@@ -18,14 +18,11 @@
  *
  */
 
-#include <iostream>
 #include <functional>
 #include <string>
 
 #include "frmmain.h"
-#include "config.h"
 
-#include "moba/environmentmessages.h"
 #include "moba/servermessages.h"
 #include "moba/timermessages.h"
 #include "noticelogger.h"
@@ -51,15 +48,12 @@ m_Environment_Control{mhp} {
 void FrmMain::initActiveApps() {
     m_VBox.append(m_Notebook);
 
-    m_Notebook.append_page(m_ScrolledWindow, "Active Apps");
+    m_Notebook.append_page(m_ActiveApps, "Aktive Anwendungen");
     m_Notebook.append_page(m_Server_Data, "Server Info");
     m_Notebook.append_page(m_System_Control, "Systemsteuerung");
     m_Notebook.append_page(m_Automatic_Control, "Automatic Control");
     m_Notebook.append_page(m_Environment_Control, "Umgebung");
-    m_Notebook.append_page(m_Notice_Logger, "Notice Logger");
-
-    m_ScrolledWindow.set_child(m_ActiveApps);
-    m_ScrolledWindow.set_policy(Gtk::PolicyType::AUTOMATIC, Gtk::PolicyType::AUTOMATIC);
+    m_Notebook.append_page(m_Incident_Logger, "Statusmeldungen");
 }
 
 void FrmMain::setSensitive(bool sensitive) {
@@ -76,8 +70,16 @@ void FrmMain::setSensitive(bool sensitive) {
     }
 }
 
-void FrmMain::listNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    m_Notice_Logger.setNotice(noticeType, caption, text);
+void FrmMain::listNotice(
+    const std::string &timestamp,
+    const std::string &level,
+    const std::string &type,
+    const std::string &caption,
+    const std::string &text,
+    const std::string &origin,
+    const std::string &source
+) {
+    m_Incident_Logger.setNotice(timestamp, level, type, caption, text, origin, source);
 }
 
 void FrmMain::initialSend() {
@@ -85,6 +87,7 @@ void FrmMain::initialSend() {
     msgEndpoint->sendMsg(ServerConClientsReq{});
     msgEndpoint->sendMsg(SystemGetHardwareState{});
     msgEndpoint->sendMsg(TimerGetGlobalTimer{});
+    msgEndpoint->sendMsg(MessagingGetIncidentList{});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -92,9 +95,14 @@ void FrmMain::initialSend() {
 void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
     m_ActiveApps.clearList();
 
-    for(auto iter : data.endpoints) {
+    for(const auto& iter : data.endpoints) {
         m_ActiveApps.addActiveApp(
-            iter.appId, iter.appInfo.appName, iter.appInfo.version.getString(), iter.addr, iter.port, iter.startTime
+            iter.appId,
+            iter.appInfo.appName,
+            iter.appInfo.version.getString(),
+            iter.addr,
+            iter.port,
+            iter.startTime
         );
     }
 }

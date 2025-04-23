@@ -20,8 +20,6 @@
 
 #include "noticelogger.h"
 
-#include <ctime>
-#include <sstream>
 #include <iomanip>
 
 NoticeLogger::NoticeLogger(): Box{Gtk::Orientation::VERTICAL} {
@@ -37,10 +35,13 @@ NoticeLogger::NoticeLogger(): Box{Gtk::Orientation::VERTICAL} {
     m_refTreeModel_Notices = Gtk::ListStore::create(m_Columns_Notices);
     m_TreeView_Notices.set_model(m_refTreeModel_Notices);
 
-    m_TreeView_Notices.append_column("Timestamp", m_Columns_Notices.m_col_timestamp);
-    m_TreeView_Notices.append_column("Type",      m_Columns_Notices.m_col_type);
-    m_TreeView_Notices.append_column("Caption",   m_Columns_Notices.m_col_caption);
-    m_TreeView_Notices.append_column("Text",      m_Columns_Notices.m_col_text);
+    m_TreeView_Notices.append_column("Zeitpunkt", m_Columns_Notices.m_col_timestamp);
+    m_TreeView_Notices.append_column("Level",     m_Columns_Notices.m_col_level);
+    m_TreeView_Notices.append_column("Art",       m_Columns_Notices.m_col_type);
+    m_TreeView_Notices.append_column("Meldung",   m_Columns_Notices.m_col_caption);
+    m_TreeView_Notices.append_column("Kontext",   m_Columns_Notices.m_col_text);
+    m_TreeView_Notices.append_column("Origin",    m_Columns_Notices.m_col_origin);
+    m_TreeView_Notices.append_column("Source",    m_Columns_Notices.m_col_source);
 
     // HBox
     m_ButtonBox_NoticeLogger.append(m_Button_NoticesClear);
@@ -50,38 +51,23 @@ NoticeLogger::NoticeLogger(): Box{Gtk::Orientation::VERTICAL} {
     m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &NoticeLogger::on_button_notices_clear_clicked));
 }
 
-void NoticeLogger::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-
-    std::ostringstream oss;
-
-    oss << std::put_time(&tm, "%d.%m.%Y %H:%M:%S");
-
-    std::string type;
-
-    switch(noticeType) {
-        case Gtk::MessageType::ERROR:
-            type = "ERROR";
-            break;
-
-        case Gtk::MessageType::WARNING:
-            type = "WARNING";
-            break;
-
-        default:
-            type = "INFO";
-            break;
-    }
-    setNotice(oss.str(), type, caption, text);
-}
-
-void NoticeLogger::setNotice(std::string timestamp, std::string type, std::string caption, std::string text) {
-    Gtk::TreeModel::Row row = *(m_refTreeModel_Notices->append());
+void NoticeLogger::setNotice(
+    const std::string& timestamp,
+    const std::string& level,
+    const std::string& type,
+    const std::string& caption,
+    const std::string &text,
+    const std::string &origin,
+    const std::string &source
+) {
+    Gtk::TreeModel::Row row = *m_refTreeModel_Notices->prepend();
     row[m_Columns_Notices.m_col_timestamp] = timestamp;
+    row[m_Columns_Notices.m_col_level    ] = level;
     row[m_Columns_Notices.m_col_caption  ] = caption;
     row[m_Columns_Notices.m_col_text     ] = text;
     row[m_Columns_Notices.m_col_type     ] = type;
+    row[m_Columns_Notices.m_col_origin   ] = origin;
+    row[m_Columns_Notices.m_col_source   ] = source;
     m_ButtonBox_NoticeLogger.set_sensitive(true);
 }
 

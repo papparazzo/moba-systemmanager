@@ -54,15 +54,23 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
 
     sigc::slot<bool()> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout_status), 1);
     sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 25 ms
-    
-    // Add the message label to the InfoBar:
-    //auto infoBarContainer = dynamic_cast<Gtk::Container*>(m_InfoBar.get_content_area());
-    //if(infoBarContainer) {
-    //    infoBarContainer->add(m_Label_InfoBarMessage);
-    //}
 
+    m_VBox.set_margin(6);
     set_child(m_VBox);
-    
+
+    // Add the message label to the InfoBar:
+    m_InfoBar.append(m_Label_InfoBarMessage);
+ 	m_Label_InfoBarMessage.set_margin_start(5);
+  	m_Label_InfoBarMessage.set_hexpand(true);
+  	m_Label_InfoBarMessage.set_halign(Gtk::Align::START);
+
+ 	m_InfoBar.append(m_Button_OK);
+  	m_Button_OK.set_margin(5);
+  	m_InfoBar.set_visible(false);
+
+ 	// Connect signals:
+  	m_Button_OK.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_infobar_response) );
+
     m_VBox.append(m_InfoBar);
 
     m_HBox_Status.set_margin(6);
@@ -75,9 +83,6 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
 
     m_HBox_Status.append(m_HButtonBox);
-
-    m_InfoBar.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_infobar_response));
-    m_InfoBar.add_button("_OK", 0);
 
     m_HBox_Expander.set_hexpand();
     m_HButtonBox.append(m_HBox_Expander);
@@ -93,15 +98,16 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     m_Button_Emergency.set_sensitive(false);
     initAboutDialog();
 
-    registry.registerHandler<GuiSystemNotice>(std::bind(&FrmBase::setSystemNotice, this, std::placeholders::_1));
-    registry.registerHandler<ClientError>(std::bind(&FrmBase::setErrorNotice, this, std::placeholders::_1));
-    registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmBase::setHardwareState, this, std::placeholders::_1));
+    registry.registerHandler<MessagingNotifyIncident>(std::bind(&FrmBase::handleNotifyIncident, this, std::placeholders::_1));
+    registry.registerHandler<MessagingSetIncidentList>(std::bind(&FrmBase::handleSetIncidentList, this, std::placeholders::_1));
+    registry.registerHandler<ClientError>(std::bind(&FrmBase::handleError, this, std::placeholders::_1));
+    registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmBase::handleHardwareState, this, std::placeholders::_1));
 }
 
 void FrmBase::finishForm() {
    // show_all_children();
     m_VBox.append(m_HBox_Status);
-    m_InfoBar.hide();
+    m_InfoBar.set_visible(false);
 }
  
 void FrmBase::initAboutDialog() {
@@ -116,13 +122,13 @@ void FrmBase::initAboutDialog() {
     m_Dialog.set_website("<pappi-@gmx.de>");
     m_Dialog.set_website_label("pappi-@gmx.de");
 
-   // m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/" PACKAGE_NAME ".svg"));
+    // m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/" PACKAGE_NAME ".svg"));
 
     std::vector<Glib::ustring> list_authors;
     list_authors.push_back("Stefan Paproth");
     m_Dialog.set_authors(list_authors);
 
-   // m_Dialog.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_about_dialog_response));
+    // m_Dialog.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_about_dialog_response));
 
     m_Button_About.grab_focus();
 }
@@ -139,42 +145,68 @@ std::string FrmBase::getDisplayMessage(std::string caption, std::string text) {
 }
 
 void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    listNotice(noticeType, caption, text);
-
     m_Label_InfoBarMessage.set_markup(getDisplayMessage(caption, text));
-    m_InfoBar.set_message_type(noticeType);
-    m_InfoBar.show();
+    //m_InfoBar.set_message_type(noticeType);
+    m_InfoBar.set_visible(true);
 }
 
-void FrmBase::setErrorNotice(const ClientError &data) {
+void FrmBase::handleSetIncidentList(const MessagingSetIncidentList &data) {
+    for(const auto& iter : data.incidents) {
+        listNotice(
+            iter.timeStamp,
+            incidentLevelEnumToString(iter.level),
+            incidentTypeEnumToString(iter.type),
+            iter.caption,
+            iter.message,
+            iter.origin.toString(),
+            iter.source
+        );
+    }
+}
+
+void FrmBase::handleError(const ClientError &data) {
     setNotice(
-        Gtk::MessageType::ERROR, 
+        Gtk::MessageType::ERROR,
         errorIdEnumToString(data.errorId),    
         data.additionalMsg
     );
 }
 
-void FrmBase::setSystemNotice(const GuiSystemNotice &data) {
-    
+void FrmBase::handleNotifyIncident(const MessagingNotifyIncident &data) {
+
+    listNotice(
+        data.incident.timeStamp,
+        incidentLevelEnumToString(data.incident.level),
+        incidentTypeEnumToString(data.incident.type),
+        data.incident.caption,
+        data.incident.message,
+        data.incident.origin.toString(),
+        data.incident.source
+    );
+
+    //data.incident.endpoint.toString();
+
     Gtk::MessageType mt;
-    switch(data.noticeType) {
-        case GuiSystemNotice::NoticeType::ERROR:
+    switch(data.incident.type) {
+        case IncidentType::EXCEPTION:
             mt = Gtk::MessageType::ERROR;
             break;
 
-        case GuiSystemNotice::NoticeType::WARNING:
+        case IncidentType::CLIENT_ERROR:
             mt = Gtk::MessageType::WARNING;
             break;
 
-        case GuiSystemNotice::NoticeType::INFO:
+        case IncidentType::NOTICE:
+        case IncidentType::SERVER_NOTICE:
+        case IncidentType::STATUS_CHANGED:
         default:
             mt = Gtk::MessageType::INFO;
             break;
     }
-    setNotice(mt, data.caption, data.text);
+    setNotice(mt, data.incident.caption, data.incident.message);
 }
 
-void FrmBase::setHardwareState(const SystemHardwareStateChanged &data) {
+void FrmBase::handleHardwareState(const SystemHardwareStateChanged &data) {
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
         m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
         m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
@@ -242,11 +274,11 @@ bool FrmBase::on_timeout(int) {
             m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
 
-            m_InfoBar.set_message_type(Gtk::MessageType::ERROR);
+          //  m_InfoBar.set_message_type(Gtk::MessageType::ERROR);
             std::stringstream ss;
             ss << "<b>msg-handler exception:</b>\n" << e.what();
             m_Label_InfoBarMessage.set_markup(ss.str());
-            m_InfoBar.show();
+            m_InfoBar.set_visible(true);
             setSensitive(false);
             connected = false;
         }
@@ -337,8 +369,8 @@ void FrmBase::on_button_emergency_clicked() {
     }
 }
 
-void FrmBase::on_infobar_response(int) {
+void FrmBase::on_infobar_response() {
     m_Label_InfoBarMessage.set_text("");
-    m_InfoBar.hide();
+    m_InfoBar.set_visible(false);
 }
 // </editor-fold>
