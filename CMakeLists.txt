@@ -14,6 +14,9 @@ configure_file(config.h.in config.h)
 add_executable(
     moba-systemmanager
 
+    src/systemcontrol.cpp
+    src/serverdata.cpp
+    src/noticelogger.cpp
     src/activeapps.cpp
     src/automaticcontrol.cpp
     src/clock.cpp

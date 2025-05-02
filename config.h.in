@@ -12,7 +12,7 @@
 #define PACKAGE_NAME "@CMAKE_PROJECT_NAME@"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "@CMAKE_PROJECT_NAME@ @moba-routing_VERSION@"
+#define PACKAGE_STRING "@CMAKE_PROJECT_NAME@ @moba-systemmanager_VERSION@"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "@CMAKE_PROJECT_NAME@"

@@ -48,7 +48,7 @@ ServerData::ServerData() : Gtk::Box{Gtk::Orientation::VERTICAL, 6} {
 
 void ServerData::setServerInfoRes(const ServerInfoRes &data) {
     lblName[1][0].set_label(data.appName);
-    lblName[1][1].set_label(data.version.getString());
+    lblName[1][1].set_label(data.version.toString());
     lblName[1][2].set_label(data.buildDate);
     lblName[1][3].set_label(data.startTime);
     lblName[1][4].set_label(std::to_string(data.maxClients));
