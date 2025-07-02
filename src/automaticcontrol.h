@@ -27,7 +27,7 @@
 
 #include "moba/endpoint.h"
 #include "moba/timermessages.h"
-#include "moba/day.h"
+#include "moba/enumday.h"
 
 class AutomaticControl: public Gtk::Box {
 public:
