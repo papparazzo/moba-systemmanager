@@ -33,6 +33,7 @@ install(TARGETS moba-systemmanager)
 
 target_include_directories(moba-systemmanager PUBLIC "${PROJECT_BINARY_DIR}")
 
+target_link_libraries(moba-systemmanager ncurses)
 target_link_libraries(moba-systemmanager mobacommon)
 target_link_libraries(moba-systemmanager ${CMAKE_SOURCE_DIR}/modules/lib-msghandling/libmoba-lib-msghandling.a)
 target_link_libraries(moba-systemmanager ${GTKMM_LIBRARIES})
