@@ -34,6 +34,7 @@ public:
     void addActiveApp(
         long id,
         const std::string &name,
+        const std::string &description,
         const std::string &version,
         const std::string &addr,
         long port,
@@ -46,6 +47,7 @@ private:
         ModelColumnsActiveApps() {
             add(m_col_id);
             add(m_col_name);
+            add(m_col_description);
             add(m_col_version);
             add(m_col_ipAddr);
             add(m_col_port);
@@ -54,6 +56,7 @@ private:
 
         Gtk::TreeModelColumn<unsigned int>  m_col_id;
         Gtk::TreeModelColumn<Glib::ustring> m_col_name;
+        Gtk::TreeModelColumn<Glib::ustring> m_col_description;
         Gtk::TreeModelColumn<Glib::ustring> m_col_version;
         Gtk::TreeModelColumn<Glib::ustring> m_col_ipAddr;
         Gtk::TreeModelColumn<unsigned int>  m_col_port;

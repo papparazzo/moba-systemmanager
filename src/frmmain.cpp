@@ -99,6 +99,7 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
         m_ActiveApps.addActiveApp(
             iter.appId,
             iter.appData.appName,
+            iter.appData.description,
             iter.appData.version.toString(),
             iter.addr,
             iter.port,
@@ -109,7 +110,10 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
 
 void FrmMain::setNewClient(const ServerNewClientStarted &data) {
     m_ActiveApps.addActiveApp(
-        data.endpoint.appId, data.endpoint.appData.appName, data.endpoint.appData.version.toString(),
+        data.endpoint.appId,
+        data.endpoint.appData.appName,
+        data.endpoint.appData.description,
+        data.endpoint.appData.version.toString(),
         data.endpoint.addr, data.endpoint.port, data.endpoint.startTime
     );
 }

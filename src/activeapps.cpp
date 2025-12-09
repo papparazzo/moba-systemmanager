@@ -31,12 +31,13 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     m_refTreeModel_ActiveApps = Gtk::ListStore::create(m_Columns_ActiveApps);
     m_TreeView_ActiveApps.set_model(m_refTreeModel_ActiveApps);
 
-    m_TreeView_ActiveApps.append_column("ID",         m_Columns_ActiveApps.m_col_id);
-    m_TreeView_ActiveApps.append_column("Name",       m_Columns_ActiveApps.m_col_name);
-    m_TreeView_ActiveApps.append_column("Version",    m_Columns_ActiveApps.m_col_version);
-    m_TreeView_ActiveApps.append_column("IP-Adresse", m_Columns_ActiveApps.m_col_ipAddr);
-    m_TreeView_ActiveApps.append_column("Port",       m_Columns_ActiveApps.m_col_port);
-    m_TreeView_ActiveApps.append_column("Start-Time", m_Columns_ActiveApps.m_col_startTime);
+    m_TreeView_ActiveApps.append_column("Id",           m_Columns_ActiveApps.m_col_id);
+    m_TreeView_ActiveApps.append_column("Name",         m_Columns_ActiveApps.m_col_name);
+    m_TreeView_ActiveApps.append_column("Beschreibung", m_Columns_ActiveApps.m_col_description);
+    m_TreeView_ActiveApps.append_column("Version",      m_Columns_ActiveApps.m_col_version);
+    m_TreeView_ActiveApps.append_column("IP-Adresse",   m_Columns_ActiveApps.m_col_ipAddr);
+    m_TreeView_ActiveApps.append_column("Port",         m_Columns_ActiveApps.m_col_port);
+    m_TreeView_ActiveApps.append_column("Start-Time",   m_Columns_ActiveApps.m_col_startTime);
 
     auto refGesture = Gtk::GestureClick::create();
     refGesture->set_button(GDK_BUTTON_SECONDARY);
@@ -78,17 +79,17 @@ void ActiveApps::clearList() {
 }
 
 void ActiveApps::addActiveApp(
-    long id, const std::string &name, const std::string &version,
-    const std::string &addr, long port, const std::string &startTime
-) {
-    Gtk::TreeModel::Row row;
-    row = *(m_refTreeModel_ActiveApps->append());
-    row[m_Columns_ActiveApps.m_col_id       ] = id;
-    row[m_Columns_ActiveApps.m_col_name     ] = name;
-    row[m_Columns_ActiveApps.m_col_version  ] = version;
-    row[m_Columns_ActiveApps.m_col_ipAddr   ] = addr;
-    row[m_Columns_ActiveApps.m_col_port     ] = port;
-    row[m_Columns_ActiveApps.m_col_startTime] = startTime;
+    const long id, const std::string &name, const std::string &description, const std::string &version,
+    const std::string &addr, const long port, const std::string &startTime
+) const {
+    Gtk::TreeModel::Row row = *m_refTreeModel_ActiveApps->append();
+    row[m_Columns_ActiveApps.m_col_id         ] = id;
+    row[m_Columns_ActiveApps.m_col_name       ] = name;
+    row[m_Columns_ActiveApps.m_col_description] = description;
+    row[m_Columns_ActiveApps.m_col_version    ] = version;
+    row[m_Columns_ActiveApps.m_col_ipAddr     ] = addr;
+    row[m_Columns_ActiveApps.m_col_port       ] = port;
+    row[m_Columns_ActiveApps.m_col_startTime  ] = startTime;
 }
 
 void ActiveApps::on_popup_button_pressed(int n_press, double x, double y) {
