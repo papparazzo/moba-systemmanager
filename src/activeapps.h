@@ -29,7 +29,7 @@ public:
     explicit ActiveApps(EndpointPtr msgEndpoint);
     ~ActiveApps() noexcept override = default;
 
-    void clearList();
+    void clearList() const;
 
     void addActiveApp(
         long id,
@@ -39,8 +39,8 @@ public:
         const std::string &addr,
         long port,
         const std::string &startTime
-    );
-    void removeActiveApp(long id);
+    ) const;
+    void removeActiveApp(long id) const;
 
 private:
     struct ModelColumnsActiveApps final : Gtk::TreeModel::ColumnRecord {

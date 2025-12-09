@@ -118,11 +118,11 @@ void FrmMain::setNewClient(const ServerNewClientStarted &data) {
     );
 }
 
-void FrmMain::setRemoveClient(const ServerClientClosed &data) {
+void FrmMain::setRemoveClient(const ServerClientClosed &data) const {
     m_ActiveApps.removeActiveApp(data.clientId);
 }
 
-void FrmMain::setSystemState(SystemState systemState) {
+void FrmMain::setSystemState(const SystemState systemState) {
     m_System_Control.setHardwareState(systemState);
     m_Automatic_Control.setHardwareState(systemState);
 }

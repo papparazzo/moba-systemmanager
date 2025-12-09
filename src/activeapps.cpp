@@ -39,13 +39,13 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     m_TreeView_ActiveApps.append_column("Port",         m_Columns_ActiveApps.m_col_port);
     m_TreeView_ActiveApps.append_column("Start-Time",   m_Columns_ActiveApps.m_col_startTime);
 
-    auto refGesture = Gtk::GestureClick::create();
+    const auto refGesture = Gtk::GestureClick::create();
     refGesture->set_button(GDK_BUTTON_SECONDARY);
     refGesture->signal_pressed().connect(sigc::mem_fun(*this, &ActiveApps::on_popup_button_pressed));
     add_controller(refGesture);
 
     // Fill popup menu:
-    auto gmenu = Gio::Menu::create();
+    const auto gmenu = Gio::Menu::create();
     gmenu->append("_Selftest", "popup.selftest");
     gmenu->append("_Reset", "popup.reset");
 
@@ -54,7 +54,7 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     m_Menu_Popup.set_has_arrow(false);
 
     // Create actions:
-    auto refActionGroup = Gio::SimpleActionGroup::create();
+    const auto refActionGroup = Gio::SimpleActionGroup::create();
 
     refActionGroup->add_action("selftest", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_selftest));
     refActionGroup->add_action("reset", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
@@ -62,19 +62,21 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     insert_action_group("popup", refActionGroup);
 }
 
-void ActiveApps::removeActiveApp(long id) {
+void ActiveApps::removeActiveApp(const long id) const {
     Gtk::TreeModel::Children children = m_refTreeModel_ActiveApps->children();
 
     for(auto iter = children.begin(); iter != children.end(); ++iter) {
-        Gtk::TreeModel::Row row = *iter;
-        if(row[m_Columns_ActiveApps.m_col_id] == id) {
+        if(
+            Gtk::TreeModel::Row row = *iter;
+            row[m_Columns_ActiveApps.m_col_id] == id
+        ) {
             m_refTreeModel_ActiveApps->erase(iter);
             return;
         }
     }
 }
 
-void ActiveApps::clearList() {
+void ActiveApps::clearList() const {
     m_refTreeModel_ActiveApps->clear();
 }
 
@@ -92,35 +94,35 @@ void ActiveApps::addActiveApp(
     row[m_Columns_ActiveApps.m_col_startTime  ] = startTime;
 }
 
-void ActiveApps::on_popup_button_pressed(int n_press, double x, double y) {
-    const Gdk::Rectangle rect(x, y, 1, 1);
+void ActiveApps::on_popup_button_pressed(int, const double x, const double y) {
+    const Gdk::Rectangle rect(static_cast<int>(x), static_cast<int>(y), 1, 1);
     m_Menu_Popup.set_pointing_to(rect);
     m_Menu_Popup.popup();
 }
 
 void ActiveApps::on_menu_popup_reset() {
 
-    auto refSelection = m_TreeView_ActiveApps.get_selection();
+    const auto refSelection = m_TreeView_ActiveApps.get_selection();
     if(!refSelection) {
         return;
     }
-    auto iter = refSelection->get_selected();
+    const auto iter = refSelection->get_selected();
     if(!iter) {
         return;
     }
-    long id = (*iter)[m_Columns_ActiveApps.m_col_id];
+    const long id = (*iter)[m_Columns_ActiveApps.m_col_id];
     msgEndpoint->sendMsg(ServerResetClient{id});
 }
 
 void ActiveApps::on_menu_popup_selftest() {
-    auto refSelection = m_TreeView_ActiveApps.get_selection();
+    const auto refSelection = m_TreeView_ActiveApps.get_selection();
     if(!refSelection) {
         return;
     }
-    auto iter = refSelection->get_selected();
+    const auto iter = refSelection->get_selected();
     if(!iter) {
         return;
     }
-    long id = (*iter)[m_Columns_ActiveApps.m_col_id];
+    const long id = (*iter)[m_Columns_ActiveApps.m_col_id];
     msgEndpoint->sendMsg(ServerSelfTestingClient{id});
 }

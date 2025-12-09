@@ -23,7 +23,7 @@
 #include "config.h"
 
 namespace {
-    const char license[] =
+    constexpr char license[] =
         "Project:    " PACKAGE_NAME "\n"
         "\n"
         "Copyright (C) 2018 Stefan Paproth <pappi-@gmx.de>\n"
