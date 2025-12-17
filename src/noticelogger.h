@@ -23,10 +23,12 @@
 #include <gtkmm.h>
 #include <string>
 
+#include "moba/endpoint.h"
+
 class NoticeLogger final : public Gtk::Box {
 public:
 
-    NoticeLogger();
+    explicit NoticeLogger(EndpointPtr msgEndpoint);
     NoticeLogger(const NoticeLogger&) = delete;
     NoticeLogger& operator=(const NoticeLogger&) = delete;
 
@@ -41,6 +43,8 @@ public:
         const std::string &origin,
         const std::string &source
     );
+
+    void clearList();
 
 private:
     struct ModelColumnsNotices final : Gtk::TreeModel::ColumnRecord {
@@ -74,5 +78,7 @@ private:
 
     Gtk::Box                     m_ButtonBox_NoticeLogger{Gtk::Orientation::HORIZONTAL, 6};
     Gtk::Button                  m_Button_NoticesClear{"Liste leeren"};
+
+    EndpointPtr msgEndpoint;
 };
 

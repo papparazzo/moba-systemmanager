@@ -22,7 +22,9 @@
 
 #include <iomanip>
 
-NoticeLogger::NoticeLogger(): Box{Gtk::Orientation::VERTICAL} {
+#include "moba/messagingmessages.h"
+
+NoticeLogger::NoticeLogger(EndpointPtr msgEndpoint): Box{Gtk::Orientation::VERTICAL}, msgEndpoint{msgEndpoint} {
 
     append(m_ScrolledWindow_NoticeLogger);
     append(m_ButtonBox_NoticeLogger);
@@ -71,7 +73,11 @@ void NoticeLogger::setNotice(
     m_ButtonBox_NoticeLogger.set_sensitive(true);
 }
 
-void NoticeLogger::on_button_notices_clear_clicked() {
-    m_ButtonBox_NoticeLogger.set_sensitive(false);
+void NoticeLogger::clearList() {
     m_refTreeModel_Notices->clear();
+    m_ButtonBox_NoticeLogger.set_sensitive(false);
+}
+
+void NoticeLogger::on_button_notices_clear_clicked() const {
+    msgEndpoint->sendMsg(MessagingClearIncidentList{});
 }
