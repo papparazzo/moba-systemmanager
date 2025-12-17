@@ -140,7 +140,7 @@ std::string FrmBase::getDisplayMessage(std::string caption, std::string text) {
     std::replace(text.begin(), text.end(), '>', '"');
 
     std::stringstream ss;
-    ss << "<b>" << caption << "!</b>\n" << text;
+    ss << "<b>" << caption << ":</b>\n" << text;
     return std::move(ss.str());
 }
 
@@ -275,9 +275,7 @@ bool FrmBase::on_timeout(int) {
             m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
 
           //  m_InfoBar.set_message_type(Gtk::MessageType::ERROR);
-            std::stringstream ss;
-            ss << "<b>msg-handler exception:</b>\n" << e.what();
-            m_Label_InfoBarMessage.set_markup(ss.str());
+            m_Label_InfoBarMessage.set_markup(getDisplayMessage("msg-handler exception", e.what()));
             m_InfoBar.set_visible(true);
             setSensitive(false);
             connected = false;
