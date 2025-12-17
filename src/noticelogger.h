@@ -69,7 +69,7 @@ private:
 
     ModelColumnsNotices m_Columns_Notices;
 
-    void on_button_notices_clear_clicked();
+    void on_button_notices_clear_clicked() const;
 
     // notice-logger
     Gtk::ScrolledWindow          m_ScrolledWindow_NoticeLogger;

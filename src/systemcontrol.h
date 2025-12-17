@@ -27,7 +27,7 @@
 #include "moba/endpoint.h"
 #include "frmbase.h"
 
-class SystemControl: public Gtk::Box {
+class SystemControl final : public Gtk::Box {
 public:
     explicit SystemControl(EndpointPtr msgEndpoint);
     SystemControl(const SystemControl&) = delete;

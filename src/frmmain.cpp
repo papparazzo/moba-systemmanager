@@ -29,7 +29,7 @@
 
 FrmMain::FrmMain(EndpointPtr mhp): FrmBase{mhp}, m_ActiveApps{mhp}, m_Incident_Logger{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
 m_Environment_Control{mhp} {
-    
+
     set_size_request(675, 450);
     set_resizable(false);
 
@@ -38,7 +38,7 @@ m_Environment_Control{mhp} {
 
     registry.registerHandler<ServerInfoRes>(std::bind(&ServerData::setServerInfoRes, &m_Server_Data, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
-    registry.registerHandler<ClientEchoRes>([this]{m_System_Control.setPingResult();});
+    registry.registerHandler<ClientEchoRes>([this] { m_System_Control.setPingResult(); });
     registry.registerHandler<MessagingClearIncidentList>([this] { m_Incident_Logger.clearList(); });
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
     registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
