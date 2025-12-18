@@ -49,11 +49,14 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     //set_border_width(10);
     //set_position(Gtk::WIN_POS_CENTER);
 
-    sigc::slot<bool()> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout), 1);
-    auto conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
+    const sigc::slot<bool()> my_slot1 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout), 1);
+    sigc::connection conn1 = Glib::signal_timeout().connect(my_slot1, 25); // 25 ms
 
-    sigc::slot<bool()> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout_status), 1);
-    sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 25 ms
+    const sigc::slot<bool()> my_slot2 = sigc::bind(sigc::mem_fun(*this, &FrmBase::on_timeout_status), 1);
+    sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 850 ms
+
+    this->signal_destroy().connect(sigc::mem_fun(*this, &FrmBase::on_window_closing));
+
 
     m_VBox.set_margin(6);
     set_child(m_VBox);
@@ -196,7 +199,7 @@ void FrmBase::handleNotifyIncident(const MessagingNotifyIncident &data) {
             mt = Gtk::MessageType::WARNING;
             break;
 
-        case IncidentType::NOTICE:
+        case IncidentType::CLIENT_NOTICE:
         case IncidentType::SERVER_NOTICE:
         case IncidentType::STATUS_CHANGED:
         default:
@@ -371,4 +374,9 @@ void FrmBase::on_infobar_response() {
     m_Label_InfoBarMessage.set_text("");
     m_InfoBar.set_visible(false);
 }
+
+void FrmBase::on_window_closing() {
+    msgEndpoint->sendMsg(ClientClosing{});
+}
+
 // </editor-fold>

@@ -104,5 +104,6 @@ protected:
     void on_infobar_response();
     bool on_timeout(int timer_number);
     bool on_timeout_status(int);
+    void on_window_closing();
 };
 
