@@ -48,6 +48,7 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
     const auto gmenu = Gio::Menu::create();
     gmenu->append("_Selftest", "popup.selftest");
     gmenu->append("_Reset", "popup.reset");
+    gmenu->append("_Reset (Hardware)", "popup.reset_hardware");
 
     m_Menu_Popup.set_parent(*this);
     m_Menu_Popup.set_menu_model(gmenu);
@@ -58,6 +59,7 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
 
     refActionGroup->add_action("selftest", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_selftest));
     refActionGroup->add_action("reset", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
+    refActionGroup->add_action("reset_hardware", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
 
     insert_action_group("popup", refActionGroup);
 }
@@ -112,6 +114,20 @@ void ActiveApps::on_menu_popup_reset() {
     }
     const long id = (*iter)[m_Columns_ActiveApps.m_col_id];
     msgEndpoint->sendMsg(ServerResetClient{id});
+}
+
+void ActiveApps::on_menu_popup_reset_hardware() {
+
+    const auto refSelection = m_TreeView_ActiveApps.get_selection();
+    if(!refSelection) {
+        return;
+    }
+    const auto iter = refSelection->get_selected();
+    if(!iter) {
+        return;
+    }
+    const long id = (*iter)[m_Columns_ActiveApps.m_col_id];
+    msgEndpoint->sendMsg(ServerResetClientHardware{id});
 }
 
 void ActiveApps::on_menu_popup_selftest() {

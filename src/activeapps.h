@@ -75,6 +75,7 @@ private:
     Gtk::PopoverMenu m_Menu_Popup;
 
     void on_menu_popup_reset();
+    void on_menu_popup_reset_hardware();
     void on_menu_popup_selftest();
     void on_popup_button_pressed(int n_press, double x, double y);
 };
