@@ -95,6 +95,7 @@ private:
 
     Gtk::Box          m_ButtonBox_AutomaticControl;
     Gtk::Button       m_Button_AutomaticControl_Set{"Werte setzen"};
+    Gtk::Button       m_Button_Set_AutomaticControl_Ready{"bereit"};
     Gtk::ToggleButton m_Button_AutomaticControl_Enable{"Automatik"};
 
     sigc::connection  m_click_connection;

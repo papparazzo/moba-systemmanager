@@ -42,7 +42,7 @@ namespace {
         "along with this program. If not, see <http://www.gnu.org/licenses/agpl.txt>.";
 }
 
-FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndpoint{mhp} {
+FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::INITIALIZING}, msgEndpoint{mhp} {
 
     set_icon_name(PACKAGE_NAME);
     set_title(PACKAGE_NAME);
@@ -56,7 +56,6 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     sigc::connection conn2 = Glib::signal_timeout().connect(my_slot2, 850, Glib::PRIORITY_DEFAULT_IDLE); // 850 ms
 
     this->signal_destroy().connect(sigc::mem_fun(*this, &FrmBase::on_window_closing));
-
 
     m_VBox.set_margin(6);
     set_child(m_VBox);
@@ -77,13 +76,14 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     m_VBox.append(m_InfoBar);
 
     m_HBox_Status.set_margin(6);
-    m_HBox_Status.append(m_Label_Connectivity_SW);
-    m_Label_Connectivity_SW.set_justify(Gtk::Justification::LEFT);
-    m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
 
     m_HBox_Status.append(m_Label_Connectivity_HW);
     m_Label_Connectivity_HW.set_justify(Gtk::Justification::LEFT);
     m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+
+    m_HBox_Status.append(m_Label_Connectivity_SW);
+    m_Label_Connectivity_SW.set_justify(Gtk::Justification::LEFT);
+    m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
 
     m_HBox_Status.append(m_HButtonBox);
 
@@ -98,7 +98,7 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::NO_CONNECT}, msgEndp
     m_Button_Emergency.signal_clicked().connect(sigc::mem_fun(*this, &FrmBase::on_button_emergency_clicked));
 
     setSensitive(false);
-    m_Button_Emergency.set_sensitive(false);
+   // m_Button_Emergency.set_sensitive(false);
     initAboutDialog();
 
     registry.registerHandler<MessagingNotifyIncident>(std::bind(&FrmBase::handleNotifyIncident, this, std::placeholders::_1));
@@ -210,40 +210,53 @@ void FrmBase::handleNotifyIncident(const MessagingNotifyIncident &data) {
 }
 
 void FrmBase::handleHardwareState(const SystemHardwareStateChanged &data) {
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::ERROR) {
-        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
-        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
-        systemState = SystemState::ERROR;
-        m_Button_Emergency.set_sensitive(false);
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::INCIDENT) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> Softwarefehler oder Nothalt");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> Softwarefehler oder Nothalt");
+        systemState = SystemState::INCIDENT;
+        m_Button_Emergency.set_label("Freigabe");
+        m_Button_Emergency.set_sensitive(true);
         setSystemState(systemState);
         return;
     }
-    m_Button_Emergency.set_sensitive(true);
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::EMERGENCY_STOP) {
-        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
-        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Nohalt ausgelöst");
-        systemState = SystemState::EMERGENCY_STOP;
-        m_Button_Emergency.set_label("Freigabe");
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::NO_CONNECTION) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> Verbindung zur Hardware unterbrochen");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> Verbindung zur Hardware unterbrochen");
+        systemState = SystemState::NO_CONNECTION;
+        m_Button_Emergency.set_sensitive(false);
         setSystemState(systemState);
         return;
     }
     m_Button_Emergency.set_label("Nothalt");
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::STANDBY) {
-        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
-        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Energiesparmodus");
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> Energiesparmodus (Anlage stromlos)");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> Energiesparmodus");
         systemState = SystemState::STANDBY;
         m_Button_Emergency.set_sensitive(false);
     }
-
-    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUEL) {
-        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> manuell");
-        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> manuell");
-        systemState = SystemState::MANUEL;
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::MANUAL) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> manuell");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> nicht bereit für Automatikmodus");
+        systemState = SystemState::MANUAL;
+        m_Button_Emergency.set_sensitive(true);
+    }
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::READY) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> manuell");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> bereit für Automatikmodus");
+        systemState = SystemState::READY;
+        m_Button_Emergency.set_sensitive(true);
     }
     if(data.hardwareState == SystemHardwareStateChanged::HardwareState::AUTOMATIC) {
-        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> automatisch");
-        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> automatisch");
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> automatisch");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> automatisch");
         systemState = SystemState::AUTOMATIC;
+        m_Button_Emergency.set_sensitive(true);
+    }
+    if(data.hardwareState == SystemHardwareStateChanged::HardwareState::SHUTDOWN) {
+        m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> Anlage stromlos");
+        m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> Anlage wird heruntergefahren...");
+        systemState = SystemState::SHUTDOWN;
+        m_Button_Emergency.set_sensitive(false);
     }
     setSystemState(systemState);
 }
@@ -260,9 +273,9 @@ bool FrmBase::on_timeout(int) {
     try {
         if(!connected) {
             msgEndpoint->connect();
-            systemState = SystemState::ERROR;
-            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
-            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zur Hardware");
+            systemState = SystemState::INCIDENT;
+            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> Keine Verbindung zur Hardware");
+            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> Keine Verbindung zur Hardware");
             initialSend();
             setSensitive(true);
 
@@ -273,9 +286,9 @@ bool FrmBase::on_timeout(int) {
     } catch(std::exception &e) {
         if(connected) {
             m_Button_Emergency.set_sensitive(false);
-            systemState = SystemState::NO_CONNECT;
-            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
-            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status:</b> Keine Verbindung zum Server");
+            systemState = SystemState::INITIALIZING;
+            m_Label_Connectivity_HW.set_tooltip_markup("<b>Status Hardware:</b> Keine Verbindung zum Server");
+            m_Label_Connectivity_SW.set_tooltip_markup("<b>Status Software:</b> Keine Verbindung zum Server");
 
           //  m_InfoBar.set_message_type(Gtk::MessageType::ERROR);
             m_Label_InfoBarMessage.set_markup(getDisplayMessage("msg-handler exception", e.what()));
@@ -292,44 +305,40 @@ bool FrmBase::on_timeout_status(int) {
 
     on = !on;
     switch(systemState) {
-        case SystemState::NO_CONNECT:
-            if(on) {
-                m_Label_Connectivity_SW.set_markup("<span color=\"red\"> \xe2\x96\x84</span>");
-            } else {
-                m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
-            }
+        case SystemState::INITIALIZING:
+            m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
             m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
             break;
 
-        case SystemState::ERROR:
-            m_Label_Connectivity_SW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
+        case SystemState::NO_CONNECTION:
             if(on) {
                 m_Label_Connectivity_HW.set_markup("<span color=\"red\"> \xe2\x96\x84</span>");
             } else {
                 m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
             }
+            m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+            break;
+
+        case SystemState::INCIDENT:
+            if(on) {
+                m_Label_Connectivity_SW.set_markup("<span color=\"red\"> \xe2\x96\x84</span>");
+            } else {
+                m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+            }
+            m_Label_Connectivity_HW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
             break;
 
         case SystemState::STANDBY:
+            m_Label_Connectivity_SW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
+            m_Label_Connectivity_HW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
+            break;
+
+        case SystemState::MANUAL:
+            m_Label_Connectivity_HW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
             m_Label_Connectivity_SW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
-            if(on) {
-                m_Label_Connectivity_HW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
-            } else {
-                m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
-            }
             break;
 
-        case SystemState::EMERGENCY_STOP:
-            if(on) {
-                m_Label_Connectivity_HW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
-                m_Label_Connectivity_SW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
-            } else {
-                m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
-                m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
-            }
-            break;
-
-        case SystemState::MANUEL:
+        case SystemState::READY:
             m_Label_Connectivity_HW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
             if(on) {
                 m_Label_Connectivity_SW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
@@ -339,22 +348,28 @@ bool FrmBase::on_timeout_status(int) {
             break;
 
         case SystemState::AUTOMATIC:
-            m_Label_Connectivity_HW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
-            m_Label_Connectivity_SW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
+            if(on) {
+                m_Label_Connectivity_SW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
+                m_Label_Connectivity_HW.set_markup("<span color=\"green\"> \xe2\x96\x84</span>");
+            } else {
+                m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+                m_Label_Connectivity_HW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+            }
+            break;
+
+        case SystemState::SHUTDOWN:
+            m_Label_Connectivity_HW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
+            if(on) {
+                m_Label_Connectivity_SW.set_markup("<span color=\"gold\"> \xe2\x96\x84</span>");
+            } else {
+                m_Label_Connectivity_SW.set_markup("<span color=\"gray\"> \xe2\x96\x84</span>");
+            }
+            break;
+
+        default:
             break;
     }
     return true;
-
-    /*
-                SW              HW
-    -           rot / blink     grau
-    ERROR       grün            rot / blink
-    STANDBY     grün            gelb / blink
-    EMERGENCY   gelb / blink    gelb / blink
-    MANUELL     grün / blink    grün
-    AUTOMATIC   grün            grün
-
-     */
 }
 
 void FrmBase::on_button_about_clicked() {
@@ -362,7 +377,7 @@ void FrmBase::on_button_about_clicked() {
     m_Dialog.present();
 }
 
-void FrmBase::on_button_emergency_clicked() {
+void FrmBase::on_button_emergency_clicked() const {
     if(m_Button_Emergency.get_label() == "Nothalt") {
         msgEndpoint->sendMsg(SystemTriggerEmergencyStop{});
     } else {
@@ -375,8 +390,12 @@ void FrmBase::on_infobar_response() {
     m_InfoBar.set_visible(false);
 }
 
-void FrmBase::on_window_closing() {
-    msgEndpoint->sendMsg(ClientClosing{});
+void FrmBase::on_window_closing() const {
+    try {
+        msgEndpoint->sendMsg(ClientClosing{});
+    } catch (...) {
+        // Possibly not connected to the application-server!
+    }
 }
 
 // </editor-fold>

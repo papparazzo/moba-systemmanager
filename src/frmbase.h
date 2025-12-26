@@ -31,12 +31,14 @@
 #include <atomic>
 
 enum class SystemState {
-    NO_CONNECT,
-    ERROR,
+    INITIALIZING,
+    INCIDENT,
+    NO_CONNECTION,
     STANDBY,
-    EMERGENCY_STOP,
-    MANUEL,
-    AUTOMATIC
+    MANUAL,
+    READY,
+    AUTOMATIC,
+    SHUTDOWN
 };
 
 class FrmBase: public Gtk::Window {
@@ -100,10 +102,10 @@ protected:
     // Signal handlers:
     void on_about_dialog_response(int response_id);
     void on_button_about_clicked();
-    void on_button_emergency_clicked();
+    void on_button_emergency_clicked() const;
     void on_infobar_response();
     bool on_timeout(int timer_number);
     bool on_timeout_status(int);
-    void on_window_closing();
+    void on_window_closing() const;
 };
 

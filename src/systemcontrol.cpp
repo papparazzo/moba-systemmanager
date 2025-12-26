@@ -121,9 +121,15 @@ void SystemControl::disable() {
 
 void SystemControl::setHardwareState(const SystemState systemState) {
     switch(systemState) {
-        case SystemState::ERROR:
+        case SystemState::INITIALIZING:
             m_Button_SystemStandby.set_sensitive(false);
-            setHardwareStateLabel("Hardwarefehler");
+            setHardwareStateLabel("Initialisierung");
+            break;
+
+        case SystemState::INCIDENT:
+        case SystemState::NO_CONNECTION:
+            m_Button_SystemStandby.set_sensitive(false);
+            setHardwareStateLabel("Allgemeiner Fehler / Nothalt / Keine Verbindung zur CS");
             break;
 
         case SystemState::STANDBY:
@@ -134,12 +140,8 @@ void SystemControl::setHardwareState(const SystemState systemState) {
             setHardwareStateLabel("standby");
             break;
 
-        case SystemState::EMERGENCY_STOP:
-            m_Button_SystemStandby.set_sensitive(false);
-            setHardwareStateLabel("Nothalt");
-            break;
-
-        case SystemState::MANUEL:
+        case SystemState::MANUAL:
+        case SystemState::READY:
             m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
             m_Button_SystemStandby.set_active(false);
@@ -155,9 +157,9 @@ void SystemControl::setHardwareState(const SystemState systemState) {
             setHardwareStateLabel("automatisch");
             break;
 
-        case SystemState::NO_CONNECT:
+        case SystemState::SHUTDOWN:
             m_Button_SystemStandby.set_sensitive(false);
-            setHardwareStateLabel("Keine Verbindung");
+            setHardwareStateLabel("Shutdown");
             break;
     }
 }

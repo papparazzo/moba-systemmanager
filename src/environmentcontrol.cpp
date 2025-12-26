@@ -87,17 +87,14 @@ void EnvironmentControl::disable() {
     set_sensitive(false);
 }
 
-void EnvironmentControl::setHardwareState(SystemHardwareStateChanged::HardwareState state) {
+void EnvironmentControl::setHardwareState(const SystemHardwareStateChanged::HardwareState state) {
     switch(state) {
-        case SystemHardwareStateChanged::HardwareState::MANUEL:
-            set_sensitive(true);
-            break;
-
         case SystemHardwareStateChanged::HardwareState::AUTOMATIC:
             set_sensitive(false);
             break;
 
         default:
+            set_sensitive(true);
             break;
     }
 }

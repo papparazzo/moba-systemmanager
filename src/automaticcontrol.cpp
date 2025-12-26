@@ -71,9 +71,11 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
 
     m_Button_AutomaticControl_Enable.set_margin(10);
     m_Button_AutomaticControl_Set.set_margin(10);
+    m_Button_Set_AutomaticControl_Ready.set_margin(10);
 
     m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Enable);
     m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Set);
+    m_ButtonBox_AutomaticControl.append(m_Button_Set_AutomaticControl_Ready);
     m_ButtonBox_AutomaticControl.set_margin(10);
 
     m_ButtonBox_AutomaticControl.set_sensitive(false);
@@ -140,25 +142,27 @@ void AutomaticControl::disable() {
 
 void AutomaticControl::setHardwareState(SystemState systemState) {
     switch(systemState) {
-        case SystemState::ERROR:
-            m_Clock.stop();
-            m_Button_AutomaticControl_Enable.set_sensitive(false);
-            break;
-
+        case SystemState::INCIDENT:
         case SystemState::STANDBY:
+        case SystemState::SHUTDOWN:
+        case SystemState::NO_CONNECTION:
             m_Clock.stop();
             m_Button_AutomaticControl_Enable.set_sensitive(false);
             break;
 
-        case SystemState::EMERGENCY_STOP:
-            m_Clock.stop();
-            m_Button_AutomaticControl_Enable.set_sensitive(false);
-            break;
-
-        case SystemState::MANUEL:
+        case SystemState::READY:
             m_Clock.stop();
             m_click_connection.block();
             m_Button_AutomaticControl_Enable.set_sensitive(true);
+            m_Button_AutomaticControl_Enable.set_active(false);
+            m_click_connection.unblock();
+            break;
+
+        case SystemState::MANUAL:
+        case SystemState::INITIALIZING:
+            m_Clock.stop();
+            m_click_connection.block();
+            m_Button_AutomaticControl_Enable.set_sensitive(false);
             m_Button_AutomaticControl_Enable.set_active(false);
             m_click_connection.unblock();
             break;
@@ -169,11 +173,6 @@ void AutomaticControl::setHardwareState(SystemState systemState) {
             m_Button_AutomaticControl_Enable.set_sensitive(true);
             m_Button_AutomaticControl_Enable.set_active(true);
             m_click_connection.unblock();
-            break;
-
-        case SystemState::NO_CONNECT:
-            m_Button_AutomaticControl_Enable.set_sensitive(false);
-            m_Clock.stop();
             break;
     }
 }

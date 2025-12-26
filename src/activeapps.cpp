@@ -59,7 +59,7 @@ ActiveApps::ActiveApps(EndpointPtr msgEndpoint): msgEndpoint(msgEndpoint) {
 
     refActionGroup->add_action("selftest", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_selftest));
     refActionGroup->add_action("reset", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
-    refActionGroup->add_action("reset_hardware", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset));
+    refActionGroup->add_action("reset_hardware", sigc::mem_fun(*this, &ActiveApps::on_menu_popup_reset_hardware));
 
     insert_action_group("popup", refActionGroup);
 }
