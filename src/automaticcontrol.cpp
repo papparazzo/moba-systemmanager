@@ -86,31 +86,31 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     m_refListModel_CurModelDay = Gtk::ListStore::create(m_Columns_CurModelDay);
     m_Combo_CurModelDay.set_model(m_refListModel_CurModelDay);
 
-    auto row = *(m_refListModel_CurModelDay->append());
+    auto row = *m_refListModel_CurModelDay->append();
     row[m_Columns_CurModelDay.m_col_id] = Day::MONDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Montag";
 
-    row = *(m_refListModel_CurModelDay->append());
+    row = *m_refListModel_CurModelDay->append();
     row[m_Columns_CurModelDay.m_col_id] = Day::TUESDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Dienstag";
 
-    row = *(m_refListModel_CurModelDay->append());
+    row = *m_refListModel_CurModelDay->append();
     row[m_Columns_CurModelDay.m_col_id] = Day::WEDNESDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Mittwoch";
 
-    row = *(m_refListModel_CurModelDay->append());
+    row = *m_refListModel_CurModelDay->append();
     row[m_Columns_CurModelDay.m_col_id] = Day::THURSDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Donnerstag";
 
-    row = *(m_refListModel_CurModelDay->append());
+    row = *m_refListModel_CurModelDay->append();
     row[m_Columns_CurModelDay.m_col_id] = Day::FRIDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Freitag";
 
-    row = *(m_refListModel_CurModelDay->append());
+    row = *m_refListModel_CurModelDay->append();
     row[m_Columns_CurModelDay.m_col_id] = Day::SATURDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Samstag";
 
-    row = *(m_refListModel_CurModelDay->append());
+    row = *m_refListModel_CurModelDay->append();
     row[m_Columns_CurModelDay.m_col_id] = Day::SUNDAY;
     row[m_Columns_CurModelDay.m_col_name] = "Sonntag";
 
@@ -124,7 +124,7 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
 
         ss << "1min -> " << i << "h";
 
-        auto row1 = *(m_refListModel_Multiplicator->append());
+        auto row1 = *m_refListModel_Multiplicator->append();
         row1[m_Columns_Multiplicator.m_col_factor] = i;
         row1[m_Columns_Multiplicator.m_col_label] = ss.str();
     }
@@ -140,8 +140,12 @@ void AutomaticControl::disable() {
     m_ButtonBox_AutomaticControl.set_sensitive(false);
 }
 
-void AutomaticControl::setHardwareState(SystemState systemState) {
+void AutomaticControl::setHardwareState(const SystemState systemState) {
+    m_click_connection.block();
+    m_checkbox_connection.block();
+
     switch(systemState) {
+        case SystemState::INITIALIZING:
         case SystemState::INCIDENT:
         case SystemState::STANDBY:
         case SystemState::SHUTDOWN:
@@ -177,7 +181,7 @@ void AutomaticControl::setHardwareState(SystemState systemState) {
     }
 }
 
-void AutomaticControl::setClock(Day day, Time time) {
+void AutomaticControl::setClock(const Day day, const Time time) {
     std::stringstream ss;
 
     switch(day) {
@@ -275,10 +279,10 @@ void AutomaticControl::on_button_time_control_set_clicked() {
     });
 }
 
-void AutomaticControl::on_button_automatic_clicked() {
     if(m_Button_AutomaticControl_Enable.get_active()) {
         msgEndpoint->sendMsg(SystemSetAutomaticMode{true});
     } else {
+void AutomaticControl::on_button_automatic_clicked() const {
         msgEndpoint->sendMsg(SystemSetAutomaticMode{false});
     }
 }
@@ -311,8 +315,7 @@ void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     setClock(data.curModelDay, data.curModelTime);
 
     std::stringstream ss;
-    ss <<
-        "<b>Faktor:</b> 1min -> " << data.multiplicator << "h (" << data.multiplicator << ")";
+    ss << "<b>Faktor:</b> 1min -> " << data.multiplicator << "h (" << data.multiplicator << ")";
 
     m_Label_Date.set_tooltip_markup(ss.str());
 }

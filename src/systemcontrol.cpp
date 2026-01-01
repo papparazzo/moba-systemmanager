@@ -141,12 +141,19 @@ void SystemControl::setHardwareState(const SystemState systemState) {
             break;
 
         case SystemState::MANUAL:
-        case SystemState::READY:
             m_click_connection.block();
             m_Button_SystemStandby.set_sensitive(true);
             m_Button_SystemStandby.set_active(false);
             m_click_connection.unblock();
             setHardwareStateLabel("manuell");
+            break;
+
+        case SystemState::READY:
+            m_click_connection.block();
+            m_Button_SystemStandby.set_sensitive(true);
+            m_Button_SystemStandby.set_active(false);
+            m_click_connection.unblock();
+            setHardwareStateLabel("manuell (bereit für automatik)");
             break;
 
         case SystemState::AUTOMATIC:

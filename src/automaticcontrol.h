@@ -29,13 +29,13 @@
 #include "moba/timermessages.h"
 #include "moba/enumday.h"
 
-class AutomaticControl: public Gtk::Box {
+class AutomaticControl final: public Gtk::Box {
 public:
-    AutomaticControl(EndpointPtr msgEndpoint);
+    explicit AutomaticControl(EndpointPtr msgEndpoint);
     AutomaticControl(const AutomaticControl&) = delete;
     AutomaticControl& operator=(const AutomaticControl&) = delete;
 
-    virtual ~AutomaticControl() noexcept = default;
+    ~AutomaticControl() noexcept override = default;
 
     void enable();
     void disable();
@@ -50,7 +50,7 @@ private:
     void on_button_time_control_set_clicked();
     void on_button_automatic_clicked();
 
-    struct ModelColumns_CurModelDay: public Gtk::TreeModel::ColumnRecord {
+    struct ModelColumns_CurModelDay final: Gtk::TreeModel::ColumnRecord {
         ModelColumns_CurModelDay() {
             add(m_col_name);
             add(m_col_id);
@@ -60,7 +60,7 @@ private:
         Gtk::TreeModelColumn<Day>           m_col_id;
     };
 
-    struct ModelColumns_Multiplicator: public Gtk::TreeModel::ColumnRecord {
+    struct ModelColumns_Multiplicator final: Gtk::TreeModel::ColumnRecord {
         ModelColumns_Multiplicator() {
             add(m_col_label);
             add(m_col_factor);
@@ -69,7 +69,6 @@ private:
         Gtk::TreeModelColumn<Glib::ustring> m_col_label;
         Gtk::TreeModelColumn<unsigned int>  m_col_factor;
     };
-
 
     ModelColumns_CurModelDay     m_Columns_CurModelDay;
     ModelColumns_Multiplicator   m_Columns_Multiplicator;
