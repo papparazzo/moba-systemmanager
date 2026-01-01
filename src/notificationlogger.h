@@ -25,14 +25,14 @@
 
 #include "moba/endpoint.h"
 
-class NoticeLogger final : public Gtk::Box {
+class NotificationLogger final : public Gtk::Box {
 public:
 
-    explicit NoticeLogger(EndpointPtr msgEndpoint);
-    NoticeLogger(const NoticeLogger&) = delete;
-    NoticeLogger& operator=(const NoticeLogger&) = delete;
+    explicit NotificationLogger(EndpointPtr msgEndpoint);
+    NotificationLogger(const NotificationLogger&) = delete;
+    NotificationLogger& operator=(const NotificationLogger&) = delete;
 
-    ~NoticeLogger() noexcept override = default;
+    ~NotificationLogger() noexcept override = default;
 
     void setNotice(
         const std::string &timestamp,

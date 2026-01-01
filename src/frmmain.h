@@ -25,7 +25,7 @@
 #include "moba/endpoint.h"
 #include "moba/servermessages.h"
 
-#include "noticelogger.h"
+#include "notificationlogger.h"
 #include "systemcontrol.h"
 #include "automaticcontrol.h"
 #include "environmentcontrol.h"
@@ -42,7 +42,7 @@ protected:
 
     // active-apps
     ActiveApps         m_ActiveApps;
-    NoticeLogger       m_Incident_Logger;
+    NotificationLogger m_Notification_Logger;
     SystemControl      m_System_Control;
     AutomaticControl   m_Automatic_Control;
     ServerData         m_Server_Data;

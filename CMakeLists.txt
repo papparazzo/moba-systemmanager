@@ -16,7 +16,6 @@ add_executable(
 
     src/systemcontrol.cpp
     src/serverdata.cpp
-    src/noticelogger.cpp
     src/activeapps.cpp
     src/automaticcontrol.cpp
     src/clock.cpp
@@ -24,7 +23,7 @@ add_executable(
     src/frmbase.cpp
     src/frmmain.cpp
     src/main.cpp
-    src/noticelogger.cpp
+    src/notificationlogger.cpp
     src/serverdata.cpp
     src/systemcontrol.cpp
 )

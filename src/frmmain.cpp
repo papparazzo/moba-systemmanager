@@ -25,9 +25,9 @@
 
 #include "moba/servermessages.h"
 #include "moba/timermessages.h"
-#include "noticelogger.h"
+#include "notificationlogger.h"
 
-FrmMain::FrmMain(EndpointPtr mhp): FrmBase{mhp}, m_ActiveApps{mhp}, m_Incident_Logger{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
+FrmMain::FrmMain(EndpointPtr mhp): FrmBase{mhp}, m_ActiveApps{mhp}, m_Notification_Logger{mhp}, m_System_Control{mhp}, m_Automatic_Control{mhp},
 m_Environment_Control{mhp} {
 
     set_size_request(675, 450);
@@ -39,7 +39,7 @@ m_Environment_Control{mhp} {
     registry.registerHandler<ServerInfoRes>(std::bind(&ServerData::setServerInfoRes, &m_Server_Data, std::placeholders::_1));
     registry.registerHandler<ServerConClientsRes>(std::bind(&FrmMain::setConClientsRes, this, std::placeholders::_1));
     registry.registerHandler<ClientEchoRes>([this] { m_System_Control.setPingResult(); });
-    registry.registerHandler<MessagingClearIncidentList>([this] { m_Incident_Logger.clearList(); });
+    registry.registerHandler<MessagingClearNotificationList>([this] { m_Notification_Logger.clearList(); });
     registry.registerHandler<ServerNewClientStarted>(std::bind(&FrmMain::setNewClient, this, std::placeholders::_1));
     registry.registerHandler<ServerClientClosed>(std::bind(&FrmMain::setRemoveClient, this, std::placeholders::_1));
     registry.registerHandler<TimerGlobalTimerEvent>(std::bind(&AutomaticControl::setTimerGlobalTimerEvent, &m_Automatic_Control, std::placeholders::_1));
@@ -54,7 +54,7 @@ void FrmMain::initActiveApps() {
     m_Notebook.append_page(m_System_Control, "Systemsteuerung");
     m_Notebook.append_page(m_Automatic_Control, "Automatic Control");
     m_Notebook.append_page(m_Environment_Control, "Umgebung");
-    m_Notebook.append_page(m_Incident_Logger, "Statusmeldungen");
+    m_Notebook.append_page(m_Notification_Logger, "Statusmeldungen");
 }
 
 void FrmMain::setSensitive(bool sensitive) {
@@ -80,7 +80,7 @@ void FrmMain::listNotice(
     const std::string &origin,
     const std::string &source
 ) {
-    m_Incident_Logger.setNotice(timestamp, level, type, caption, text, origin, source);
+    m_Notification_Logger.setNotice(timestamp, level, type, caption, text, origin, source);
 }
 
 void FrmMain::initialSend() {
@@ -88,7 +88,7 @@ void FrmMain::initialSend() {
     msgEndpoint->sendMsg(ServerConClientsReq{});
     msgEndpoint->sendMsg(SystemGetHardwareState{});
     msgEndpoint->sendMsg(TimerGetGlobalTimer{});
-    msgEndpoint->sendMsg(MessagingGetIncidentList{});
+    msgEndpoint->sendMsg(MessagingGetNotificationList{});
 }
 
 ////////////////////////////////////////////////////////////////////////////////

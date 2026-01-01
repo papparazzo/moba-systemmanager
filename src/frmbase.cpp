@@ -101,8 +101,8 @@ FrmBase::FrmBase(EndpointPtr mhp): systemState{SystemState::INITIALIZING}, msgEn
    // m_Button_Emergency.set_sensitive(false);
     initAboutDialog();
 
-    registry.registerHandler<MessagingNotifyIncident>(std::bind(&FrmBase::handleNotifyIncident, this, std::placeholders::_1));
-    registry.registerHandler<MessagingSetIncidentList>(std::bind(&FrmBase::handleSetIncidentList, this, std::placeholders::_1));
+    registry.registerHandler<MessagingSendNotification>(std::bind(&FrmBase::handlesendNotification, this, std::placeholders::_1));
+    registry.registerHandler<MessagingSetNotificationList>(std::bind(&FrmBase::handleSetNotificationList, this, std::placeholders::_1));
     registry.registerHandler<ClientError>(std::bind(&FrmBase::handleError, this, std::placeholders::_1));
     registry.registerHandler<SystemHardwareStateChanged>(std::bind(&FrmBase::handleHardwareState, this, std::placeholders::_1));
 }
@@ -153,7 +153,7 @@ void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::s
     m_InfoBar.set_visible(true);
 }
 
-void FrmBase::handleSetIncidentList(const MessagingSetIncidentList &data) {
+void FrmBase::handleSetNotificationList(const MessagingSetNotificationList &data) {
     for(const auto& iter : data.incidents) {
         listNotice(
             iter.timeStamp,
@@ -175,7 +175,7 @@ void FrmBase::handleError(const ClientError &data) {
     );
 }
 
-void FrmBase::handleNotifyIncident(const MessagingNotifyIncident &data) {
+void FrmBase::handlesendNotification(const MessagingSendNotification &data) {
 
     listNotice(
         data.incident.timeStamp,
@@ -191,17 +191,17 @@ void FrmBase::handleNotifyIncident(const MessagingNotifyIncident &data) {
 
     Gtk::MessageType mt;
     switch(data.incident.type) {
-        case IncidentType::EXCEPTION:
+        case NotificationType::EXCEPTION:
             mt = Gtk::MessageType::ERROR;
             break;
 
-        case IncidentType::CLIENT_ERROR:
+        case NotificationType::CLIENT_ERROR:
             mt = Gtk::MessageType::WARNING;
             break;
 
-        case IncidentType::CLIENT_NOTICE:
-        case IncidentType::SERVER_NOTICE:
-        case IncidentType::STATUS_CHANGED:
+        case NotificationType::CLIENT_NOTICE:
+        case NotificationType::SERVER_NOTICE:
+        case NotificationType::STATUS_CHANGED:
         default:
             mt = Gtk::MessageType::INFO;
             break;

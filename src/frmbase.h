@@ -81,8 +81,8 @@ protected:
 
     // message-response
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
-    void handleNotifyIncident(const MessagingNotifyIncident &data);
-    void handleSetIncidentList(const MessagingSetIncidentList &data) ;
+    void handlesendNotification(const MessagingSendNotification &data);
+    void handleSetNotificationList(const MessagingSetNotificationList &data) ;
     void handleError(const ClientError &data);
     void handleHardwareState(const SystemHardwareStateChanged &data);
 

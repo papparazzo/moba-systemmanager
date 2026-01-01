@@ -18,13 +18,13 @@
  *
  */
 
-#include "noticelogger.h"
+#include "notificationlogger.h"
 
 #include <iomanip>
 
 #include "moba/messagingmessages.h"
 
-NoticeLogger::NoticeLogger(EndpointPtr msgEndpoint): Box{Gtk::Orientation::VERTICAL}, msgEndpoint{msgEndpoint} {
+NotificationLogger::NotificationLogger(EndpointPtr msgEndpoint): Box{Gtk::Orientation::VERTICAL}, msgEndpoint{msgEndpoint} {
 
     append(m_ScrolledWindow_NoticeLogger);
     append(m_ButtonBox_NoticeLogger);
@@ -50,10 +50,10 @@ NoticeLogger::NoticeLogger(EndpointPtr msgEndpoint): Box{Gtk::Orientation::VERTI
     m_ButtonBox_NoticeLogger.set_halign(Gtk::Align::END);
     m_ButtonBox_NoticeLogger.set_sensitive(false);
 
-    m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &NoticeLogger::on_button_notices_clear_clicked));
+    m_Button_NoticesClear.signal_clicked().connect(sigc::mem_fun(*this, &NotificationLogger::on_button_notices_clear_clicked));
 }
 
-void NoticeLogger::setNotice(
+void NotificationLogger::setNotice(
     const std::string& timestamp,
     const std::string& level,
     const std::string& type,
@@ -73,11 +73,11 @@ void NoticeLogger::setNotice(
     m_ButtonBox_NoticeLogger.set_sensitive(true);
 }
 
-void NoticeLogger::clearList() {
+void NotificationLogger::clearList() {
     m_refTreeModel_Notices->clear();
     m_ButtonBox_NoticeLogger.set_sensitive(false);
 }
 
-void NoticeLogger::on_button_notices_clear_clicked() const {
-    msgEndpoint->sendMsg(MessagingClearIncidentList{});
+void NotificationLogger::on_button_notices_clear_clicked() const {
+    msgEndpoint->sendMsg(MessagingClearNotificationList{});
 }
