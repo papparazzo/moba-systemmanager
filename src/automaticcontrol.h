@@ -48,7 +48,9 @@ private:
     void setClock(Day day, Time time);
 
     void on_button_time_control_set_clicked();
-    void on_button_automatic_clicked();
+    void on_button_automatic_clicked() const;
+    void on_button_automatic_finish(const Glib::RefPtr<Gio::AsyncResult>& result) const;
+    void on_button_automatic_ready_toggle();
 
     struct ModelColumns_CurModelDay final: Gtk::TreeModel::ColumnRecord {
         ModelColumns_CurModelDay() {
@@ -87,17 +89,23 @@ private:
     Gtk::Entry        m_Entry_Time[5];
     Gtk::Label        m_Label_Time[5];
 
-    Gtk::Box          m_VBox_Clock{Gtk::Orientation::VERTICAL};
-    Gtk::Label        m_Label_Date;
+    Gtk::Label        m_Label_AutomaticControl{"Automatische Steuerung:"};
+    Gtk::CheckButton  m_Button_AutomaticControl_Ready{"bereit"};
 
-    Clock             m_Clock;
+    Gtk::Box            m_VBox_Clock{Gtk::Orientation::VERTICAL};
+    Gtk::Label          m_Label_Date;
 
-    Gtk::Box          m_ButtonBox_AutomaticControl;
-    Gtk::Button       m_Button_AutomaticControl_Set{"Werte setzen"};
-    Gtk::Button       m_Button_Set_AutomaticControl_Ready{"bereit"};
-    Gtk::ToggleButton m_Button_AutomaticControl_Enable{"Automatik"};
+    Clock               m_Clock;
 
-    sigc::connection  m_click_connection;
+    Gtk::Box            m_ButtonBox_AutomaticControl;
+    Gtk::Button         m_Button_AutomaticControl_Set{"Werte setzen"};
+    Gtk::ToggleButton   m_Button_AutomaticControl_Enable{"Automatik an"};
+
+    Glib::RefPtr<Gtk::AlertDialog>
+                        m_pDialog;
+
+    sigc::connection    m_click_connection;
+    sigc::connection    m_checkbox_connection;
 
     EndpointPtr msgEndpoint;
 
@@ -105,5 +113,13 @@ private:
     Time sunriseStartTime;
     Time dayStartTime;
     Time sunsetStartTime;
+
+    enum class AutomaticMode {
+        ACTIVE,
+        NOT_READY,
+        READY
+    };
+
+    AutomaticMode automaticModeState{AutomaticMode::NOT_READY};
 };
 

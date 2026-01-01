@@ -45,6 +45,8 @@ public:
 private:
     void setHardwareStateLabel(const std::string &status);
 
+    static void shutdown();
+
     void on_button_shutdown_clicked() const;
     void on_button_reset_clicked() const;
     void on_button_standby_clicked() const;

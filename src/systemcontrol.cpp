@@ -119,6 +119,13 @@ void SystemControl::disable() {
     m_ButtonBox_System.set_sensitive(false);
 }
 
+void SystemControl::shutdown() {
+    // TODO: Consider to ask before shutdown
+    if(const auto app = Gtk::Application::get_default()) {
+        app->quit();
+    }
+}
+
 void SystemControl::setHardwareState(const SystemState systemState) {
     switch(systemState) {
         case SystemState::INITIALIZING:
@@ -167,6 +174,7 @@ void SystemControl::setHardwareState(const SystemState systemState) {
         case SystemState::SHUTDOWN:
             m_Button_SystemStandby.set_sensitive(false);
             setHardwareStateLabel("Shutdown");
+            shutdown();
             break;
     }
 }

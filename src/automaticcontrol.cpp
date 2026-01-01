@@ -39,8 +39,16 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
     m_grid_control_panel.set_margin(25);
     m_grid_control_panel.set_halign(Gtk::Align::CENTER);
 
-    m_grid_control_panel.attach(m_Label_Multiplicator, 0, 0);
-    m_grid_control_panel.attach(m_Combo_Multiplicator, 1, 0);
+    m_grid_control_panel.attach(m_Label_AutomaticControl, 0, 0);
+    m_grid_control_panel.attach(m_Button_AutomaticControl_Ready, 1, 0);
+
+    m_Button_AutomaticControl_Ready.set_halign(Gtk::Align::START);
+    m_Button_AutomaticControl_Ready.set_margin(4);
+    m_Label_AutomaticControl.set_halign(Gtk::Align::START);
+    m_Label_AutomaticControl.set_margin(4);
+
+//    m_grid_control_panel.attach(m_Label_Multiplicator, 0, 0);
+//    m_grid_control_panel.attach(m_Combo_Multiplicator, 1, 0);
 
     m_grid_control_panel.attach(m_Label_CurModelDay, 0, 1);
     m_grid_control_panel.attach(m_Combo_CurModelDay, 1, 1);
@@ -71,17 +79,16 @@ AutomaticControl::AutomaticControl(EndpointPtr msgEndpoint): msgEndpoint{msgEndp
 
     m_Button_AutomaticControl_Enable.set_margin(10);
     m_Button_AutomaticControl_Set.set_margin(10);
-    m_Button_Set_AutomaticControl_Ready.set_margin(10);
 
     m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Enable);
     m_ButtonBox_AutomaticControl.append(m_Button_AutomaticControl_Set);
-    m_ButtonBox_AutomaticControl.append(m_Button_Set_AutomaticControl_Ready);
     m_ButtonBox_AutomaticControl.set_margin(10);
 
     m_ButtonBox_AutomaticControl.set_sensitive(false);
 
     m_Button_AutomaticControl_Set.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_time_control_set_clicked));
     m_click_connection = m_Button_AutomaticControl_Enable.signal_clicked().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_automatic_clicked));
+    m_checkbox_connection = m_Button_AutomaticControl_Ready.signal_toggled().connect(sigc::mem_fun(*this, &AutomaticControl::on_button_automatic_ready_toggle));
 
     m_refListModel_CurModelDay = Gtk::ListStore::create(m_Columns_CurModelDay);
     m_Combo_CurModelDay.set_model(m_refListModel_CurModelDay);
@@ -151,34 +158,40 @@ void AutomaticControl::setHardwareState(const SystemState systemState) {
         case SystemState::SHUTDOWN:
         case SystemState::NO_CONNECTION:
             m_Clock.stop();
+            m_Button_AutomaticControl_Ready.set_sensitive(false);
             m_Button_AutomaticControl_Enable.set_sensitive(false);
             break;
 
         case SystemState::READY:
             m_Clock.stop();
-            m_click_connection.block();
+            automaticModeState = AutomaticMode::READY;
+            m_Button_AutomaticControl_Ready.set_sensitive(true);
+            m_Button_AutomaticControl_Ready.set_active(true);
             m_Button_AutomaticControl_Enable.set_sensitive(true);
             m_Button_AutomaticControl_Enable.set_active(false);
-            m_click_connection.unblock();
             break;
 
         case SystemState::MANUAL:
-        case SystemState::INITIALIZING:
             m_Clock.stop();
-            m_click_connection.block();
+
+            automaticModeState = AutomaticMode::NOT_READY;
+            m_Button_AutomaticControl_Ready.set_sensitive(true);
+            m_Button_AutomaticControl_Ready.set_active(false);
             m_Button_AutomaticControl_Enable.set_sensitive(false);
             m_Button_AutomaticControl_Enable.set_active(false);
-            m_click_connection.unblock();
             break;
 
         case SystemState::AUTOMATIC:
             m_Clock.run();
-            m_click_connection.block();
+            automaticModeState = AutomaticMode::ACTIVE;
+            m_Button_AutomaticControl_Ready.set_sensitive(false);
+            m_Button_AutomaticControl_Ready.set_active(true);
             m_Button_AutomaticControl_Enable.set_sensitive(true);
             m_Button_AutomaticControl_Enable.set_active(true);
-            m_click_connection.unblock();
             break;
     }
+    m_checkbox_connection.unblock();
+    m_click_connection.unblock();
 }
 
 void AutomaticControl::setClock(const Day day, const Time time) {
@@ -279,11 +292,37 @@ void AutomaticControl::on_button_time_control_set_clicked() {
     });
 }
 
-    if(m_Button_AutomaticControl_Enable.get_active()) {
-        msgEndpoint->sendMsg(SystemSetAutomaticMode{true});
-    } else {
 void AutomaticControl::on_button_automatic_clicked() const {
+    if(automaticModeState == AutomaticMode::ACTIVE) {
         msgEndpoint->sendMsg(SystemSetAutomaticMode{false});
+        return;
+    }
+
+    if(automaticModeState == AutomaticMode::READY) {
+        msgEndpoint->sendMsg(SystemSetAutomaticMode{true});
+    }
+}
+
+void AutomaticControl::on_button_automatic_finish(const Glib::RefPtr<Gio::AsyncResult>& result) const {
+    try {
+        switch(m_pDialog->choose_finish(result)) {
+            case 0:
+                return;
+
+            case 1:
+                msgEndpoint->sendMsg(SystemReadyForAutomaticMode{true});
+                break;
+
+            default:
+                std::cout << "Unexpected response: " << std::endl;
+                break;
+        }
+    } catch(const Gtk::DialogError& err) {
+        // TODO: Propper error handling!
+         std::cout << "DialogError, " << err.what() << std::endl;
+    } catch(const Glib::Error& err) {
+        // TODO: Propper error handling!
+         std::cout << "Unexpected exception. " << err.what() << std::endl;
     }
 }
 
@@ -318,4 +357,32 @@ void AutomaticControl::setTimerSetGlobalTimer(const TimerSetGlobalTimer &data) {
     ss << "<b>Faktor:</b> 1min -> " << data.multiplicator << "h (" << data.multiplicator << ")";
 
     m_Label_Date.set_tooltip_markup(ss.str());
+}
+
+void AutomaticControl::on_button_automatic_ready_toggle() {
+    if(automaticModeState == AutomaticMode::ACTIVE) {
+        return;
+    }
+
+    if(automaticModeState == AutomaticMode::READY) {
+        msgEndpoint->sendMsg(SystemReadyForAutomaticMode{false});
+        return;
+    }
+
+    m_checkbox_connection.block();
+    m_Button_AutomaticControl_Ready.set_active(false);
+    m_checkbox_connection.unblock();
+
+    if(!m_pDialog) {
+        m_pDialog = Gtk::AlertDialog::create();
+    }
+
+    m_pDialog->set_message("Aktivierung Automatik");
+    m_pDialog->set_detail("Befinden sich alle Züge in definierten Positionen?");
+    m_pDialog->set_buttons({"Abbrechen", "OK"});
+    m_pDialog->set_default_button(1);
+    m_pDialog->set_cancel_button(0);
+    if(auto* window = dynamic_cast<Gtk::Window*>(get_root())) {
+        m_pDialog->choose(*window, sigc::mem_fun(*this, &AutomaticControl::on_button_automatic_finish));
+    }
 }
