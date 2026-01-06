@@ -24,7 +24,7 @@
 
 #include "moba/endpoint.h"
 
-class ActiveApps: public Gtk::Box {
+class ActiveApps final: public Gtk::Box {
 public:
     explicit ActiveApps(EndpointPtr msgEndpoint);
     ~ActiveApps() noexcept override = default;

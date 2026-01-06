@@ -20,8 +20,6 @@
 
 #include "notificationlogger.h"
 
-#include <iomanip>
-
 #include "moba/messagingmessages.h"
 
 NotificationLogger::NotificationLogger(EndpointPtr msgEndpoint): Box{Gtk::Orientation::VERTICAL}, msgEndpoint{msgEndpoint} {
