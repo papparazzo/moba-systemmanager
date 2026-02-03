@@ -32,10 +32,9 @@ SystemControl::SystemControl(EndpointPtr msgEndpoint): Gtk::Box{Gtk::Orientation
     m_Label_HardwareState.set_margin(50);
     m_HBox_Expander.append(m_Label_HardwareState);
 
-    m_HBox_Expander.append(m_Label_PingResult[0]);
-    m_HBox_Expander.append(m_Label_PingResult[1]);
-    m_HBox_Expander.append(m_Label_PingResult[2]);
-    m_HBox_Expander.append(m_Label_PingResult[3]);
+    for(auto & i : m_Label_PingResult) {
+        m_HBox_Expander.append(i);
+    }
     m_HBox_Expander.append(m_ButtonBox_System);
 
 	m_ButtonBox_System.set_margin(25);
