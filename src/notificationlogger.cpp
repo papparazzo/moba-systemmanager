@@ -52,10 +52,10 @@ NotificationLogger::NotificationLogger(EndpointPtr msgEndpoint): Box{Gtk::Orient
 }
 
 void NotificationLogger::setNotice(
-    const std::string& timestamp,
-    const std::string& level,
-    const std::string& type,
-    const std::string& caption,
+    const std::string &timestamp,
+    const std::string &level,
+    const std::string &type,
+    const std::string &caption,
     const std::string &text,
     const std::string &origin,
     const std::string &source
