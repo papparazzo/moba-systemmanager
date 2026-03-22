@@ -2,10 +2,10 @@
 Version=1.0
 Type=Application
 Name=MoBa-Systemmanager
-Exec=moba-systemmanager
-Comment=Systemmanger
+Exec=/usr/local/bin/moba-systemmanager
+Comment=Systemmanager
 Icon=moba-systemmanager
-Terminal=0
-Categories=System-manager
-Encoding=UTF-8
+Terminal=false
+Categories=System
+StartupWMClass=org.moba.systemmanager
 
