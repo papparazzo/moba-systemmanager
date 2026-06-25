@@ -47,6 +47,13 @@ void Clock::setNightLight(const Time on_at, const Time off_at) {
     m_nightlight_off_at = off_at;
 }
 
+void Clock::enableNightLight(bool enable) {
+    m_nightlight_enabled = enable;
+    if(m_nightlight_active && !enable) {
+        setNightLight(false);
+    }
+}
+
 void Clock::run() {
     m_run = true;
 }
@@ -239,7 +246,13 @@ bool Clock::on_timeout() {
     return true;
 }
 
-void Clock::setNightLight(bool activate) {
+void Clock::setNightLight(const bool activate) {
+    m_nightlight_active = activate;
+
+    if (!m_nightlight_enabled) {
+        return;
+    }
+
     Glib::RefPtr<Gio::Settings> s1 = Gio::Settings::create("org.gnome.settings-daemon.plugins.color");
     Glib::RefPtr<Gio::Settings> s2 = Gio::Settings::create("org.gnome.desktop.interface");
 
@@ -251,8 +264,4 @@ void Clock::setNightLight(bool activate) {
         s2->set_string("gtk-theme", "Yaru");
         s1->set_boolean("night-light-enabled", false);
     }
-
-    nightlightActive = activate;
-
-    //FIXME ACHTUNG: Wenn Applikation beendet wird, dann setNightLight(false) aufrufen!!!
 }

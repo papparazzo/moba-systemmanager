@@ -32,6 +32,7 @@ public:
     void setTime(unsigned int hours, unsigned int minutes, bool draw);
     void setMultiplier(unsigned int multiplier);
     void setNightLight(Time on_at, Time off_at);
+    void enableNightLight(bool enable);
 
     void run();
     void stop();
@@ -59,4 +60,5 @@ protected:
     const double m_radius = 0.42 * m_factor;
 
     bool m_nightlight_active{false};
+    bool m_nightlight_enabled{true};
 };
