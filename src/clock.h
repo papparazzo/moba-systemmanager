@@ -58,5 +58,5 @@ protected:
     const double m_factor = 1;
     const double m_radius = 0.42 * m_factor;
 
-    bool nightlightActive{false};
+    bool m_nightlight_active{false};
 };

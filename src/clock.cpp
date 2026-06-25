@@ -34,7 +34,7 @@ void Clock::setTime(unsigned int hours, unsigned int minutes, bool draw) {
     m_hours = hours;
     m_minutes = minutes;
     if(draw) {
-         queue_draw();
+        queue_draw();
     }
 }
 
@@ -42,7 +42,7 @@ void Clock::setMultiplier(unsigned int multiplier) {
     m_multiplier = multiplier;
 }
 
-void Clock::setNightLight(Time on_at, Time off_at) {
+void Clock::setNightLight(const Time on_at, const Time off_at) {
     m_nightlight_on_at = on_at;
     m_nightlight_off_at = off_at;
 }
@@ -227,11 +227,11 @@ bool Clock::on_timeout() {
 
     Time t{m_hours, m_minutes};
 
-    if((t >= m_nightlight_on_at || t <= m_nightlight_off_at) && !nightlightActive) {
+    if((t >= m_nightlight_on_at || t <= m_nightlight_off_at) && !m_nightlight_active) {
         setNightLight(true);
     }
 
-    if((t < m_nightlight_on_at && t > m_nightlight_off_at) && nightlightActive) {
+    if((t < m_nightlight_on_at && t > m_nightlight_off_at) && m_nightlight_active) {
         setNightLight(false);
     }
 
