@@ -26,11 +26,11 @@
 #include "clock.h"
 
 Clock::Clock() {
-    Glib::signal_timeout().connect(sigc::mem_fun(*this, &Clock::on_timeout), 250);
+    Glib::signal_timeout().connect(mem_fun(*this, &Clock::on_timeout), 250);
     set_draw_func(sigc::mem_fun(*this, &Clock::on_draw));
 }
 
-void Clock::setTime(unsigned int hours, unsigned int minutes, bool draw) {
+void Clock::setTime(const unsigned int hours, const unsigned int minutes, const bool draw) {
     m_hours = hours;
     m_minutes = minutes;
     if(draw) {
@@ -38,7 +38,7 @@ void Clock::setTime(unsigned int hours, unsigned int minutes, bool draw) {
     }
 }
 
-void Clock::setMultiplier(unsigned int multiplier) {
+void Clock::setMultiplier(const unsigned int multiplier) {
     m_multiplier = multiplier;
 }
 
@@ -47,7 +47,7 @@ void Clock::setNightLight(const Time on_at, const Time off_at) {
     m_nightlight_off_at = off_at;
 }
 
-void Clock::enableNightLight(bool enable) {
+void Clock::enableNightLight(const bool enable) {
     m_nightlight_enabled = enable;
     if(m_nightlight_active && !enable) {
         setNightLight(false);
@@ -65,7 +65,8 @@ void Clock::stop() {
     setNightLight(false);
 }
 
-void Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int height) {
+void Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, const int width, const int height) const
+{
     const double radius = 0.42 * m_factor;
 
     // scale to unit square and translate (0, 0) to be (0.5, 0.5), i.e.
@@ -115,9 +116,9 @@ void Clock::on_draw(const Cairo::RefPtr<Cairo::Context>& cr, int width, int heig
     }
 
     // compute the angles of the indicators of our clock
-    double seconds= m_seconds * M_PI / 30;
-    double minutes = m_minutes * M_PI / 30;
-    double hours = m_hours * M_PI / 6;
+    const double seconds= m_seconds * M_PI / 30;
+    const double minutes = m_minutes * M_PI / 30;
+    const double hours = m_hours * M_PI / 6;
 
     cr->save();
 
@@ -176,14 +177,14 @@ bool Clock::on_timeout() {
     switch(m_ticks) {
         case 0:
         case 4:
-            m_minutes++;
+            ++m_minutes;
             break;
 
         case 1:
         case 3:
         case 5:
             if(m_multiplier > 2) {
-                m_minutes++;
+                ++m_minutes;
             } else {
                 queue_draw();
                 return true;
@@ -192,7 +193,7 @@ bool Clock::on_timeout() {
 
         case 2:
             if(m_multiplier == 2 || m_multiplier == 4) {
-                m_minutes++;
+                ++m_minutes;
             } else {
                 queue_draw();
                 return true;
