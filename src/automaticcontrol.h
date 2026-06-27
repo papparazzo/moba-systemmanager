@@ -78,16 +78,16 @@ private:
     Glib::RefPtr<Gtk::ListStore> m_refListModel_CurModelDay;
     Glib::RefPtr<Gtk::ListStore> m_refListModel_Multiplicator;
 
-    Gtk::Grid         m_grid_control_panel;
+    Gtk::Grid           m_grid_control_panel;
 
-    Gtk::ComboBox     m_Combo_CurModelDay;
-    Gtk::Label        m_Label_CurModelDay{"Tag:"};
+    Gtk::ComboBox       m_Combo_CurModelDay;
+    Gtk::Label          m_Label_CurModelDay{"Tag:"};
 
-    Gtk::ComboBox     m_Combo_Multiplicator;
-    Gtk::Label        m_Label_Multiplicator{"Multiplikator"};
+    Gtk::ComboBox       m_Combo_Multiplicator;
+    Gtk::Label          m_Label_Multiplicator{"Multiplikator"};
 
-    Gtk::Entry        m_Entry_Time[5];
-    Gtk::Label        m_Label_Time[5];
+    Gtk::Entry          m_Entry_Time[5];
+    Gtk::Label          m_Label_Time[5];
 
     Gtk::Label        m_Label_AutomaticControl{"Automatische Steuerung:"};
     Gtk::CheckButton  m_Button_AutomaticControl_Ready{"bereit"};

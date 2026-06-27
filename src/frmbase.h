@@ -74,14 +74,14 @@ protected:
     Gtk::Box         m_VBox{Gtk::Orientation::VERTICAL, 6};
     Gtk::Box         m_HBox_Status{Gtk::Orientation::HORIZONTAL, 6};
 
-    std::string getDisplayMessage(std::string caption, std::string text);
+    static std::string getDisplayMessage(std::string caption, std::string text);
 
     void initAboutDialog();
     void finishForm();
 
     // message-response
     void setNotice(Gtk::MessageType noticeType, std::string caption, std::string text);
-    void handlesendNotification(const MessagingSendNotification &data);
+    void handleSendNotification(const MessagingSendNotification &data);
     void handleSetNotificationList(const MessagingSetNotificationList &data) ;
     void handleError(const ClientError &data);
     void handleHardwareState(const SystemHardwareStateChanged &data);

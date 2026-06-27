@@ -128,7 +128,7 @@ void FrmBase::initAboutDialog() {
     // m_Dialog.set_logo(Gdk::Pixbuf::create_from_file("/usr/local/share/icons/hicolor/scalable/apps/" PACKAGE_NAME ".svg"));
 
     std::vector<Glib::ustring> list_authors;
-    list_authors.push_back("Stefan Paproth");
+    list_authors.emplace_back("Stefan Paproth");
     m_Dialog.set_authors(list_authors);
 
     // m_Dialog.signal_response().connect(sigc::mem_fun(*this, &FrmBase::on_about_dialog_response));
@@ -148,7 +148,7 @@ std::string FrmBase::getDisplayMessage(std::string caption, std::string text) {
 }
 
 void FrmBase::setNotice(Gtk::MessageType noticeType, std::string caption, std::string text) {
-    m_Label_InfoBarMessage.set_markup(getDisplayMessage(caption, text));
+    m_Label_InfoBarMessage.set_markup(getDisplayMessage(std::move(caption), std::move(text)));
     //m_InfoBar.set_message_type(noticeType);
     m_InfoBar.set_visible(true);
 }
@@ -175,7 +175,7 @@ void FrmBase::handleError(const ClientError &data) {
     );
 }
 
-void FrmBase::handlesendNotification(const MessagingSendNotification &data) {
+void FrmBase::handleSendNotification(const MessagingSendNotification &data) {
 
     listNotice(
         data.incident.timeStamp,
