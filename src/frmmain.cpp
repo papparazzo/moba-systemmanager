@@ -57,7 +57,7 @@ void FrmMain::initActiveApps() {
     m_Notebook.append_page(m_Notification_Logger, "Statusmeldungen");
 }
 
-void FrmMain::setSensitive(bool sensitive) {
+void FrmMain::setSensitive(const bool sensitive) {
     if(sensitive) {
         m_Automatic_Control.enable();
         m_System_Control.enable();
@@ -93,7 +93,7 @@ void FrmMain::initialSend() {
 
 ////////////////////////////////////////////////////////////////////////////////
 // <editor-fold defaultstate="collapsed" desc="msg-response">
-void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
+void FrmMain::setConClientsRes(const ServerConClientsRes &data) const {
     m_ActiveApps.clearList();
 
     for(const auto& iter : data.endpoints) {
@@ -109,7 +109,7 @@ void FrmMain::setConClientsRes(const ServerConClientsRes &data) {
     }
 }
 
-void FrmMain::setNewClient(const ServerNewClientStarted &data) {
+void FrmMain::setNewClient(const ServerNewClientStarted &data) const {
     m_ActiveApps.addActiveApp(
         data.endpoint.appId,
         data.endpoint.appData.name,

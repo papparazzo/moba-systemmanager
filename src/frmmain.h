@@ -62,8 +62,8 @@ protected:
     ) override;
 
     // msg-response
-    void setConClientsRes(const ServerConClientsRes &data);
-    void setNewClient(const ServerNewClientStarted &data);
+    void setConClientsRes(const ServerConClientsRes &data) const;
+    void setNewClient(const ServerNewClientStarted &data) const;
     void setRemoveClient(const ServerClientClosed &data) const;
     void setSystemState(SystemState systemState) override;
 };
